@@ -130,12 +130,8 @@ namespace LibraryManagement.Repository
         }
 
         // Hàm lấy danh sách độc giả
-        public async Task<List<ReaderResponse>> getAllReaderAsync(string token)
+        public async Task<List<ReaderResponse>> getAllReaderAsync()
         {
-            var reader = await _account.AuthenticationAsync(token);
-
-            if (reader == null) return null!;
-
             var listReader = await _context.Readers
                 .Include(r => r.Images)
                 .Include(r => r.TypeReader)
@@ -272,12 +268,10 @@ namespace LibraryManagement.Repository
             return ApiResponse<string>.SuccessResponse("Đã xóa độc giả", 200, "");
         }
 
-        public async Task<FindReaderOutputDto> findReaderAsync(FindReaderInputDto dto)
+        public async Task<FindReaderOutputDto> findReaderAsync(string dto)
         {
-            var user = await _account.AuthenticationAsync(dto.token);
-            if (user == null) return null!;
-
-            var listReader = await _context.Readers.Where(x => x.ReaderUsername == dto.username).Select(a => new FindReaderOutputDto
+      
+            var listReader = await _context.Readers.Where(x => x.ReaderUsername == dto).Select(a => new FindReaderOutputDto
             {
                 username = a.ReaderUsername,
                 phone = a.Phone!, 

@@ -6,6 +6,7 @@ using LibraryManagement.Helpers;
 using LibraryManagement.Models;
 using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Repository.IRepository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagement.Repository
@@ -163,14 +164,10 @@ namespace LibraryManagement.Repository
             authorResponse.UrlAvatar = imageUrl;
             return ApiResponse<AuthorResponse>.SuccessResponse("Thay đổi thông tin tác giả thành công", 200, authorResponse);
         }
-
+        
         public async Task<List<Author>> findAuthor(FindAuthorInputDto dto)
         {
-            var user = await _account.AuthenticationAsync(dto.token);
-
-            if (user == null ) return null!;
-
-            var authors = await _context.Authors.Where(x => x.NameAuthor == dto.nameAuthor).ToListAsync();
+            var authors = await _context.Authors.Where(x => x.NameAuthor.ToLower().Contains(dto.nameAuthor)).ToListAsync();
             return authors;
         }
     }

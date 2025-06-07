@@ -75,7 +75,6 @@ namespace LibraryManagement.Helpers
             {
                 new Claim(ClaimTypes.Email, reader.ReaderUsername),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Role, reader.RoleName.ToString())
             };
 
             if (!string.IsNullOrEmpty(reader.RoleName))

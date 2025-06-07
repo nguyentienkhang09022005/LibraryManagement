@@ -7,6 +7,7 @@ using LibraryManagement.Models;
 using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace LibraryManagement.Repository
@@ -577,5 +578,37 @@ namespace LibraryManagement.Repository
             return result; 
         }
 
+        public async Task<List<BooksAndCommentsWithoutLogin>> findBook(string namebook)
+        {
+            var result = await _context.Books
+            .AsNoTracking()
+            .Where(x => x.HeaderBook.NameHeaderBook.ToLower().Contains(namebook.ToLower()))
+            .Select(x => new BooksAndCommentsWithoutLogin
+            {
+                idBook = x.IdBook,
+                nameBook = x.HeaderBook.NameHeaderBook,
+                describe = x.HeaderBook.DescribeBook,
+                image = x.images.Select(img => img.Url).FirstOrDefault() ?? string.Empty,
+                Evaluations = x.Evaluates.Select(c => new EvaluationDetails
+                {
+                    IdEvaluation = c.IdEvaluate,
+                    IdReader = c.IdReader,
+                    Comment = c.EvaComment,
+                    Rating = c.EvaStar,
+                    Create_Date = c.CreateDate
+                }).ToList(),
+                Authors = x.HeaderBook.bookWritings.Select(k => new AuthorResponse
+                {
+                    IdAuthor = k.IdAuthor,
+                    NameAuthor = k.Author.NameAuthor,
+                    IdTypeBook = new TypeBookResponse { IdTypeBook = k.Author.IdTypeBook, NameTypeBook = string.Empty },
+                    Nationality = k.Author.Nationality,
+                    Biography = k.Author.Biography,
+                    UrlAvatar = null
+                }).ToList()
+            }).ToListAsync();
+
+            return result; 
+        }
     }
 }

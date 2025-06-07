@@ -26,9 +26,11 @@ namespace LibraryManagement.Models
 
         public ICollection<Evaluate> Evaluates { get; set; }
 
-        public ICollection<FavoriteBook> likedHeaderBooks { get; set; }
+        public ICollection<FavoriteBook> FavoriteBooks { get; set; }
 
         public ICollection<Image> images { get; set; }
+
+        
     }
 
 }

@@ -74,11 +74,13 @@ namespace LibraryManagement.Controllers
             return NotFound(result);
         }
 
-        [HttpPost("findAuthor")]
-        public async Task<IActionResult> findAuthor([FromBody] FindAuthorInputDto dto)
+        [HttpGet("findAuthor")]
+        [Authorize]
+        public async Task<IActionResult> findAuthor(string name)
         {
-            var result = await _authorService.findAuthor(dto);
-            if (result == null) return Unauthorized("Không có quyền admin");
+            var user = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(user)) return NotFound("Không tìm thấy tài khoản"); 
+            var result = await _authorService.findAuthor(new FindAuthorInputDto { nameAuthor = name});
             return Ok(result);
         }
     }

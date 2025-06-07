@@ -1,7 +1,9 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Formats.Asn1;
+using System.Security.Claims;
 
 namespace LibraryManagement.Controllers
 {
@@ -106,6 +108,13 @@ namespace LibraryManagement.Controllers
         {
             var result = await _bookService.getAllBooksInDetail(token);
             return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result); 
+        }
+
+        [HttpGet("findBooks{namebook}")]
+        public async Task<IActionResult> findBooks(string namebook)
+        {
+            var result = await _bookService.findBook(namebook);
+            return Ok(result);
         }
     }
 }

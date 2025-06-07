@@ -1,6 +1,7 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Dto.Response;
 using LibraryManagement.Helpers;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Internal;
 
 
 namespace LibraryManagement.Repository.InterFace
@@ -24,6 +25,9 @@ namespace LibraryManagement.Repository.InterFace
 
         public Task<List<BooksAndComments>> getAllBooksInDetail(string token);
 
-      
+        public Task<List<BooksAndCommentsWithoutLogin>> findBook(string namebook);
+
+
+
     } 
 }

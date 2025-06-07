@@ -13,6 +13,7 @@
     public class BookResponse
     {
         public string IdBook { get; set; }
+        public string NameBook { get; set; }
         public string Publisher { get; set; }
         public int ReprintYear { get; set; }
         public decimal ValueOfBook { get; set; }

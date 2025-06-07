@@ -1,6 +1,8 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.IRepository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LibraryManagement.Controllers
 {
@@ -16,13 +18,24 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint lấy danh sách độc giả
-    //    [Authorize(Roles = "Reader")]
-        [HttpPost("list_reader")]
-        public async Task<IActionResult> gettAllReader([FromBody]string token)
+        //    [Authorize(Roles = "Reader")]
+        [HttpGet("list_reader")]
+        [Authorize]
+        public async Task<IActionResult> gettAllReader()
         {
-            var result = await _readerService.getAllReaderAsync(token);
-            if (result == null) return Unauthorized();
-            return Ok(result);   
+            var user = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(user))
+            {
+                return Unauthorized("Vui lòng đăng nhập");
+            }
+            try
+            {
+                return Ok(await _readerService.getAllReaderAsync());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // Endpoint thêm độc giả
@@ -55,12 +68,12 @@ namespace LibraryManagement.Controllers
             return NotFound(result);
         }
 
-        [HttpPost("find_reader")]
-        public async Task<IActionResult> findReader(FindReaderInputDto dto)
+        [HttpGet("find_readerby{username}")]
+        public async Task<IActionResult> findReader(string username)
         {
             try
             {
-                var result = await _readerService.findReaderAsync(dto);
+                var result = await _readerService.findReaderAsync(username);
                 if (result == null) return Unauthorized("Yêu cầu quyền admin");
                 return Ok(result);
             }

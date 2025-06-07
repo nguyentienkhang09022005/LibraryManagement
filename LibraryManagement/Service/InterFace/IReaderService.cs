@@ -10,7 +10,7 @@ namespace LibraryManagement.Repository.IRepository
         public Task<ApiResponse<ReaderResponse>> addReaderAsync(ReaderCreationRequest request);
 
         // Interface lấy danh sách độc giả
-        public Task<List<ReaderResponse>> getAllReaderAsync(string token);
+        public Task<List<ReaderResponse>> getAllReaderAsync();
 
         // Interface sửa độc giả
         public Task<ApiResponse<ReaderResponse>> updateReaderAsync(ReaderUpdateRequest request, string idReader);
@@ -18,7 +18,7 @@ namespace LibraryManagement.Repository.IRepository
         // Interface xóa độc giả
         public Task<ApiResponse<string>> deleteReaderAsync(string idReader);
 
-        public Task<FindReaderOutputDto> findReaderAsync(FindReaderInputDto dto);
+        public Task<FindReaderOutputDto> findReaderAsync(string dto);
         public Task<string> generateNextIdReaderAsync();
     }
 }
