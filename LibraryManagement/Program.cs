@@ -163,7 +163,12 @@ builder.Services.AddFluentEmail("noreply@gmail.com", "no reply")
                     EnableSsl =  emailConfig.EnableSSL
                 });
 builder.Services.AddMemoryCache();
+
+
+
+
 var app = builder.Build();
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();

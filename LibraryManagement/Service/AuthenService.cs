@@ -63,8 +63,6 @@ namespace LibraryManagement.Repository
             if (reader == null || !BCrypt.Net.BCrypt.Verify(request.password, reader.ReaderPassword))
                 throw new Exception("Unauthenticated");
 
-            
-
             var _token = _tokenGenerator.GenerateToken(reader);
             var _refreshToken = _tokenGenerator.GenerateRefreshToken(reader);
             return new AuthenticationResponse
