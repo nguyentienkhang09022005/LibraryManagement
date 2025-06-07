@@ -9,7 +9,7 @@ namespace LibraryManagement.Service
 
         public MessageService(IConfiguration configuration)
         {
-            var connectionString = configuration["ConnectionStrings:MongoDbConnection"];
+            var connectionString = configuration["MongoDB:ConnectionString"];
             var databaseName = configuration["MongoDB:DatabaseName"];
             var collectionName = configuration["MongoDB:MessagesCollection"];
 
