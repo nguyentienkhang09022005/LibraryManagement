@@ -28,10 +28,8 @@ namespace LibraryManagement.Repository
         }
 
         // Lấy danh sách tác giả
-        public async Task<List<AuthorResponse>> getListAuthor(string token)
+        public async Task<List<AuthorResponse>> getListAuthor()
         {
-            var reader = await _account.AuthenticationAsync(token);
-            if (reader == null ) return null!;
 
             var listAuthor = await _context.Authors
                 .Include(a => a.Images)

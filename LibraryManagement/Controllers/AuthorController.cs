@@ -1,6 +1,11 @@
-﻿using LibraryManagement.Dto.Request;
+﻿using LibraryManagement.Data;
+using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using ZstdSharp.Unsafe;
 
 namespace LibraryManagement.Controllers
 {
@@ -9,19 +14,27 @@ namespace LibraryManagement.Controllers
     public class AuthorController : ControllerBase
     {
         private readonly IAuthorService _authorService;
+        private readonly LibraryManagermentContext _context; 
 
-        public AuthorController(IAuthorService authorService)
+        public AuthorController(IAuthorService authorService, LibraryManagermentContext context)
         {
             _authorService = authorService;
+            _context = context;
         }
 
         // Endpoint lấy danh sách tác giả
-        [HttpPost("list_author")]
-        public async Task<IActionResult> gettListAuthor([FromBody ]string token)
+
+        [HttpGet("list_author")]
+        public async Task<IActionResult> gettListAuthor()
         {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return Unauthorized("Vui lòng đăng nhập");
+            }
             try
             {
-                var result = await _authorService.getListAuthor(token);
+                var result = await _authorService.getListAuthor();
                 if (result == null) return Unauthorized("Vui lòng đăng nhập");
                 return Ok(result); 
             }

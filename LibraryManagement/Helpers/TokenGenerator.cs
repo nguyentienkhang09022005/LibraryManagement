@@ -35,7 +35,9 @@ namespace LibraryManagement.Helpers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, reader.ReaderUsername),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, reader.RoleName.ToString())
+
             };
 
             var scopeList = new List<string>();
@@ -72,20 +74,21 @@ namespace LibraryManagement.Helpers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, reader.ReaderUsername),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, reader.RoleName.ToString())
             };
-
-            var scopeList = new List<string>();
 
             if (!string.IsNullOrEmpty(reader.RoleName))
             {
-                scopeList.Add(reader.RoleName);
+               
 
+                // Nếu bạn vẫn muốn thêm scope thì giữ lại
                 var permissions = GetPermissionsByRole(reader.RoleName);
+                var scopeList = new List<string> { reader.RoleName };
                 scopeList.AddRange(permissions);
-            }
-            claims.Add(new Claim("scope", string.Join(" ", scopeList)));
 
+                claims.Add(new Claim("scope", string.Join(" ", scopeList))); // Optional
+            }
             // Khóa để ký Token
             var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SecretKey"]));
 
