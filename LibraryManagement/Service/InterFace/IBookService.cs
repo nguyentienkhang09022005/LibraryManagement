@@ -14,14 +14,14 @@ namespace LibraryManagement.Repository.InterFace
 
       
         public Task<List<EvaluationDetails>> getBooksEvaluation(EvaluationDetailInput dto);
+        
+        public Task<ApiResponse<bool>> LikeBook(EvaluationDetailInput dto);
 
-        public Task<bool> LikeBook(EvaluationDetailInput dto);
-
-        //public Task<List<HeadbookAndComments>> getLikedHeaderBook(string token);
+        public Task<List<BooksAndComments>> getFavoriteBook(string idUser);
 
         public Task<bool> DeleteEvaluation(DeleteEvaluationInput dto);
 
-        public Task<List<GetHeaderbookResponse>> GetAllHeaderBooks(string token);
+        public Task<List<GetHeaderbookResponse>> GetAllHeaderBooks();
 
         public Task<List<BooksAndComments>> getAllBooksInDetail(string token);
 

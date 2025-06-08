@@ -7,6 +7,7 @@ using LibraryManagement.Models;
 using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -385,8 +386,7 @@ namespace LibraryManagement.Repository
      
         public async Task<List<EvaluationDetails>> getBooksEvaluation(EvaluationDetailInput dto)
         {
-            var user = await _authen.AuthenticationAsync(dto.token);
-            if (user == null) return null!;
+          
             var result = await _context.Evaluates.AsNoTracking().Where(x => x.IdBook == dto.IdBook).Take(50).Select(a => new EvaluationDetails
             {
                 IdEvaluation = a.IdEvaluate,
@@ -398,36 +398,35 @@ namespace LibraryManagement.Repository
             return result;
         }
 
-        public async Task<bool> LikeBook(EvaluationDetailInput dto)
-        {
-            var user = await _authen.AuthenticationAsync(dto.token);
-            if (user == null) return false;
 
-            var likedBook = await _context.FavoriteBooks.Where(x => x.IdReader == user.IdReader && x.IdBook == dto.IdBook).FirstOrDefaultAsync();
+        //
+        public async Task<ApiResponse<bool>> LikeBook(EvaluationDetailInput dto)
+        {
+          
+            var likedBook = await _context.FavoriteBooks.AsNoTracking().Where(x => x.IdReader == dto.idUser && x.IdBook == dto.IdBook).FirstOrDefaultAsync();
             if (likedBook != null)
             {
-                _context.Remove(likedBook);
+                await _context.FavoriteBooks.AsNoTracking().Where(x=>x.IdReader == dto.idUser && x.IdBook == dto.IdBook).ExecuteDeleteAsync();
                 await _context.SaveChangesAsync();
-                return true;
+                return new ApiResponse<bool>(false, "Bỏ like thành công", 200, data: false);
+             
             }
             else
             {
                 var likeBook = new FavoriteBook
                 {
                     IdBook = dto.IdBook,
-                    IdReader = user.IdReader,
+                    IdReader = dto.idUser,
                     createDay = DateTime.UtcNow
                 };
                 await _context.LikedHeaderBooks.AddAsync(likeBook);
                 await _context.SaveChangesAsync();
-                return true;
+                return new ApiResponse<bool>(false, "Like thành công", 200, data: false);
             }
         }
 
         public async Task<List<BooksAndComments>> getAllBooksInDetail(string reeaderId)
         {
-           
-            
             var result = await _context.Books
                 .AsNoTracking()
                 .Include(a => a.HeaderBook)
@@ -465,7 +464,6 @@ namespace LibraryManagement.Repository
                                   Nationality = a.Author.Nationality
                               }).ToList(),
                     image = x.images.FirstOrDefault() != null ? x.images.FirstOrDefault()!.Url : string.Empty
-
                 }).ToListAsync();
             return result;
         }
@@ -482,11 +480,9 @@ namespace LibraryManagement.Repository
 
         }
 
-        public async Task<List<GetHeaderbookResponse>> GetAllHeaderBooks(string token)
+        public async Task<List<GetHeaderbookResponse>> GetAllHeaderBooks()
         {
-            var reader = await _authen.AuthenticationAsync(token);
-            if (reader == null) return null!;
-
+        
             var result = await _context.HeaderBooks
                 .AsNoTracking()
                 .Select(a => new GetHeaderbookResponse
@@ -531,5 +527,56 @@ namespace LibraryManagement.Repository
 
             return result; 
         }
+
+        public async Task<List<BooksAndComments>> getFavoriteBook(string idUser)
+        {
+            var result = await _context.FavoriteBooks
+               .AsNoTracking()
+               .Where(x=>x.IdReader == idUser)
+               .Include(a => a.book).ThenInclude(x=>x.HeaderBook)
+               .ThenInclude(x => x.bookWritings)
+               .ThenInclude(c => c.Author)
+
+               .Include(x=>x.book)
+               .ThenInclude(a => a.Evaluates)
+
+               .Include(x=>x.book)
+               .ThenInclude(a => a.images)
+               
+               .Select(x => new BooksAndComments
+               {
+                   idBook = x.IdBook,
+                   nameBook = x.book.HeaderBook.NameHeaderBook,
+                   describe = x.book.HeaderBook.DescribeBook,
+                   isLiked = _context.FavoriteBooks.Any(k => k.IdReader == idUser && k.IdBook == x.IdBook),
+                   Evaluations = _context.Evaluates
+                               .Where(a => a.IdBook == x.IdBook)
+                               .Select(a => new EvaluationDetails
+                               {
+                                   IdEvaluation = a.IdEvaluate,
+                                   IdReader = a.IdReader,
+                                   Comment = a.EvaComment,
+                                   Rating = a.EvaStar,
+                                   Create_Date = a.CreateDate
+                               }).ToList(),
+                   Authors = x.book.HeaderBook.bookWritings
+                             .Select(a => new AuthorResponse
+                             {
+                                 IdAuthor = a.IdAuthor,
+                                 NameAuthor = a.Author.NameAuthor,
+                                 Biography = a.Author.Biography,
+                                 IdTypeBook = new TypeBookResponse
+                                 {
+                                     IdTypeBook = a.Author.TypeBook.IdTypeBook,
+                                     NameTypeBook = a.Author.TypeBook.NameTypeBook
+                                 },
+                                 Nationality = a.Author.Nationality
+                             }).ToList(),
+                   image = x.book.images.FirstOrDefault() != null ? x.book.images.FirstOrDefault()!.Url : string.Empty
+               }).ToListAsync();
+            return result; 
+        }
+
+    
     }
 }

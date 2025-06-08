@@ -144,14 +144,14 @@ namespace LibraryManagement.Repository
                 var response = new ReaderResponse
                 {
                     IdReader = readerInf.IdReader,
-                    NameReader = readerInf.NameReader,
-                    Sex = readerInf.Sex,
-                    Address = readerInf.Address,
-                    Email = readerInf.Email,
+                    NameReader = readerInf.NameReader!,
+                    Sex = readerInf.Sex!,
+                    Address = readerInf.Address!,
+                    Email = readerInf.Email!,
                     Dob = readerInf.Dob,
-                    Phone = readerInf.Phone,
+                    Phone = readerInf.Phone!,
                     CreateDate = readerInf.CreateDate,
-                    ReaderAccount = readerInf.Email,
+                    ReaderAccount = readerInf.Email!,
                     TotalDebt = readerInf.TotalDebt,
                     UrlAvatar = readerInf.Images?.FirstOrDefault()?.Url,
                     IdTypeReader = readerInf.TypeReader != null

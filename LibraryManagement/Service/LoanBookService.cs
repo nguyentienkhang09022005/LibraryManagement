@@ -167,8 +167,7 @@ namespace LibraryManagement.Repository
 
         public async Task<List<LoanSlipBookResponse>> getListLoanSlipBook(string token)
         {
-            var user = await _account.AuthenticationAsync(token);
-            if (user == null) return null;
+            
             var result = await _context.LoanSlipBooks.Select(a => new LoanSlipBookResponse
             {
                 IdLoanSlipBook = a.IdLoanSlipBook,
@@ -179,6 +178,23 @@ namespace LibraryManagement.Repository
                 FineAmount = a.FineAmount
             }).ToListAsync();
             return result; 
+        }
+
+        public async Task<List<LoanBookHistory>> getLoanSlipBookByUser(string idReader)
+        {
+            var result = await _context.LoanSlipBooks
+                .Include(x => x.Reader)
+                .Where(x => x.IdReader == idReader)
+                .Select(x => new LoanBookHistory
+                {
+                    IdBook = x.TheBook.IdBook,
+                    NameBook = x.TheBook.Book.HeaderBook.NameHeaderBook,
+                    Genre = x.TheBook.Book.HeaderBook.TypeBook.NameTypeBook,
+                    DateBorrow = x.BorrowDate,
+                    DateReturn = x.ReturnDate,
+                    AvatarUrl = (x.TheBook.Book.images.FirstOrDefault() == null) ? string.Empty : x.TheBook.Book.images.FirstOrDefault()!.Url
+                }).ToListAsync();
+            return result;
         }
     }
 }

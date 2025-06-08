@@ -68,7 +68,7 @@ namespace LibraryManagement.Repository
             var newAuthor = _mapper.Map<Author>(request);
 
             // Chuỗi url ảnh từ cloudinary
-            string imageUrl = null;
+            string imageUrl = null!;
             if (request.AvatarImage != null)
             {
                 imageUrl = await _upLoadImageFileService.UploadImageAsync(request.AvatarImage);
@@ -94,7 +94,7 @@ namespace LibraryManagement.Repository
             authorResponse.IdTypeBook = new TypeBookResponse
             {
                 IdTypeBook = newAuthor.IdTypeBook,
-                NameTypeBook = typeBook?.NameTypeBook,
+                NameTypeBook = typeBook!.NameTypeBook,
             };
             authorResponse.UrlAvatar = imageUrl;
             return ApiResponse<AuthorResponse>.SuccessResponse("Thêm tác giả thành công", 201, authorResponse);
@@ -124,7 +124,7 @@ namespace LibraryManagement.Repository
             _mapper.Map(request, updateAuthor);
 
             // Chuỗi url ảnh từ cloudinary
-            string imageUrl = null;
+            string imageUrl = null!;
             if (request.AvatarImage != null)
             {
                 imageUrl = await _upLoadImageFileService.UploadImageAsync(request.AvatarImage);
@@ -159,7 +159,7 @@ namespace LibraryManagement.Repository
             authorResponse.IdTypeBook = new TypeBookResponse
             {
                 IdTypeBook = updateAuthor.IdTypeBook,
-                NameTypeBook = typeBook?.NameTypeBook,
+                NameTypeBook = typeBook!.NameTypeBook,
             };
             authorResponse.UrlAvatar = imageUrl;
             return ApiResponse<AuthorResponse>.SuccessResponse("Thay đổi thông tin tác giả thành công", 200, authorResponse);

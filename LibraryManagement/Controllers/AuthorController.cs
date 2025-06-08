@@ -25,12 +25,13 @@ namespace LibraryManagement.Controllers
         // Endpoint lấy danh sách tác giả
 
         [HttpGet("list_author")]
+        [Authorize]
         public async Task<IActionResult> gettListAuthor()
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ;
             if (string.IsNullOrEmpty(userEmail))
             {
-                return Unauthorized("Vui lòng đăng nhập");
+                return NotFound("Không tìm thấy thông tin người dùng");
             }
             try
             {

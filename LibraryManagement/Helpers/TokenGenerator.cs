@@ -54,12 +54,12 @@ namespace LibraryManagement.Helpers
             claims.Add(new Claim("scope", string.Join(" ", scopeList)));
 
             // Khóa để ký Token
-            var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SecretKey"]));
+            var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SecretKey"]!));
 
             // Tạo Access Token
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(5),
+                expires: DateTime.UtcNow.AddMinutes(60),
                 signingCredentials: new SigningCredentials(authenKey, SecurityAlgorithms.HmacSha256)
                 );
 
@@ -89,7 +89,7 @@ namespace LibraryManagement.Helpers
                 claims.Add(new Claim("scope", string.Join(" ", scopeList))); // Optional
             }
             // Khóa để ký Token
-            var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SecretKey"]));
+            var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SecretKey"]!));
 
             // Tạo Refresh Token
             var refreshToken = new JwtSecurityToken(

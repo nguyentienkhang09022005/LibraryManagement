@@ -17,17 +17,12 @@ namespace LibraryManagement.Controllers
             _readerService = readerService;
         }
 
-        // Endpoint lấy danh sách độc giả
-        //    [Authorize(Roles = "Reader")]
         [HttpGet("list_reader")]
         [Authorize]
         public async Task<IActionResult> gettAllReader()
         {
             var user = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(user))
-            {
-                return Unauthorized("Vui lòng đăng nhập");
-            }
+            if (string.IsNullOrEmpty(user) || user == null) return NotFound("Không tìm thấy thông tin người dùng");
             try
             {
                 return Ok(await _readerService.getAllReaderAsync());

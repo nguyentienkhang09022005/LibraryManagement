@@ -10,5 +10,6 @@ namespace LibraryManagement.Repository.InterFace
         Task<ApiResponse<string>> deleteLoanBookAsync(Guid idLoanSlipBook);
 
         Task<List<LoanSlipBookResponse>> getListLoanSlipBook(string token);
+        Task<List<LoanBookHistory>> getLoanSlipBookByUser(string idUser);
     }
 }

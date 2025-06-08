@@ -14,8 +14,8 @@ namespace LibraryManagement.Controllers
         private readonly ISlipBookService _slipBookService;
         private readonly LibraryManagermentContext _context;
 
-        public LoanSlipBookController(ILoanBookService loanSlipBookService, LibraryManagermentContext context, 
-                                                                            ISlipBookService slipBookService )
+        public LoanSlipBookController(ILoanBookService loanSlipBookService, LibraryManagermentContext context,
+                                                                            ISlipBookService slipBookService)
         {
             _loanBookService = loanSlipBookService;
             _context = context;
@@ -71,5 +71,18 @@ namespace LibraryManagement.Controllers
                 return Ok(result);
             return NotFound(result);
         }
-    } 
+        [HttpGet("getloansliphistory")]
+        public async Task<IActionResult> getLoanSlipByUser(string idUser)
+        {
+            try
+            {
+                var result = await _loanBookService.getLoanSlipBookByUser(idUser);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+    }
 }

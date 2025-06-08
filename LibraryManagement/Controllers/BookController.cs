@@ -65,36 +65,41 @@ namespace LibraryManagement.Controllers
         //}
 
         [HttpPost("getEvaluation")]
-        public async Task<IActionResult> getDetailedEvaluation(EvaluationDetailInput dto)
+        [Authorize]
+        public async Task<IActionResult> getDetailedEvaluation(string idBook)
         {
-            var result = await _bookService.getBooksEvaluation(dto);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var user = await _context.Readers.AsNoTracking().FirstOrDefaultAsync(x => x.ReaderUsername == userEmail || x.Email == userEmail);
+            if (user == null) return NotFound("Không tìm tháy thông tin người dùng");
+            var result = await _bookService.getBooksEvaluation(new EvaluationDetailInput { idUser = user.IdReader, IdBook = idBook });
             if (result == null) return Unauthorized("Không có quyền admin");
             return Ok(result);
         }
 
-        [HttpPost("LikeHeaderBook")]
-        public async Task<IActionResult> likeHeaderBook(EvaluationDetailInput dto)
+        [HttpPost("LikeBook")]
+        [Authorize]
+        public async Task<IActionResult> LikeBook(string idBook)
         {
-            var result = await _bookService.LikeBook(dto);
-            if (result == false) return Unauthorized("Vui lòng đăng nhập ");
-            return Ok("Success");
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var user = await _context.Readers.AsNoTracking().FirstOrDefaultAsync(x => x.ReaderUsername == userEmail || x.Email == userEmail);
+            if (user == null) return NotFound("Không tìm tháy thông tin người dùng"); 
+            var result = await _bookService.LikeBook(new EvaluationDetailInput { idUser = user.IdReader, IdBook = idBook});
+            return Ok(result);
         }
-        //[HttpPost("getAllBooksAndComments")]
-        //public async Task<IActionResult> getAllBooksAndComments([FromBody] string token)
-        //{
-        //    var result = await _bookService.getAllHeaderbookandComments(token);
-        //    if (result == null) return Unauthorized("Vui lòng đăng nhập");
-        //    return Ok(result); 
-        //}
 
-        //[HttpPost("getLikedHeaderbook")]
-        //public async Task<IActionResult> getLikeHeaderBook([FromBody] string token)
-        //{
-        //    var result = await _bookService.getLikedHeaderBook(token);
-        //    if (result == null) return Unauthorized("Vui lòng đăng nhập");
-        //    return Ok(result); 
+        [HttpGet("getlikedbook")]
+        [Authorize]
+        public async Task<IActionResult> getLikeHeaderBook()
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (userEmail == null || string.IsNullOrEmpty(userEmail)) return NotFound("Không tìm thấy thông tin người dùng");
+            var user = await _context.Readers.AsNoTracking().FirstOrDefaultAsync(x => x.ReaderUsername == userEmail);
+            if (user == null) return NotFound("Không tìm thấy thông tin người dùng");
+            var result = await _bookService.getFavoriteBook(user!.IdReader);
+            if (result == null) return Unauthorized("Vui lòng đăng nhập");
+            return Ok(result);
 
-        //}
+        }
         [HttpDelete("deleteEvaluation")]
         public async Task<IActionResult> deleteEvaluation([FromBody]DeleteEvaluationInput dto)
         {
@@ -104,9 +109,10 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpPost("getallheaderbooks")]
-        public async Task<IActionResult> getAllHeaderbooks([FromBody] string token)
+        [Authorize]
+        public async Task<IActionResult> getAllHeaderbooks()
         {
-            var result = await _bookService.GetAllHeaderBooks(token);
+            var result = await _bookService.GetAllHeaderBooks();
             return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result); 
         }
         [HttpGet("getbooksandcomments")]

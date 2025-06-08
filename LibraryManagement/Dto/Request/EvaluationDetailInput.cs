@@ -2,7 +2,7 @@
 {
     public class EvaluationDetailInput
     {
-        public string token { get; set; }
+        public string idUser { get; set; }
         public string IdBook { get; set; }
     }
 }
