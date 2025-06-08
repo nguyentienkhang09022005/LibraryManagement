@@ -84,5 +84,10 @@ namespace LibraryManagement.Controllers
             var result = await _authorService.findAuthor(new FindAuthorInputDto { nameAuthor = name});
             return Ok(result);
         }
+        [HttpGet("getauthorbyid{idauthor}")]
+        public async Task<IActionResult> getAuthorById(Guid idauthor)
+        {
+            return Ok(await _authorService.GetAuthorById(idauthor));
+        }
     }
 }

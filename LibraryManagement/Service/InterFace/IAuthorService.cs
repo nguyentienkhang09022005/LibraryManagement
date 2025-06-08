@@ -13,5 +13,7 @@ namespace LibraryManagement.Repository.InterFace
         public Task<ApiResponse<string>> deleteAuthorAsync(Guid idAuthor);
 
         public Task<List<AuthorResponse>> findAuthor(FindAuthorInputDto dto);
+
+        public Task<AuthorResponse> GetAuthorById(Guid idauthor);
     }
 }

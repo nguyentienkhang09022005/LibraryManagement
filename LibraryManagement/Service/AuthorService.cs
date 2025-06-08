@@ -183,5 +183,24 @@ namespace LibraryManagement.Repository
                 }).ToListAsync();
             return authors;
         }
+
+        public async Task<AuthorResponse> GetAuthorById(Guid idauthor)
+        {
+            var authors = await _context.Authors.AsNoTracking().Where(x => x.IdAuthor == idauthor)
+               .Select(a => new AuthorResponse
+               {
+
+                   IdAuthor = a.IdAuthor,
+                   NameAuthor = a.NameAuthor,
+                   Biography = a.Biography,
+                   IdTypeBook = new TypeBookResponse
+                   {
+                       IdTypeBook = a.TypeBook.IdTypeBook,
+                       NameTypeBook = a.TypeBook.NameTypeBook
+                   },
+                   Nationality = a.Nationality
+               }).FirstOrDefaultAsync() ?? null!;
+            return authors;
+        }
     }
 }
