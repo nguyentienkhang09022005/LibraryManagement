@@ -125,6 +125,13 @@ namespace LibraryManagement.Controllers
             var result = await _bookService.getAllBooksInDetail(user!.IdReader);
             return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result); 
         }
+        [HttpGet("getbooksindetailbyid{idbook}")]
+   
+        public async Task<IActionResult> getBooksAndCommentsById(string idbook)
+        {
+            var result = await _bookService.getAllBooksInDetailById(idbook);
+            return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result);
+        }
 
         [HttpGet("findBooks{namebook}")]
         public async Task<IActionResult> findBooks(string namebook)

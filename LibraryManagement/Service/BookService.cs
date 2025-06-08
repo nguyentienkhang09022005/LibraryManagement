@@ -521,7 +521,7 @@ namespace LibraryManagement.Repository
                     IdTypeBook = new TypeBookResponse { IdTypeBook = k.Author.IdTypeBook, NameTypeBook = string.Empty },
                     Nationality = k.Author.Nationality,
                     Biography = k.Author.Biography,
-                    UrlAvatar = null
+                    UrlAvatar =  k.Author.Images.Select(x=>x.Url).FirstOrDefault() ?? string.Empty,
                 }).ToList()
             }).ToListAsync();
 
@@ -577,6 +577,37 @@ namespace LibraryManagement.Repository
             return result; 
         }
 
-    
+        public async Task<List<BooksAndCommentsWithoutLogin>> getAllBooksInDetailById( string idbook)
+        {
+            var result = await _context.Books
+          .AsNoTracking()
+          .Where(x => x.IdBook == idbook)
+          .Select(x => new BooksAndCommentsWithoutLogin
+          {
+              idBook = x.IdBook,
+              nameBook = x.HeaderBook.NameHeaderBook,
+              describe = x.HeaderBook.DescribeBook,
+              image = x.images.Select(img => img.Url).FirstOrDefault() ?? string.Empty,
+              Evaluations = x.Evaluates.Select(c => new EvaluationDetails
+              {
+                  IdEvaluation = c.IdEvaluate,
+                  IdReader = c.IdReader,
+                  Comment = c.EvaComment,
+                  Rating = c.EvaStar,
+                  Create_Date = c.CreateDate
+              }).ToList(),
+              Authors = x.HeaderBook.bookWritings.Select(k => new AuthorResponse
+              {
+                  IdAuthor = k.IdAuthor,
+                  NameAuthor = k.Author.NameAuthor,
+                  IdTypeBook = new TypeBookResponse { IdTypeBook = k.Author.IdTypeBook, NameTypeBook = string.Empty },
+                  Nationality = k.Author.Nationality,
+                  Biography = k.Author.Biography,
+                  UrlAvatar = k.Author.Images.Select(x=>x.Url).FirstOrDefault() ?? string.Empty,
+              }).ToList()
+          }).ToListAsync();
+
+            return result;
+        }
     }
 }
