@@ -382,85 +382,7 @@ namespace LibraryManagement.Repository
         }
 
 
-        //public Task<BookResponse> findPost(string name_book)
-        //{
-        //    throw new NotImplementedException();
-        //}
-        //public async Task<List<HeadbookAndComments>> getHeaderbookandCommentsByid(GetHeaderBookDtoInput dto)
-        //{
-        //    var user = await _authen.AuthenticationAsync(dto.token);
-        //    if (user == null) return null!;
-          
-        //    var bookResult = await _context.HeaderBooks
-        //        .AsNoTracking()
-        //        .Where(hd => hd.NameHeaderBook == dto.name_headerbook)
-        //        //.Include(hd => hd.Evaluates)
-        //        .Select(hb => new HeadbookAndComments
-        //        {
-        //            idHeaderBook = hb.IdHeaderBook.ToString(),
-        //            nameHeaderBook = hb.NameHeaderBook,
-        //            describe = hb.DescribeBook,
-        //            isLiked = _context.LikedHeaderBooks
-        //            .Any(x => x.IdReader == user.IdReader && x.IdBook == hb.IdHeaderBook),
-        //            Evaluations = hb.Evaluates
-        //            .Select(e => new EvaluationDetails
-        //            {
-        //                IdEvaluation = e.IdEvaluate,
-        //                IdReader = e.IdReader,
-        //                Comment = e.EvaComment,
-        //                Rating = e.EvaStar,
-        //                Create_Date = e.CreateDate
-        //            })
-        //        .OrderByDescending(e => e.Create_Date) // Sắp xếp theo ngày tạo
-        //        .ToList()
-        //        }).ToListAsync();
-
-        //    return bookResult ;
-        //}
-
-        //public async Task<List<HeadbookAndComments>> getAllHeaderbookandComments(string token)
-        //{
-        //    var user = await _authen.AuthenticationAsync(token);
-        //    if (user == null) return null!;
-        //    var bookResult = await _context.HeaderBooks
-        //         .AsNoTracking()
-        //         .Include(hd => hd.Evaluates)
-        //         .Include(bw=>bw.bookWritings)
-        //            .ThenInclude(at => at.Author)
-        //         .Select(hb => new HeadbookAndComments
-        //         {
-        //             idHeaderBook = hb.IdHeaderBook.ToString(),
-        //             nameHeaderBook = hb.NameHeaderBook,
-        //             describe = hb.DescribeBook,
-        //             image = hb.ImageBook,
-        //             isLiked = _context.LikedHeaderBooks
-        //             .Any(x => x.IdReader == user.IdReader && x.IdBook == hb.IdHeaderBook),
-        //             Evaluations = hb.Evaluates
-        //             .Select(e => new EvaluationDetails
-        //             {
-        //                 IdEvaluation = e.IdEvaluate,
-        //                 IdReader = e.IdReader,
-        //                 Comment = e.EvaComment,
-        //                 Rating = e.EvaStar,
-        //                 Create_Date = e.CreateDate
-        //             })
-            
-        //         .OrderByDescending(e => e.Create_Date) // Sắp xếp theo ngày tạo
-        //         .ToList(),
-        //           Authors = hb.bookWritings
-        //                     .Select(bw=>new AuthorResponse
-        //                     {
-        //                         IdAuthor = bw.IdAuthor,
-        //                         NameAuthor = bw.Author.NameAuthor ,
-        //                         Biography = bw.Author.Biography,
-        //                         Nationality = bw.Author.Nationality,
-        //                         IdTypeBook = bw.Author.IdTypeBook
-        //                     })
-        //                     .ToList(),
-        //         }).ToListAsync();
-
-        //    return bookResult;
-        //}
+     
         public async Task<List<EvaluationDetails>> getBooksEvaluation(EvaluationDetailInput dto)
         {
             var user = await _authen.AuthenticationAsync(dto.token);
@@ -502,11 +424,10 @@ namespace LibraryManagement.Repository
             }
         }
 
-        public async Task<List<BooksAndComments>> getAllBooksInDetail(string token)
+        public async Task<List<BooksAndComments>> getAllBooksInDetail(string reeaderId)
         {
-            var user = await _authen.AuthenticationAsync(token);
-            if (user == null) return null!;
-
+           
+            
             var result = await _context.Books
                 .AsNoTracking()
                 .Include(a => a.HeaderBook)
@@ -519,7 +440,7 @@ namespace LibraryManagement.Repository
                     idBook = x.IdBook,
                     nameBook = x.HeaderBook.NameHeaderBook,
                     describe = x.HeaderBook.DescribeBook,
-                    isLiked = _context.FavoriteBooks.Any(k => k.IdReader == user.IdReader && k.IdBook == x.IdBook),
+                    isLiked = _context.FavoriteBooks.Any(k => k.IdReader == reeaderId && k.IdBook == x.IdBook),
                     Evaluations = _context.Evaluates
                                 .Where(a => a.IdBook == x.IdBook)
                                 .Select(a => new EvaluationDetails

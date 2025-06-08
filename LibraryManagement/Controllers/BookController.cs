@@ -1,9 +1,14 @@
-﻿using LibraryManagement.Dto.Request;
+﻿using LibraryManagement.Data;
+using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Formats.Asn1;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
+using ZstdSharp.Unsafe;
 
 namespace LibraryManagement.Controllers
 {
@@ -12,10 +17,11 @@ namespace LibraryManagement.Controllers
     public class BookController : ControllerBase
     {
         private readonly IBookService _bookService;
-
-        public BookController(IBookService bookService)
+        private readonly LibraryManagermentContext _context;
+        public BookController(IBookService bookService, LibraryManagermentContext context)
         {
             _bookService = bookService;
+            _context = context;
         }
 
         // Endpoint tạo sách
@@ -103,10 +109,14 @@ namespace LibraryManagement.Controllers
             var result = await _bookService.GetAllHeaderBooks(token);
             return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result); 
         }
-        [HttpPost("getbooksandcomments")]
-        public async Task<IActionResult> getBooksAndComments([FromBody] string token)
+        [HttpGet("getbooksandcomments")]
+        [Authorize]
+        public async Task<IActionResult> getBooksAndComments()
         {
-            var result = await _bookService.getAllBooksInDetail(token);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail)) return NotFound("Không tìm thấy thông tin người dùng");
+            var user = await _context.Readers.AsNoTracking().FirstOrDefaultAsync(x=>x.ReaderUsername == userEmail || x.Email == userEmail);
+            var result = await _bookService.getAllBooksInDetail(user!.IdReader);
             return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result); 
         }
 

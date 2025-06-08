@@ -115,6 +115,21 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]!))
     };
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = context =>
+        {
+            context.HandleResponse();
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+            var result = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                message = "Vui lòng đăng nhập"
+            });
+
+            return context.Response.WriteAsync(result);
+        }
+    };
 });
 
 
