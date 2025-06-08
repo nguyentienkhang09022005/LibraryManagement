@@ -159,6 +159,10 @@ builder.Services.AddScoped<IUpLoadImageFileService, UpLoadImageFileService>();
 
 
 
+builder.Services.AddSingleton<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IChatService, ChatService>();
+
+
 // Cấu hình up ảnh lên Cloudinary
 var account = new Account(
     Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__CLOUDNAME"),
@@ -179,7 +183,7 @@ builder.Services.AddFluentEmail("noreply@gmail.com", "no reply")
                 });
 builder.Services.AddMemoryCache();
 
-
+builder.Services.AddSignalR(); 
 
 
 var app = builder.Build();
@@ -202,5 +206,6 @@ app.UseSwaggerUI(c =>
 });
 app.MapControllers();
 
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();

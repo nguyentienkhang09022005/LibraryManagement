@@ -165,9 +165,22 @@ namespace LibraryManagement.Repository
             return ApiResponse<AuthorResponse>.SuccessResponse("Thay đổi thông tin tác giả thành công", 200, authorResponse);
         }
         
-        public async Task<List<Author>> findAuthor(FindAuthorInputDto dto)
+        public async Task<List<AuthorResponse>> findAuthor(FindAuthorInputDto dto)
         {
-            var authors = await _context.Authors.Where(x => x.NameAuthor.ToLower().Contains(dto.nameAuthor)).ToListAsync();
+            var authors = await _context.Authors.AsNoTracking().Where(x => x.NameAuthor.ToLower().Contains(dto.nameAuthor))
+                .Select(a=>new AuthorResponse
+                {
+
+                    IdAuthor = a.IdAuthor,
+                    NameAuthor = a.NameAuthor,
+                    Biography = a.Biography,
+                    IdTypeBook = new TypeBookResponse
+                    {
+                        IdTypeBook = a.TypeBook.IdTypeBook,
+                        NameTypeBook = a.TypeBook.NameTypeBook
+                    },
+                    Nationality = a.Nationality
+                }).ToListAsync();
             return authors;
         }
     }

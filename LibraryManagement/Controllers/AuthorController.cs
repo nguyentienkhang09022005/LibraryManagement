@@ -28,8 +28,8 @@ namespace LibraryManagement.Controllers
         [Authorize]
         public async Task<IActionResult> gettListAuthor()
         {
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ;
-            if (string.IsNullOrEmpty(userEmail))
+            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ;
+            if (string.IsNullOrEmpty(user))
             {
                 return NotFound("Không tìm thấy thông tin người dùng");
             }
@@ -79,7 +79,7 @@ namespace LibraryManagement.Controllers
         [Authorize]
         public async Task<IActionResult> findAuthor(string name)
         {
-            var user = User.FindFirst(ClaimTypes.Email)?.Value;
+            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(user)) return NotFound("Không tìm thấy tài khoản"); 
             var result = await _authorService.findAuthor(new FindAuthorInputDto { nameAuthor = name});
             return Ok(result);

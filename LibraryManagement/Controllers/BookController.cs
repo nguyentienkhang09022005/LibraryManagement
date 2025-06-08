@@ -68,11 +68,10 @@ namespace LibraryManagement.Controllers
         [Authorize]
         public async Task<IActionResult> getDetailedEvaluation(string idBook)
         {
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            var user = await _context.Readers.AsNoTracking().FirstOrDefaultAsync(x => x.ReaderUsername == userEmail || x.Email == userEmail);
-            if (user == null) return NotFound("Không tìm tháy thông tin người dùng");
-            var result = await _bookService.getBooksEvaluation(new EvaluationDetailInput { idUser = user.IdReader, IdBook = idBook });
-            if (result == null) return Unauthorized("Không có quyền admin");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return NotFound("Không tìm thấy thông tin người dùng");
+            var result = await _bookService.getBooksEvaluation(new EvaluationDetailInput { idUser = userId, IdBook = idBook });
+          
             return Ok(result);
         }
 
@@ -80,10 +79,8 @@ namespace LibraryManagement.Controllers
         [Authorize]
         public async Task<IActionResult> LikeBook(string idBook)
         {
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            var user = await _context.Readers.AsNoTracking().FirstOrDefaultAsync(x => x.ReaderUsername == userEmail || x.Email == userEmail);
-            if (user == null) return NotFound("Không tìm tháy thông tin người dùng"); 
-            var result = await _bookService.LikeBook(new EvaluationDetailInput { idUser = user.IdReader, IdBook = idBook});
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await _bookService.LikeBook(new EvaluationDetailInput { idUser = userId, IdBook = idBook});
             return Ok(result);
         }
 
@@ -91,12 +88,9 @@ namespace LibraryManagement.Controllers
         [Authorize]
         public async Task<IActionResult> getLikeHeaderBook()
         {
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (userEmail == null || string.IsNullOrEmpty(userEmail)) return NotFound("Không tìm thấy thông tin người dùng");
-            var user = await _context.Readers.AsNoTracking().FirstOrDefaultAsync(x => x.ReaderUsername == userEmail);
-            if (user == null) return NotFound("Không tìm thấy thông tin người dùng");
-            var result = await _bookService.getFavoriteBook(user!.IdReader);
-            if (result == null) return Unauthorized("Vui lòng đăng nhập");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null || string.IsNullOrEmpty(userId)) return NotFound("Không tìm thấy thông tin người dùng"); 
+            var result = await _bookService.getFavoriteBook(userId);
             return Ok(result);
 
         }
@@ -119,10 +113,9 @@ namespace LibraryManagement.Controllers
         [Authorize]
         public async Task<IActionResult> getBooksAndComments()
         {
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(userEmail)) return NotFound("Không tìm thấy thông tin người dùng");
-            var user = await _context.Readers.AsNoTracking().FirstOrDefaultAsync(x=>x.ReaderUsername == userEmail || x.Email == userEmail);
-            var result = await _bookService.getAllBooksInDetail(user!.IdReader);
+            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userID)) return NotFound("Không tìm thấy thông tin người dùng");
+            var result = await _bookService.getAllBooksInDetail(userID);
             return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result); 
         }
         [HttpGet("getbooksindetailbyid{idbook}")]

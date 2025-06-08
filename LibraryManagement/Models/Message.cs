@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LibraryManagement.Models
 {
@@ -7,6 +8,7 @@ namespace LibraryManagement.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string? Id { get; set; }
 
         [BsonElement("senderId")]
