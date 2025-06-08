@@ -572,7 +572,7 @@ namespace LibraryManagement.Repository
                                  },
                                  Nationality = a.Author.Nationality
                              }).ToList(),
-                   image = x.book.images.FirstOrDefault() != null ? x.book.images.FirstOrDefault()!.Url : string.Empty
+                   image = x.book.images.FirstOrDefault(a=>a.IdBook == x.IdBook) != null ? x.book.images.FirstOrDefault()!.Url : string.Empty
                }).ToListAsync();
             return result; 
         }

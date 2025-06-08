@@ -115,7 +115,7 @@ namespace LibraryManagement.Controllers
             var result = await _bookService.GetAllHeaderBooks();
             return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result); 
         }
-        [HttpGet("getbooksandcomments")]
+        [HttpGet("getbooksindetail")]
         [Authorize]
         public async Task<IActionResult> getBooksAndComments()
         {
