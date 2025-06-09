@@ -1,6 +1,8 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ZstdSharp.Unsafe;
 
 namespace LibraryManagement.Controllers
 {
@@ -33,6 +35,20 @@ namespace LibraryManagement.Controllers
                 return Ok(result);
             return NotFound(result);
         }
+        [HttpGet("getCategoryOverdueReport")]
+        [Authorize]
+        public async Task<IActionResult> GetCategoryOverdueReport()
+        {
+            try
+            {
+                var result = await _categoryReportService.getOverdueReport();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+            }
 
     }
 }

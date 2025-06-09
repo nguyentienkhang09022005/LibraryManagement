@@ -21,7 +21,36 @@ namespace LibraryManagement.Service
             var database = client.GetDatabase(databaseName);
             _messages = database.GetCollection<Message>(collectionName);
             _hubContext = hubContext;
+            EnsureIndexes();
         }
+        private void EnsureIndexes()
+        {
+            var indexModels = new List<CreateIndexModel<Message>>();
+            indexModels.Add(new CreateIndexModel<Message>(
+                Builders<Message>.IndexKeys
+                    .Ascending(m => m.SenderId)
+                    .Ascending(m => m.ReceiverId)
+                    .Ascending(m => m.SentAt)
+            ));
+            indexModels.Add(new CreateIndexModel<Message>(
+                Builders<Message>.IndexKeys
+                    .Ascending(m => m.ReceiverId)
+                    .Descending(m => m.SentAt)
+            ));
+            indexModels.Add(new CreateIndexModel<Message>(
+                Builders<Message>.IndexKeys
+                    .Ascending("GroupId") 
+                    .Descending(m => m.SentAt)
+            ));
+
+           
+            indexModels.Add(new CreateIndexModel<Message>(
+                Builders<Message>.IndexKeys.Text(m => m.Content)
+            ));
+
+            _messages.Indexes.CreateMany(indexModels);
+        }
+
 
         public async Task<List<Message>> GetAllMessagesAsync(string userId1, string userId2)
         {
@@ -45,8 +74,6 @@ namespace LibraryManagement.Service
         {
             message.SentAt = DateTime.UtcNow;
             await _messages.InsertOneAsync(message);
-
-            // Push tin nhắn realtime bằng SignalR
             await _hubContext.Clients.User(message.ReceiverId)
                 .SendAsync("ReceiveMessage", message.SenderId, message.Content, message.SentAt);
         }

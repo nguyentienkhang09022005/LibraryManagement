@@ -132,7 +132,7 @@ namespace LibraryManagement.Repository
                 readerResponse = new ReaderInLoanBookResponse
                 {
                     IdReader = reader.IdReader,
-                    NameReader = reader.NameReader
+                    NameReader = reader.NameReader!
                 },
                 BorrowDate = loanBook.BorrowDate,
                 ReturnDate = loanBook.ReturnDate
@@ -178,6 +178,46 @@ namespace LibraryManagement.Repository
                 FineAmount = a.FineAmount
             }).ToListAsync();
             return result; 
+        }
+
+        public async Task<List<GetLoanSlipBookByType>> getLoanSlipBookByType(string? genre)
+        {
+            if (genre != null)
+            {
+                 return await _context.CategoryReportDetails
+                    .Include(x => x.CategoryReport)
+                    .Include(x => x.TypeBook)
+                    .Where(x => x.TypeBook.NameTypeBook.ToLower().Contains(genre.ToLower()))
+                    .Select(x => new GetLoanSlipBookByType
+                    {
+                        IdReportGenre = x.IdCategoryReport,
+                        ReportMonth = x.CategoryReport.MonthReport,
+                        Genre = x.TypeBook.NameTypeBook,
+                        TotalBorrow = x.BorrowCount,
+                        Rate = x.BorrowRatio
+                    })
+                     .OrderByDescending(x => x.ReportMonth)
+                     .ThenByDescending(x => x.TotalBorrow)
+                    .ToListAsync();
+            }
+            else
+            {
+                 return  await _context.CategoryReportDetails
+                   .Include(x => x.CategoryReport)
+                   .Include(x => x.TypeBook)
+                   .Select(x => new GetLoanSlipBookByType
+                   {
+                       IdReportGenre = x.IdCategoryReport,
+                       ReportMonth = x.CategoryReport.MonthReport,
+                       Genre = x.TypeBook.NameTypeBook,
+                       TotalBorrow = x.BorrowCount,
+                       Rate = x.BorrowRatio
+                   })
+                    .OrderByDescending(x => x.ReportMonth)
+                    .ThenByDescending(x => x.TotalBorrow)
+                   .ToListAsync();
+            }
+              
         }
 
         public async Task<List<LoanBookHistory>> getLoanSlipBookByUser(string idReader)

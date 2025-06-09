@@ -34,13 +34,18 @@ namespace LibraryManagement.Controllers
                 ReceiverId = message.ReceiverId,
                 SentAt = message.SentAt,
                 Content = message.Content,
-            }; 
+            };
             await _chatService.SendMessageAsync(messageSent);
             return Ok(messageSent);
         }
 
         [HttpGet("history")]
-        public async Task<IActionResult> History([FromQuery] string user1, [FromQuery] string user2)
-            => Ok(await _chatService.GetAllMessagesAsync(user1, user2));
+        [Authorize]
+        public async Task<IActionResult> History([FromQuery] string receiveUserId) {
+            var sendUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (sendUserId == null) return NotFound("Không tìm thấy thông tin người dùng");
+            return Ok(await _chatService.GetAllMessagesAsync(sendUserId, receiveUserId));
+
+        }
     }
 }

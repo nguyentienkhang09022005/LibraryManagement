@@ -80,7 +80,8 @@ namespace LibraryManagement.Controllers
         public async Task<IActionResult> LikeBook(string idBook)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var result = await _bookService.LikeBook(new EvaluationDetailInput { idUser = userId, IdBook = idBook});
+            if (userId == null) return NotFound("Không tìm thấy thông tin người dùng");
+            var result = await _bookService.LikeBook(new EvaluationDetailInput { idUser = userId!, IdBook = idBook});
             return Ok(result);
         }
 

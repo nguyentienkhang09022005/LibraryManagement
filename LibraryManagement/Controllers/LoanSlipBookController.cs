@@ -3,6 +3,7 @@ using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Service.InterFace;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics.Contracts;
 
 namespace LibraryManagement.Controllers
 {
@@ -77,6 +78,19 @@ namespace LibraryManagement.Controllers
             try
             {
                 var result = await _loanBookService.getLoanSlipBookByUser(idUser);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("getloanslipbygenre")]
+        public async Task<IActionResult> getLoanslipByType(string? genre)
+        {
+            try
+            {
+                var result = await _loanBookService.getLoanSlipBookByType(genre ?? string.Empty);
                 return Ok(result);
             }
             catch (Exception ex)

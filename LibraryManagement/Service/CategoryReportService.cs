@@ -123,6 +123,35 @@ namespace LibraryManagement.Service
             return ApiResponse<string>.SuccessResponse("Đã xóa báo cáo thành công", 200, "");
         }
 
+        public async Task<List<CategoryOverdueResponse>> getOverdueReport()
+        {
+            var result = await (from obd in _context.OverdueReportDetails.AsNoTracking()
+                                .Include(d => d.OverdueReport)
+                                .Include(d => d.TheBook)
+                                    .ThenInclude(t => t.Book)
+                                        .ThenInclude(b => b.HeaderBook)
+                                join lsb in _context.LoanSlipBooks
+                                    on new { obd.IdTheBook, obd.BorrowDate } equals new { lsb.IdTheBook, lsb.BorrowDate }
+                                join r in _context.Readers
+                                    on lsb.IdReader equals r.IdReader
+                                select new CategoryOverdueResponse
+                                {
+                                    IdOverDueReport = obd.OverdueReport.IdOverdueReport,
+                                    reportDate = obd.OverdueReport.CreatedDate,
+                                    IDbook = obd.IdTheBook,
+                                    BookName = obd.TheBook.Book.HeaderBook.NameHeaderBook,
+                                    DateBorrow = obd.BorrowDate,
+                                    DateLate = obd.LateDays, 
+                                    IDuser = lsb.IdReader,
+                                    username = r.NameReader!,
+                                    totalfine = lsb.FineAmount
+                                })
+                            .OrderByDescending(x => x.reportDate)
+                            .ThenByDescending(x => x.DateLate)
+                            .ToListAsync();
+            return result; 
+        }
+
         // Sửa thông tin báo cáo
         public async Task<ApiResponse<CategoryReportResponse>> updateCategoryReportAsync(CategoryReportRequest request, Guid idCategoryReport)
         {

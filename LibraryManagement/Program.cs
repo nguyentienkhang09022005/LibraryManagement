@@ -40,7 +40,7 @@ builder.Configuration["MongoDB:ConnectionString"] = Environment.GetEnvironmentVa
 
 
 // Connect to MongoDB
-builder.Services.AddSingleton<MessageService>();
+
 System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 //NpgsqlConnection.GlobalTypeMapper.MapDateTime(DateTimeKind.Utc);
 

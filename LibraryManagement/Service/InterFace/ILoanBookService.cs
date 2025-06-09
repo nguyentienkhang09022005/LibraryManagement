@@ -11,5 +11,7 @@ namespace LibraryManagement.Repository.InterFace
 
         Task<List<LoanSlipBookResponse>> getListLoanSlipBook(string token);
         Task<List<LoanBookHistory>> getLoanSlipBookByUser(string idUser);
+
+        Task<List<GetLoanSlipBookByType>> getLoanSlipBookByType(string genre);
     }
 }
