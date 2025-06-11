@@ -46,8 +46,8 @@ namespace LibraryManagement.Controllers
 
         // Endpoint sửa sách
         [HttpPut("update_book/{idBook}/{idTheBook}")]
-        public async Task<IActionResult> updateHeaderBook([FromForm] HeaderBookUpdateRequest request, 
-                                                          string idBook, 
+        public async Task<IActionResult> updateHeaderBook([FromForm] HeaderBookUpdateRequest request,
+                                                          string idBook,
                                                           string idTheBook)
         {
             var result = await _bookService.updateBookAsync(request, idBook, idTheBook);
@@ -71,7 +71,7 @@ namespace LibraryManagement.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return NotFound("Không tìm thấy thông tin người dùng");
             var result = await _bookService.getBooksEvaluation(new EvaluationDetailInput { idUser = userId, IdBook = idBook });
-          
+
             return Ok(result);
         }
 
@@ -81,7 +81,7 @@ namespace LibraryManagement.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null) return NotFound("Không tìm thấy thông tin người dùng");
-            var result = await _bookService.LikeBook(new EvaluationDetailInput { idUser = userId!, IdBook = idBook});
+            var result = await _bookService.LikeBook(new EvaluationDetailInput { idUser = userId!, IdBook = idBook });
             return Ok(result);
         }
 
@@ -90,17 +90,17 @@ namespace LibraryManagement.Controllers
         public async Task<IActionResult> getLikeHeaderBook()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null || string.IsNullOrEmpty(userId)) return NotFound("Không tìm thấy thông tin người dùng"); 
+            if (userId == null || string.IsNullOrEmpty(userId)) return NotFound("Không tìm thấy thông tin người dùng");
             var result = await _bookService.getFavoriteBook(userId);
             return Ok(result);
 
         }
         [HttpDelete("deleteEvaluation")]
-        public async Task<IActionResult> deleteEvaluation([FromBody]DeleteEvaluationInput dto)
+        public async Task<IActionResult> deleteEvaluation([FromBody] DeleteEvaluationInput dto)
         {
             var user = await _bookService.DeleteEvaluation(dto);
             if (user == false) return Unauthorized();
-            return Ok("Xóa thành công"); 
+            return Ok("Xóa thành công");
         }
 
         [HttpGet("getallheaderbooks")]
@@ -108,7 +108,7 @@ namespace LibraryManagement.Controllers
         public async Task<IActionResult> getAllHeaderbooks()
         {
             var result = await _bookService.GetAllHeaderBooks();
-            return Ok(result); 
+            return Ok(result);
         }
         [HttpGet("getbooksindetail")]
         [Authorize]
@@ -117,10 +117,10 @@ namespace LibraryManagement.Controllers
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userID)) return NotFound("Không tìm thấy thông tin người dùng");
             var result = await _bookService.getAllBooksInDetail(userID);
-            return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result); 
+            return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result);
         }
         [HttpGet("getbooksindetailbyid{idbook}")]
-   
+
         public async Task<IActionResult> getBooksAndCommentsById(string idbook)
         {
             var result = await _bookService.getAllBooksInDetailById(idbook);
@@ -145,5 +145,6 @@ namespace LibraryManagement.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
     }
 }
