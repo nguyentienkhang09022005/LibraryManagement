@@ -51,6 +51,7 @@ namespace LibraryManagement.Repository
                  .SelectMany(tb => tb.HeaderBooks.Select(hb => new TypeBookResponseAndBook
                  {
                      IdHeaderBook = hb.IdHeaderBook.ToString(),
+                     TypeBook = hb.TypeBook.NameTypeBook,
                      NameHeaderBook = hb.NameHeaderBook.ToString(),
                      IDTypeBook = tb.IdTypeBook.ToString()
                  }))
