@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /LibraryManagement/.env
+/LibraryManagement/Dockerfile
+/LibraryManagement/docker-compose.yml

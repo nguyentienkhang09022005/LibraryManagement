@@ -440,6 +440,7 @@ namespace LibraryManagement.Repository
                     nameBook = x.HeaderBook.NameHeaderBook,
                     describe = x.HeaderBook.DescribeBook,
                     isLiked = _context.FavoriteBooks.Any(k => k.IdReader == reeaderId && k.IdBook == x.IdBook),
+                    valueOfbook = x.ValueOfBook,
                     Evaluations = _context.Evaluates
                                 .Where(a => a.IdBook == x.IdBook)
                                 .Select(a => new EvaluationDetails
@@ -506,6 +507,7 @@ namespace LibraryManagement.Repository
                 nameBook = x.HeaderBook.NameHeaderBook,
                 describe = x.HeaderBook.DescribeBook,
                 image = x.images.Select(img => img.Url).FirstOrDefault() ?? string.Empty,
+                valueOfbook = x.ValueOfBook,
                 Evaluations = x.Evaluates.Select(c => new EvaluationDetails
                 {
                     IdEvaluation = c.IdEvaluate,
@@ -549,6 +551,7 @@ namespace LibraryManagement.Repository
                    nameBook = x.book.HeaderBook.NameHeaderBook,
                    describe = x.book.HeaderBook.DescribeBook,
                    isLiked = _context.FavoriteBooks.Any(k => k.IdReader == idUser && k.IdBook == x.IdBook),
+                   valueOfbook = x.book.ValueOfBook,
                    Evaluations = _context.Evaluates
                                .Where(a => a.IdBook == x.IdBook)
                                .Select(a => new EvaluationDetails
@@ -588,6 +591,7 @@ namespace LibraryManagement.Repository
               nameBook = x.HeaderBook.NameHeaderBook,
               describe = x.HeaderBook.DescribeBook,
               image = x.images.Select(img => img.Url).FirstOrDefault() ?? string.Empty,
+              valueOfbook = x.ValueOfBook,
               Evaluations = x.Evaluates.Select(c => new EvaluationDetails
               {
                   IdEvaluation = c.IdEvaluate,
