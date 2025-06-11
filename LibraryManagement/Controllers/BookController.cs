@@ -103,12 +103,12 @@ namespace LibraryManagement.Controllers
             return Ok("Xóa thành công"); 
         }
 
-        [HttpPost("getallheaderbooks")]
+        [HttpGet("getallheaderbooks")]
         [Authorize]
         public async Task<IActionResult> getAllHeaderbooks()
         {
             var result = await _bookService.GetAllHeaderBooks();
-            return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result); 
+            return Ok(result); 
         }
         [HttpGet("getbooksindetail")]
         [Authorize]
@@ -133,5 +133,17 @@ namespace LibraryManagement.Controllers
             var result = await _bookService.findBook(namebook);
             return Ok(result);
         }
+        [HttpGet("getHeaderbookByThebokId{thebookId}")]
+        public async Task<IActionResult> getHeaderBookByThebookId(string thebookId)
+        {
+            try
+            {
+                var result = await _bookService.GetAllHeaderBooksByTheBook(thebookId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
     }
 }

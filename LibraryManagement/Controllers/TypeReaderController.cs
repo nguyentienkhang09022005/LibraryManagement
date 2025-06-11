@@ -44,5 +44,18 @@ namespace LibraryManagement.Controllers
                 return Ok(result);
             return NotFound(result);
         }
+        [HttpGet("getAllTypeReader")]
+        public async Task<IActionResult> getAllTypeReader()
+        {
+            try
+            {
+                return Ok(await _typeReaderServie.getAllTypeReader());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
     }
-}
+} 

@@ -9,6 +9,8 @@ namespace LibraryManagement.Repository.InterFace
         public Task<ApiResponse<TypeReaderResponse>> addTypeReaderAsync(TypeReaderRequest request);
         public Task<ApiResponse<TypeReaderResponse>> updateTypeReaderAsync(TypeReaderRequest request, Guid idTypeReader);
         public Task<ApiResponse<string>> deleteTypeReaderAsync(Guid idTypeReader);
+
+        public Task<List<TypeReaderResponse>> getAllTypeReader();
      
     }
 }

@@ -23,6 +23,8 @@ namespace LibraryManagement.Repository.InterFace
 
         public Task<List<GetHeaderbookResponse>> GetAllHeaderBooks();
 
+        public Task<List<GetHeaderbookResponse>> GetAllHeaderBooksByTheBook(string idThebook);
+
         public Task<List<BooksAndComments>> getAllBooksInDetail(string readerId);
 
 

@@ -609,5 +609,20 @@ namespace LibraryManagement.Repository
 
             return result;
         }
+
+        public async Task<List<GetHeaderbookResponse>> GetAllHeaderBooksByTheBook(string idThebook)
+        {
+            var result = await _context.TheBooks.AsNoTracking()
+                   .Where(x => x.IdTheBook == idThebook)
+                   .Include(x=>x.Book).ThenInclude(x=>x.HeaderBook)
+                   .Select(x=> new GetHeaderbookResponse
+                   {
+                        IdHeaderbook = x.Book.IdHeaderBook,
+                        NameBook= x.Book.HeaderBook.NameHeaderBook, 
+                        Describe = x.Book.HeaderBook.DescribeBook
+                   })
+                    .ToListAsync();
+            return result; 
+        }
     }
 }

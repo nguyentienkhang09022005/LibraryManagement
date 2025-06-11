@@ -43,7 +43,18 @@ namespace LibraryManagement.Repository
             return ApiResponse<string>.SuccessResponse("Đã xóa loại độc giả", 200, "");
         }
 
-     
+        public async Task<List<TypeReaderResponse>> getAllTypeReader()
+        {
+            var result = await _context.TypeReaders.AsNoTracking()
+                .Select(x => new TypeReaderResponse
+                {
+                    idTypeReader = x.IdTypeReader,
+                    NameTypeReader = x.NameTypeReader
+                }).ToListAsync();
+            return result; 
+        }
+
+
 
         // Hàm sửa loại độc giả
         public async Task<ApiResponse<TypeReaderResponse>> updateTypeReaderAsync(TypeReaderRequest request, Guid idTypeReader)
@@ -60,5 +71,6 @@ namespace LibraryManagement.Repository
             var typeReaderResponse = _mapper.Map<TypeReaderResponse>(updateTypeReader);
             return ApiResponse<TypeReaderResponse>.SuccessResponse("Thay đổi thông tin loại độc giả thành công", 200, typeReaderResponse);
         }
+
     }
 }
