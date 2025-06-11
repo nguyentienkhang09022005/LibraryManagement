@@ -23,6 +23,8 @@ namespace LibraryManagement.Models
         public TypeBook TypeBook { get; set; }
 
         public ICollection<BookWriting> bookWritings { get; set; }
+
+        public ICollection<Book> Books { get; set; }
     }
 
 }

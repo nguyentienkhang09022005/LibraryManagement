@@ -14,6 +14,6 @@ namespace LibraryManagement.Repository.InterFace
 
         public Task<List<AuthorResponse>> findAuthor(FindAuthorInputDto dto);
 
-        public Task<AuthorResponse> GetAuthorById(Guid idauthor);
+        public Task<GetAuthorByIdResponse> GetAuthorById(Guid idauthor);
     }
 }

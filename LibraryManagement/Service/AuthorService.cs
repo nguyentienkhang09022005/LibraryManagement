@@ -184,10 +184,10 @@ namespace LibraryManagement.Repository
             return authors;
         }
 
-        public async Task<AuthorResponse> GetAuthorById(Guid idauthor)
+        public async Task<GetAuthorByIdResponse> GetAuthorById(Guid idauthor)
         {
             var authors = await _context.Authors.AsNoTracking().Where(x => x.IdAuthor == idauthor)
-               .Select(a => new AuthorResponse
+               .Select( a => new GetAuthorByIdResponse
                {
 
                    IdAuthor = a.IdAuthor,
@@ -198,7 +198,20 @@ namespace LibraryManagement.Repository
                        IdTypeBook = a.TypeBook.IdTypeBook,
                        NameTypeBook = a.TypeBook.NameTypeBook
                    },
-                   Nationality = a.Nationality
+
+                   Nationality = a.Nationality,
+                   UrlAvatar = _context.Images.Where(x => x.IdAuthor == a.IdAuthor).Select(x => x.Url).FirstOrDefault(),
+                   Books = _context.BookWritings
+                   .Include(x => x.HeaderBook).ThenInclude(x => x.Books)
+                   .SelectMany(bw=>bw.HeaderBook.Books.Select(book => new BookResponse
+                   {
+                       IdBook = book.IdBook,
+                       NameBook = book.HeaderBook.NameHeaderBook,
+                       Publisher =book.Publisher,
+                       ReprintYear =book.ReprintYear,
+                       ValueOfBook = book.ValueOfBook,
+                       UrlImage = _context.Images.Where(x=>x.IdBook == book.IdBook).Select(x=>x.Url).FirstOrDefault()??string.Empty
+                   })).ToList(),
                }).FirstOrDefaultAsync() ?? null!;
             return authors;
         }
