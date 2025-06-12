@@ -173,6 +173,8 @@ namespace LibraryManagement.Repository
                 IdLoanSlipBook = a.IdLoanSlipBook,
                 IdTheBook = a.IdTheBook,
                 IdReader = a.IdReader,
+                IdBook = a.TheBook.Book.IdBook,  
+                NameBook = a.TheBook.Book.HeaderBook.NameHeaderBook,
                 BorrowDate = a.BorrowDate,
                 ReturnDate = a.ReturnDate,
                 FineAmount = a.FineAmount
