@@ -13,8 +13,8 @@ $envVars = $processedLines -join ','
 Write-Host "Deploying with env vars: $envVars"
 
 # Deploy bằng gcloud
-gcloud run deploy nhapmon-cnpm `
-  --image tukhoa040505/nhapmon-cnpm:latest `
+gcloud run deploy librarymanagement-api `
+  --image tukhoa040505/librarymanagement-api:latest `
   --platform managed `
   --region asia-southeast1 `
   --allow-unauthenticated `

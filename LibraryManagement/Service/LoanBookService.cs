@@ -165,7 +165,7 @@ namespace LibraryManagement.Repository
         // Sửa phiếu mượn sách
 
 
-        public async Task<List<LoanSlipBookResponse>> getListLoanSlipBook(string token)
+        public async Task<List<LoanSlipBookResponse>> getListLoanSlipBook()
         {
             
             var result = await _context.LoanSlipBooks.Select(a => new LoanSlipBookResponse

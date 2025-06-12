@@ -9,7 +9,7 @@ namespace LibraryManagement.Repository.InterFace
         Task<ApiResponse<LoanBookResponse>> addLoanBookAsync(LoanBookRequest request);
         Task<ApiResponse<string>> deleteLoanBookAsync(Guid idLoanSlipBook);
 
-        Task<List<LoanSlipBookResponse>> getListLoanSlipBook(string token);
+        Task<List<LoanSlipBookResponse>> getListLoanSlipBook();
         Task<List<LoanBookHistory>> getLoanSlipBookByUser(string idUser);
 
         Task<List<GetLoanSlipBookByType>> getLoanSlipBookByType(string genre);

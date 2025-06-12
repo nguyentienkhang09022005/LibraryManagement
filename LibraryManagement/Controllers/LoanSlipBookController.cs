@@ -24,10 +24,10 @@ namespace LibraryManagement.Controllers
         }
 
         // Enpoint danh sách phiếu mượn trả sách
-        [HttpPost("getAllBookLoanSlip")]
-        public async Task<IActionResult> getAllBookLoanSlip([FromBody] string token)
+        [HttpGet("getAllBookLoanSlip")]
+        public async Task<IActionResult> getAllBookLoanSlip()
         {
-            var result = await _loanBookService.getListLoanSlipBook(token);
+            var result = await _loanBookService.getListLoanSlipBook();
             if (result == null) return Unauthorized("Vui lòng đăng nhập");
             return Ok(result);
 
