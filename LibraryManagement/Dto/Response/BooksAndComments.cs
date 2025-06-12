@@ -7,7 +7,7 @@
         public string describe { get; set; }
         public decimal valueOfbook {  get; set; }
         public string image {  get; set; }
-
+        public int reprintYear { get; set; }
         public bool isLiked { get; set; } = false;
 
         

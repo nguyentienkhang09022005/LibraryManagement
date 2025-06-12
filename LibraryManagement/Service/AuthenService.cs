@@ -68,7 +68,8 @@ namespace LibraryManagement.Repository
             return new AuthenticationResponse
             {
                 Token = _token,
-                refreshToken = _refreshToken
+                refreshToken = _refreshToken, 
+                iduser = reader.IdReader.ToString(),
             };
         }
 

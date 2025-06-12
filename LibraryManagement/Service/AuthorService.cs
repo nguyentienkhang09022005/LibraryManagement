@@ -8,6 +8,7 @@ using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
 
 namespace LibraryManagement.Repository
 {
@@ -73,7 +74,8 @@ namespace LibraryManagement.Repository
             {
                 imageUrl = await _upLoadImageFileService.UploadImageAsync(request.AvatarImage);
             }
-            _context.Authors.Add(newAuthor);
+            await _context.Authors.AddAsync(newAuthor);
+      
             await _context.SaveChangesAsync();
 
             // Lưu avatar vào bảng image nếu có
@@ -84,7 +86,7 @@ namespace LibraryManagement.Repository
                     IdAuthor = newAuthor.IdAuthor,
                     Url = imageUrl,
                 };
-                _context.Images.Add(image);
+                await _context.Images.AddAsync(image);
                 await _context.SaveChangesAsync();
             }
 

@@ -18,7 +18,9 @@ using Npgsql;
 using System.Net;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("http://*:8080");
 
 // Add services to the container.
 
@@ -187,7 +189,7 @@ builder.Services.AddSignalR();
 
 
 var app = builder.Build();
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+
 
 // Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
