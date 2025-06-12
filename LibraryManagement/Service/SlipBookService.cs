@@ -120,7 +120,9 @@ namespace LibraryManagement.Service
                 {
                     reader.TotalDebt -= deleteSlipBook.FineAmount;
                     reader.TotalDebt = Math.Max(reader.TotalDebt, 0);
-                    _context.Readers.Update(reader);
+                    _context.Readers.Attach(reader);
+                    _context.Entry(reader).Property(r => r.TotalDebt).IsModified = true;
+                    await _context.SaveChangesAsync();
                 }
             }
             _context.LoanSlipBooks.Remove(deleteSlipBook);
