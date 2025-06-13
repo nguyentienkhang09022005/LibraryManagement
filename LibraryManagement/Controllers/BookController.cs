@@ -45,7 +45,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint sửa sách
-        [HttpPut("update_book/{idBook}/{idTheBook}")]
+        [HttpPatch("update_book/{idBook}/{idTheBook}")]
         public async Task<IActionResult> updateHeaderBook([FromForm] HeaderBookUpdateRequest request,
                                                           string idBook,
                                                           string idTheBook)

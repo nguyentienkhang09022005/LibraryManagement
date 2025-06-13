@@ -56,7 +56,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint sửa tác giả
-        [HttpPut("update_author/{idAuthor}")]
+        [HttpPatch("update_author/{idAuthor}")]
         public async Task<IActionResult> updateAuthor([FromForm] AuthorRequest request, Guid idAuthor)
         {
             var result = await _authorService.updateAuthorAsync(request, idAuthor);

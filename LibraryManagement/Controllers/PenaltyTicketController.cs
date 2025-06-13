@@ -36,7 +36,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint sửa thông tin phiếu thu tiền phạt
-        [HttpPut("update_penalty/{idPenaltyTicket}")]
+        [HttpPatch("update_penalty/{idPenaltyTicket}")]
         public async Task<IActionResult> updatePenaltyTicket([FromBody] PenaltyTicketRequest request, Guid idPenaltyTicket)
         {
             var result = await _penaltyTicketService.updatePenaltyTicketAsync(request, idPenaltyTicket);
