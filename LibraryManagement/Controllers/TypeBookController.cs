@@ -50,5 +50,10 @@ namespace LibraryManagement.Controllers
             var result = await _typeBookService.getTypebookAndBooks();
             return Ok(result); 
         }
+        [HttpGet("getAllTypeBook")]
+        public async Task<IActionResult> getAlltypeBook()
+        {
+            return Ok(await _typeBookService.getAllTypeBook());
+        }
     }
 }
