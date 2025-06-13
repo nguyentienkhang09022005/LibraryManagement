@@ -11,5 +11,7 @@ namespace LibraryManagement.Repository.InterFace
         public Task<ApiResponse<string>> deleteTypeBook(Guid idTypeBook);
 
         public Task<List<TypeBookResponseAndBook>> getTypebookAndBooks();
+
+        public Task<List<TypeBookResponse>> getAllTypeBook(); 
     }
 }

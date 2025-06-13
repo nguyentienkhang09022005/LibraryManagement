@@ -74,5 +74,10 @@ namespace LibraryManagement.Repository
             var typeBookResponse = _mapper.Map<TypeBookResponse>(updateTypeBook);
             return ApiResponse<TypeBookResponse>.SuccessResponse("Thay đổi thông tin loại sách thành công", 200, typeBookResponse);
         }
+        public async Task<List<TypeBookResponse>> getAllTypeBook()
+        {
+            var result = await _context.TypeBooks.Select(x=> new TypeBookResponse { IdTypeBook = x.IdTypeBook, NameTypeBook = x.NameTypeBook}).ToListAsync();
+            return result; 
+        }
     }
 }
