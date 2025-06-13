@@ -7,9 +7,6 @@ using LibraryManagement.Models;
 using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace LibraryManagement.Repository
 {
