@@ -9,7 +9,9 @@ using LibraryManagement.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using ZstdSharp.Unsafe;
 
 namespace LibraryManagement.Repository
 {
@@ -631,6 +633,54 @@ namespace LibraryManagement.Repository
                    })
                     .ToListAsync();
             return result; 
+        }
+
+        public async Task<ApiResponse<bool>> addEvaluation( string idReader, AddEvaluation dto)
+        {
+            try
+            {
+                Evaluate evaluate = new Evaluate
+                {
+                    IdReader = idReader, 
+                    IdBook = dto.IdBook,
+                    EvaComment = dto.Eva_Comment,
+                    EvaStar = dto.Eva_Star,
+                    CreateDate = DateTime.UtcNow
+                };
+                await _context.AddAsync(evaluate);
+                await _context.SaveChangesAsync();
+                return new ApiResponse<bool>(true, "Success", 201, true);
+            }catch(Exception ex )
+            {
+                return new ApiResponse<bool>(false, "Fail", 403, false); 
+            }
+            
+        }
+
+        public async Task<List<CommentResponse>> getAllCommentByIdBook(string idbook)
+        {
+            var result = await _context.Evaluates
+                         .AsNoTracking()
+                         .Where(x => x.IdBook == idbook)
+                         .Select(x => new CommentResponse
+                         {
+                             IdBook = x.IdBook,
+                             IdEvaluation = x.IdEvaluate.ToString(),
+                             IdReader = x.IdReader,
+                             Comment = x.EvaComment,
+                             Star = x.EvaStar,
+                             CreateDate = x.CreateDate
+                         }).ToListAsync(); 
+            return result;
+        }
+
+        public async Task<List<EvaResponse>> getAllStar(string idbook)
+        {
+            var values = await _context.Evaluates.AsNoTracking().Where(x => x.IdBook == idbook)
+                .GroupBy(x => x.EvaStar)
+                .Select(x => new EvaResponse { Star = x.Key, Status = x.Count() })
+                .ToListAsync();
+            return values; 
         }
     }
 }

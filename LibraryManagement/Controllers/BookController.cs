@@ -2,6 +2,7 @@
 using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -144,6 +145,40 @@ namespace LibraryManagement.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("addEvaluation")]
+        [Authorize]
+        public async Task<IActionResult> addEvaluation(AddEvaluation dto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return NotFound("Không tìm thấy thông tin người dùng");
+            var result = await _bookService.addEvaluation(userId, dto);
+            return (result.Success) ? Ok(result) : BadRequest(result);
+        }
+        [HttpGet("getAllComments{idBook}")]
+        public async Task<IActionResult> getAllComments(string idBook)
+        {
+            try
+            {
+                var result = await _bookService.getAllCommentByIdBook(idBook);
+                return Ok(result); 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("getStarById{idbook}")]
+        public async Task<IActionResult> getStarByid(string idbook)
+        {
+            try
+            {
+                return Ok(await _bookService.getAllStar(idbook));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message); 
             }
         }
     }

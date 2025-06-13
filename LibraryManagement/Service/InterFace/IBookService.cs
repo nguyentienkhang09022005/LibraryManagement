@@ -31,6 +31,11 @@ namespace LibraryManagement.Repository.InterFace
         public Task<List<BooksAndCommentsWithoutLogin>> findBook(string namebook);
         public Task<List<BooksAndCommentsWithoutLogin>> getAllBooksInDetailById(string idbook);
 
+        public Task<ApiResponse<bool>> addEvaluation(string idreader,AddEvaluation dto);
+
+        public Task<List<CommentResponse>> getAllCommentByIdBook(string idbook);
+
+        public Task<List<EvaResponse>> getAllStar(string idbook);
 
     } 
 }
