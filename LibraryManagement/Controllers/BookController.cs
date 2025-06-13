@@ -36,7 +36,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint xóa sách
-        [HttpDelete("delete_book/{idBook}/{idTheBook}")]
+        [HttpDelete("delete_book/{idBook}")]
         public async Task<IActionResult> deleteHeaderBook(string idBook)
         {
             var result = await _bookService.deleteBookAsync(idBook);
