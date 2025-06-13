@@ -116,23 +116,33 @@ namespace LibraryManagement.Repository
         }
 
         // Sửa tác giả
-        public async Task<ApiResponse<AuthorResponse>> updateAuthorAsync(AuthorRequest request, Guid idAuthor)
+        public async Task<ApiResponse<AuthorResponse>> updateAuthorAsync(AuthorUpdateRequest request, Guid idAuthor)
         {
             var updateAuthor = await _context.Authors.FirstOrDefaultAsync(author => author.IdAuthor == idAuthor);
             if (updateAuthor == null)
             {
                 return ApiResponse<AuthorResponse>.FailResponse("Không tìm thấy tác giả", 404);
             }
-            _mapper.Map(request, updateAuthor);
 
-            // Chuỗi url ảnh từ cloudinary
-            string imageUrl = null!;
+            // Chỉ cập nhật khi có dữ liệu truyền lên
+            if (request.IdTypeBook.HasValue && request.IdTypeBook != Guid.Empty)
+                updateAuthor.IdTypeBook = request.IdTypeBook.Value;
+
+            if (!string.IsNullOrEmpty(request.NameAuthor))
+                updateAuthor.NameAuthor = request.NameAuthor;
+
+            if (!string.IsNullOrEmpty(request.Nationality))
+                updateAuthor.Nationality = request.Nationality;
+
+            if (!string.IsNullOrEmpty(request.Biography))
+                updateAuthor.Biography = request.Biography;
+
+            string imageUrl = null;
             if (request.AvatarImage != null)
             {
                 imageUrl = await _upLoadImageFileService.UploadImageAsync(request.AvatarImage);
             }
 
-            _context.Authors.Update(updateAuthor);
             await _context.SaveChangesAsync();
 
             // Cập nhật hoặc thêm mới ảnh nếu có ảnh mới
@@ -153,6 +163,8 @@ namespace LibraryManagement.Repository
                     };
                     _context.Images.Add(image);
                 }
+
+                await _context.SaveChangesAsync(); // lưu lại ảnh
             }
 
             var authorResponse = _mapper.Map<AuthorResponse>(updateAuthor);
@@ -161,12 +173,16 @@ namespace LibraryManagement.Repository
             authorResponse.IdTypeBook = new TypeBookResponse
             {
                 IdTypeBook = updateAuthor.IdTypeBook,
-                NameTypeBook = typeBook!.NameTypeBook,
+                NameTypeBook = typeBook?.NameTypeBook ?? ""
             };
-            authorResponse.UrlAvatar = imageUrl;
+            authorResponse.UrlAvatar = imageUrl ?? (await _context.Images
+                .Where(i => i.IdAuthor == updateAuthor.IdAuthor)
+                .Select(i => i.Url)
+                .FirstOrDefaultAsync());
+
             return ApiResponse<AuthorResponse>.SuccessResponse("Thay đổi thông tin tác giả thành công", 200, authorResponse);
         }
-        
+
         public async Task<List<AuthorResponse>> findAuthor(FindAuthorInputDto dto)
         {
             var authors = await _context.Authors.AsNoTracking().Where(x => x.NameAuthor.ToLower().Contains(dto.nameAuthor))

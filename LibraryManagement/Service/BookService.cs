@@ -233,57 +233,75 @@ namespace LibraryManagement.Repository
         }
 
         // Hàm cập nhật sách
-        public async Task<ApiResponse<HeaderBookResponse>> updateBookAsync(HeaderBookUpdateRequest request, 
-                                                                           string idBook, string idTheBook)
+        public async Task<ApiResponse<HeaderBookResponse>> updateBookAsync(HeaderBookUpdateRequest request,
+                                                                    string idBook, string idTheBook)
         {
-            // Quy định khoảng cách năm xuất bản
-            int publishBookGap = DateTime.Now.Year - request.bookUpdateRequest.ReprintYear;
-            int publishGap = await _parameterRepository.getValueAsync("PublishGap");
-            if (publishBookGap > publishGap)
-            {
-                return ApiResponse<HeaderBookResponse>.FailResponse($"Khoảng cách năm xuất bản phải nhỏ hơn {publishGap}", 400);
-            }
-
-            var checkBook = await _context.Books.FirstOrDefaultAsync(b => b.IdBook == idBook.ToString());
+            var checkBook = await _context.Books.FirstOrDefaultAsync(b => b.IdBook == idBook);
             if (checkBook == null)
             {
                 return ApiResponse<HeaderBookResponse>.FailResponse("Không tìm thấy sách", 404);
             }
 
-            var typeBook = await _context.TypeBooks.FirstOrDefaultAsync(typebook => typebook.IdTypeBook == request.IdTypeBook);
-            if (typeBook == null)
+            var checkTheBook = await _context.TheBooks.FirstOrDefaultAsync(tb => tb.IdTheBook == idTheBook);
+            if (checkTheBook == null)
             {
-                return ApiResponse<HeaderBookResponse>.FailResponse("Không tìm thấy loại sách phù hợp", 404);
+                return ApiResponse<HeaderBookResponse>.FailResponse("Không tìm thấy cuốn sách", 404);
             }
 
-            var headerBook = await _context.HeaderBooks.FirstOrDefaultAsync(hb => hb.NameHeaderBook == request.NameHeaderBook);
-            // Tạo đầu sách
-            if (headerBook == null)
+            HeaderBook headerBook = await _context.HeaderBooks
+                .FirstOrDefaultAsync(h => h.IdHeaderBook == checkBook.IdHeaderBook);
+
+            // Nếu NameHeaderBook được truyền và khác với header cũ thì kiểm tra hoặc tạo mới
+            if (!string.IsNullOrEmpty(request.NameHeaderBook))
             {
-                headerBook = new HeaderBook
+                var existingHeader = await _context.HeaderBooks
+                    .FirstOrDefaultAsync(h => h.NameHeaderBook == request.NameHeaderBook);
+
+                if (existingHeader == null)
                 {
-                    IdTypeBook = request.IdTypeBook,
-                    NameHeaderBook = request.NameHeaderBook,
-                    DescribeBook = request.DescribeBook,
-                };
-                await _context.HeaderBooks.AddAsync(headerBook);
-                await _context.SaveChangesAsync();
-            }else
+                    headerBook = new HeaderBook
+                    {
+                        IdTypeBook = request.IdTypeBook ?? checkBook.HeaderBook.IdTypeBook,
+                        NameHeaderBook = request.NameHeaderBook,
+                        DescribeBook = request.DescribeBook
+                    };
+                    _context.HeaderBooks.Add(headerBook);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    headerBook = existingHeader;
+                }
+            }
+
+            // Cập nhật Describe nếu truyền
+            if (!string.IsNullOrEmpty(request.DescribeBook))
             {
-                headerBook.DescribeBook = request.DescribeBook; // Luôn cập nhật Describe của Book
+                headerBook.DescribeBook = request.DescribeBook;
                 _context.HeaderBooks.Update(headerBook);
                 await _context.SaveChangesAsync();
             }
 
-            // Xoá toàn bộ tác giả cũ
-            var oldBookWritings = await _context.BookWritings
-                .Where(bw => bw.IdHeaderBook == headerBook.IdHeaderBook)
-                .ToListAsync();
-
-            _context.BookWritings.RemoveRange(oldBookWritings);
-
-            if (request.IdAuthors != null && request.IdAuthors.Any()) // Duyệt qua danh sách tác giả
+            // Cập nhật loại sách nếu truyền
+            if (request.IdTypeBook.HasValue)
             {
+                var typeBook = await _context.TypeBooks.FindAsync(request.IdTypeBook.Value);
+                if (typeBook == null)
+                {
+                    return ApiResponse<HeaderBookResponse>.FailResponse("Không tìm thấy loại sách phù hợp", 404);
+                }
+                headerBook.IdTypeBook = typeBook.IdTypeBook;
+                _context.HeaderBooks.Update(headerBook);
+            }
+
+            // Cập nhật danh sách tác giả nếu truyền
+            if (request.IdAuthors != null)
+            {
+                var oldBookWritings = await _context.BookWritings
+                    .Where(bw => bw.IdHeaderBook == headerBook.IdHeaderBook)
+                    .ToListAsync();
+                _context.BookWritings.RemoveRange(oldBookWritings);
+
                 foreach (var authorId in request.IdAuthors)
                 {
                     var createBook = new BookWriting
@@ -291,40 +309,56 @@ namespace LibraryManagement.Repository
                         IdHeaderBook = headerBook.IdHeaderBook,
                         IdAuthor = authorId
                     };
-                    await _context.BookWritings.AddAsync(createBook); // Nạp dữ liệu vào bảng sáng tác
+                    await _context.BookWritings.AddAsync(createBook);
                 }
             }
-            await _context.SaveChangesAsync();
 
-            // Cập nhật thông tin sách
-            checkBook.Publisher = request.bookUpdateRequest.Publisher;
-            checkBook.ReprintYear = request.bookUpdateRequest.ReprintYear;
-            checkBook.ValueOfBook = request.bookUpdateRequest.ValueOfBook;
-            checkBook.IdHeaderBook = headerBook.IdHeaderBook;
-
-            var checkTheBook = await _context.TheBooks.FirstOrDefaultAsync(tb => tb.IdTheBook == idTheBook.ToString());
-            if (checkTheBook == null)
+            // Cập nhật thông tin Book nếu có
+            if (request.bookUpdateRequest != null)
             {
-                return ApiResponse<HeaderBookResponse>.FailResponse("Không tìm thấy cuốn sách", 404);
-            }
-            // Cập nhật thông tin cuốn sách
-            checkTheBook.Status = request.theBookUpdateRequest.Status;
-            await _context.SaveChangesAsync();
+                var bookReq = request.bookUpdateRequest;
 
-            // Cập nhật hình ảnh
+                if (bookReq.ReprintYear.HasValue)
+                {
+                    int publishBookGap = DateTime.Now.Year - bookReq.ReprintYear.Value;
+                    int publishGap = await _parameterRepository.getValueAsync("PublishGap");
+                    if (publishBookGap > publishGap)
+                    {
+                        return ApiResponse<HeaderBookResponse>.FailResponse($"Khoảng cách năm xuất bản phải nhỏ hơn {publishGap}", 400);
+                    }
+
+                    checkBook.ReprintYear = bookReq.ReprintYear.Value;
+                }
+
+                if (!string.IsNullOrEmpty(bookReq.Publisher))
+                    checkBook.Publisher = bookReq.Publisher;
+
+                if (bookReq.ValueOfBook.HasValue)
+                    checkBook.ValueOfBook = bookReq.ValueOfBook.Value;
+
+                checkBook.IdHeaderBook = headerBook.IdHeaderBook;
+                _context.Books.Update(checkBook);
+            }
+
+            // Cập nhật cuốn sách (TheBook)
+            if (request.theBookUpdateRequest?.Status != null)
+            {
+                checkTheBook.Status = request.theBookUpdateRequest.Status;
+                _context.TheBooks.Update(checkTheBook);
+            }
+
+            // Cập nhật ảnh nếu có
             if (request.BookImage != null && request.BookImage.Length > 0)
             {
                 var imageUrl = await _upLoadImageFileRepository.UploadImageAsync(request.BookImage);
 
-                var image = await _context.Images
-                    .FirstOrDefaultAsync(img => img.IdBook == checkBook.IdBook);
-
-                if (image != null) // Nếu đã có ảnh rồi thì cập nhật
+                var existingImage = await _context.Images.FirstOrDefaultAsync(img => img.IdBook == checkBook.IdBook);
+                if (existingImage != null)
                 {
-                    image.Url = imageUrl;
-                    _context.Images.Update(image);
+                    existingImage.Url = imageUrl;
+                    _context.Images.Update(existingImage);
                 }
-                else // Nếu chưa có thì thêm mới
+                else
                 {
                     var newImage = new Image
                     {
@@ -333,11 +367,11 @@ namespace LibraryManagement.Repository
                     };
                     await _context.Images.AddAsync(newImage);
                 }
-
-                await _context.SaveChangesAsync();
             }
 
-            // Lấy thông tin tác giả cuốn của sách
+            await _context.SaveChangesAsync();
+
+            // Response
             var authorOfBook = await _context.BookWritings
                 .Where(bw => bw.IdHeaderBook == headerBook.IdHeaderBook)
                 .Include(bw => bw.Author)
@@ -349,24 +383,26 @@ namespace LibraryManagement.Repository
                 NameAuthor = a.Author.NameAuthor
             }).ToList();
 
-            // Lấy hình ảnh cuốn sách
             var imageBook = await _context.Images
                 .Where(img => img.IdBook == checkBook.IdBook)
                 .Select(img => img.Url)
                 .FirstOrDefaultAsync();
 
-            // Ánh xạ response
+            var typeBookResponse = await _context.TypeBooks
+                .Where(t => t.IdTypeBook == headerBook.IdTypeBook)
+                .Select(t => new TypeBookResponse
+                {
+                    IdTypeBook = t.IdTypeBook,
+                    NameTypeBook = t.NameTypeBook
+                })
+                .FirstOrDefaultAsync();
+
             var response = new HeaderBookResponse
             {
-                TypeBook = new TypeBookResponse
-                {
-                    IdTypeBook = typeBook.IdTypeBook,
-                    NameTypeBook = typeBook.NameTypeBook
-                },
+                TypeBook = typeBookResponse,
                 NameHeaderBook = headerBook.NameHeaderBook,
                 DescribeBook = headerBook.DescribeBook,
                 Authors = authors,
-
                 bookResponse = new BookResponse
                 {
                     IdBook = checkBook.IdBook,
@@ -381,11 +417,13 @@ namespace LibraryManagement.Repository
                     Status = checkTheBook.Status
                 }
             };
-            return ApiResponse<HeaderBookResponse>.SuccessResponse("Cập nhật sách thành công", 201, response);
+
+            return ApiResponse<HeaderBookResponse>.SuccessResponse("Cập nhật sách thành công", 200, response);
         }
 
 
-     
+
+
         public async Task<List<EvaluationDetails>> getBooksEvaluation(EvaluationDetailInput dto)
         {
           

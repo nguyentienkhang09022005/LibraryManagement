@@ -9,7 +9,7 @@ namespace LibraryManagement.Repository.InterFace
     {
         public Task<List<AuthorResponse>> getListAuthor();
         public Task<ApiResponse<AuthorResponse>> addAuthorAsync(AuthorRequest request);
-        public Task<ApiResponse<AuthorResponse>> updateAuthorAsync(AuthorRequest request, Guid idAuthor);
+        public Task<ApiResponse<AuthorResponse>> updateAuthorAsync(AuthorUpdateRequest request, Guid idAuthor);
         public Task<ApiResponse<string>> deleteAuthorAsync(Guid idAuthor);
 
         public Task<List<AuthorResponse>> findAuthor(FindAuthorInputDto dto);
