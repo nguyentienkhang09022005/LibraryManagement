@@ -16,7 +16,7 @@ namespace LibraryManagement.Models
         public string NameHeaderBook { get; set; }
 
         [Column("describe_book")]
-        public string DescribeBook { get; set; }
+        public string? DescribeBook { get; set; }
 
 
         [ForeignKey("IdTypeBook")]

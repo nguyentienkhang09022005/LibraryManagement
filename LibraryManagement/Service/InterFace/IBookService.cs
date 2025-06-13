@@ -1,7 +1,6 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Dto.Response;
 using LibraryManagement.Helpers;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Internal;
 
 
 namespace LibraryManagement.Repository.InterFace
@@ -9,10 +8,10 @@ namespace LibraryManagement.Repository.InterFace
     public interface IBookService
     {
         public Task<ApiResponse<HeaderBookResponse>> addBookAsync(HeaderBookCreationRequest request);
-        public Task<ApiResponse<HeaderBookResponse>> updateBookAsync(HeaderBookUpdateRequest request, string idBook, string idTheBook);
+        public Task<ApiResponse<HeaderBookUpdateResponse>> updateBookAsync(HeaderBookUpdateRequest request, string idBook);
         public Task<ApiResponse<string>> deleteBookAsync(string idBook);
+        public Task<ApiResponse<ChangeStatusOfTheBookResponse>> changeStatusOfTheBookAsync(ChangeStatusOfTheBookRequest request);
 
-      
         public Task<List<EvaluationDetails>> getBooksEvaluation(EvaluationDetailInput dto);
         
         public Task<ApiResponse<bool>> LikeBook(EvaluationDetailInput dto);
