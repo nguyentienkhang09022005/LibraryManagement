@@ -705,6 +705,8 @@ namespace LibraryManagement.Repository
                              IdBook = x.IdBook,
                              IdEvaluation = x.IdEvaluate.ToString(),
                              IdReader = x.IdReader,
+                             NameReader = x.Reader.NameReader!,
+                             AvatarUrl = _context.Images.Where(a => a.IdReader == x.IdReader).Select(x=>x.Url).FirstOrDefault()!,
                              Comment = x.EvaComment,
                              Star = x.EvaStar,
                              CreateDate = x.CreateDate
