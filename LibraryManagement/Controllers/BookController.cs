@@ -36,7 +36,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint xóa sách
-        [HttpDelete("delete_book/{idBook}/{idTheBook}")]
+        [HttpDelete("delete_book/{idBook}")]
         public async Task<IActionResult> deleteHeaderBook(string idBook)
         {
             var result = await _bookService.deleteBookAsync(idBook);
@@ -46,17 +46,25 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint sửa sách
-        [HttpPatch("update_book/{idBook}/{idTheBook}")]
-        public async Task<IActionResult> updateHeaderBook([FromForm] HeaderBookUpdateRequest request,
-                                                          string idBook,
-                                                          string idTheBook)
+        [HttpPatch("update_book/{idBook}")]
+        public async Task<IActionResult> updateHeaderBook([FromForm] HeaderBookUpdateRequest request, string idBook)
         {
-            var result = await _bookService.updateBookAsync(request, idBook, idTheBook);
+
+            var result = await _bookService.updateBookAsync(request, idBook);
             if (result.Success)
                 return Ok(result);
             return NotFound(result);
         }
 
+        // Endpoint thay đổi trạng thái cuốn sách
+        [HttpPatch("change_status")]
+        public async Task<IActionResult> changeStatusOfTheBook(ChangeStatusOfTheBookRequest request)
+        {
+            var result = await _bookService.changeStatusOfTheBookAsync(request);
+            if (result.Success)
+                return Ok(result);
+            return NotFound(result);
+        }
 
         //[HttpPost("getBookAndCommentsByid")]
         //public async Task<IActionResult> getBooksAndCommentbyId([FromBody] GetHeaderBookDtoInput dto)
