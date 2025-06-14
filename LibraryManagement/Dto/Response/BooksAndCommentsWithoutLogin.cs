@@ -6,6 +6,7 @@
         public string nameBook { get; set; }
         public string describe { get; set; }
         public decimal valueOfbook { get; set; }
+        public string Publisher { get; set; }
         public string image { get; set; }
         public int reprintYear { get; set;  }
 

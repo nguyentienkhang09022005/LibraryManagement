@@ -487,6 +487,7 @@ namespace LibraryManagement.Repository
                     describe = x.HeaderBook.DescribeBook,
                     isLiked = _context.FavoriteBooks.Any(k => k.IdReader == reeaderId && k.IdBook == x.IdBook),
                     valueOfbook = x.ValueOfBook,
+                    publisher = x.Publisher,
                     reprintYear = x.ReprintYear,
                     Evaluations = _context.Evaluates
                                 .Where(a => a.IdBook == x.IdBook)
@@ -552,10 +553,11 @@ namespace LibraryManagement.Repository
             {
                 idBook = x.IdBook,
                 nameBook = x.HeaderBook.NameHeaderBook,
-                describe = x.HeaderBook.DescribeBook,
+                describe = x.HeaderBook.DescribeBook ?? string.Empty,
                 image = x.images.Select(img => img.Url).FirstOrDefault() ?? string.Empty,
                 valueOfbook = x.ValueOfBook,
                 reprintYear = x.ReprintYear, 
+                Publisher = x.Publisher,
                 Evaluations = x.Evaluates.Select(c => new EvaluationDetails
                 {
                     IdEvaluation = c.IdEvaluate,
@@ -597,9 +599,10 @@ namespace LibraryManagement.Repository
                {
                    idBook = x.IdBook,
                    nameBook = x.book.HeaderBook.NameHeaderBook,
-                   describe = x.book.HeaderBook.DescribeBook,
+                   describe = x.book.HeaderBook.DescribeBook ?? string.Empty,
                    isLiked = _context.FavoriteBooks.Any(k => k.IdReader == idUser && k.IdBook == x.IdBook),
                    valueOfbook = x.book.ValueOfBook,
+                   publisher = x.book.Publisher,
                    reprintYear = x.book.ReprintYear,
                    Evaluations = _context.Evaluates
                                .Where(a => a.IdBook == x.IdBook)
@@ -641,6 +644,7 @@ namespace LibraryManagement.Repository
               describe = x.HeaderBook.DescribeBook,
               image = x.images.Select(img => img.Url).FirstOrDefault() ?? string.Empty,
               valueOfbook = x.ValueOfBook,
+              Publisher = x.Publisher,
               reprintYear = x.ReprintYear, 
               Evaluations = x.Evaluates.Select(c => new EvaluationDetails
               {
