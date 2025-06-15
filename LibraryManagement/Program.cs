@@ -9,7 +9,9 @@ using LibraryManagement.Repository.IRepository;
 using LibraryManagement.Service;
 using LibraryManagement.Service.Interface;
 using LibraryManagement.Service.InterFace;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -39,7 +41,8 @@ builder.Configuration["CloudinarySettings:CloudName"] = Environment.GetEnvironme
 builder.Configuration["CloudinarySettings:ApiKey"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APIKEY");
 builder.Configuration["CloudinarySettings:ApiSecret"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APISECRET");
 builder.Configuration["MongoDB:ConnectionString"] = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__MongoDbConnection");
-
+builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__ID"] = Environment.GetEnvironmentVariable("CLIENT__ID");
+builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__SECRET"] = Environment.GetEnvironmentVariable("CLIENT__SECRET");
 
 // Connect to MongoDB
 
@@ -103,15 +106,16 @@ builder.Services.AddAutoMapper(typeof(Program));
 // Tạo service sử dụng JWT
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddCookie()
+.AddJwtBearer(options =>
 {
     options.SaveToken = true;
     options.RequireHttpsMetadata = false;
-    options.TokenValidationParameters = new
-    Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
     {
         ValidateIssuer = false,
         ValidateAudience = false,
@@ -132,6 +136,25 @@ builder.Services.AddAuthentication(options =>
             return context.Response.WriteAsync(result);
         }
     };
+})
+.AddGoogle(google =>
+{
+    google.ClientId = builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__ID"] ?? Environment.GetEnvironmentVariable("GOOGLE__CLIENT__ID")!;
+    google.ClientSecret = builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__SECRET"] ?? Environment.GetEnvironmentVariable("GOOGLE__CLIENT__SECRET")!;
+    google.CallbackPath = "/signin-google";
+    google.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("JwtOrCookie", policy =>
+    {
+        policy.AddAuthenticationSchemes(
+            JwtBearerDefaults.AuthenticationScheme,
+            CookieAuthenticationDefaults.AuthenticationScheme
+        );
+        policy.RequireAuthenticatedUser();
+    });
 });
 
 
@@ -195,6 +218,10 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 
 app.UseRouting();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+});
 app.UseCors();
 
 app.UseAuthentication();

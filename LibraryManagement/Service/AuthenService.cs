@@ -204,6 +204,85 @@ namespace LibraryManagement.Repository
             };
         }
 
-   
+        public async Task<AuthenticationResponse> LoginWithGoogleAsync(
+      string email, string fullname, string avatar, DateTime? dateOfBirth = null)
+        {
+            // 1. Tìm user trong DB
+            var reader = await _context.Readers.FirstOrDefaultAsync(x => x.ReaderUsername == email);
+
+            // 2. Nếu chưa có, tạo mới
+            if (reader == null)
+            {
+                var newRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == AppRoles.Reader);
+                if (newRole == null)
+                {
+                    newRole = new Role
+                    {
+                        RoleName = AppRoles.Reader,
+                        Description = "Reader Role"
+                    };
+                    _context.Roles.Add(newRole);
+                    await _context.SaveChangesAsync();
+                }
+
+                reader = new Reader
+                {
+                    IdReader = await generateNextIdReaderAsync(),
+                    NameReader = fullname,
+                    Dob = dateOfBirth ?? DateTime.MinValue,
+                    ReaderUsername = email,
+                    ReaderPassword = string.Empty,
+                    IdTypeReader = DefaultTypeReaderId,
+                    RoleName = newRole.RoleName,
+                    CreateDate = DateTime.UtcNow,
+                    Email = email 
+                };
+
+                 await _context.Readers.AddAsync(reader);
+
+                // Lưu Avatar nếu bạn muốn
+                if (!string.IsNullOrEmpty(avatar))
+                {
+                    var newAvatar = new Image
+                    {
+                        IdReader = reader.IdReader,
+                        Url = avatar,
+                    };
+                    _context.Images.Add(newAvatar);
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                // Nếu user đã có, có thể cập nhật avatar/name nếu muốn:
+                reader.NameReader = fullname;
+                if (dateOfBirth != null) reader.Dob = dateOfBirth.Value;
+
+                // Cập nhật avatar nếu bạn muốn, ví dụ:
+                var existAvatar = await _context.Images.FirstOrDefaultAsync(x => x.IdReader == reader.IdReader);
+                if (existAvatar == null && !string.IsNullOrEmpty(avatar))
+                {
+                    _context.Images.Add(new Image { IdReader = reader.IdReader, Url = avatar });
+                }
+                else if (existAvatar != null && !string.IsNullOrEmpty(avatar))
+                {
+                    existAvatar.Url = avatar;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            // 3. Trả về token JWT
+            var token = _tokenGenerator.GenerateToken(reader);
+            var refreshToken = _tokenGenerator.GenerateRefreshToken(reader);
+
+            return new AuthenticationResponse
+            {
+                Token = token,
+                refreshToken = refreshToken,
+                iduser = reader.IdReader.ToString()
+            };
+        }
     }
 }

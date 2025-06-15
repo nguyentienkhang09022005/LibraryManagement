@@ -474,46 +474,36 @@ namespace LibraryManagement.Repository
         public async Task<List<BooksAndComments>> getAllBooksInDetail(string reeaderId)
         {
             var result = await _context.Books
-                .AsNoTracking()
-                .Include(a => a.HeaderBook)
-                .ThenInclude(x => x.bookWritings)
-                .ThenInclude(c => c.Author)
-                .Include(a => a.Evaluates)
-                .Include(a=>a.images)
-                .Select(x => new BooksAndComments
-                {
-                    idBook = x.IdBook,
-                    nameBook = x.HeaderBook.NameHeaderBook,
-                    describe = x.HeaderBook.DescribeBook,
-                    isLiked = _context.FavoriteBooks.Any(k => k.IdReader == reeaderId && k.IdBook == x.IdBook),
-                    valueOfbook = x.ValueOfBook,
-                    publisher = x.Publisher,
-                    reprintYear = x.ReprintYear,
-                    Evaluations = _context.Evaluates
-                                .Where(a => a.IdBook == x.IdBook)
-                                .Select(a => new EvaluationDetails
-                                {
-                                    IdEvaluation = a.IdEvaluate,
-                                    IdReader = a.IdReader,
-                                    Comment = a.EvaComment,
-                                    Rating = a.EvaStar,
-                                    Create_Date = a.CreateDate
-                                }).ToList(),
-                    Authors = x.HeaderBook.bookWritings
-                              .Select(a => new AuthorResponse
-                              {
-                                  IdAuthor = a.IdAuthor,
-                                  NameAuthor = a.Author.NameAuthor,
-                                  Biography = a.Author.Biography,
-                                  IdTypeBook = new TypeBookResponse
-                                  {
-                                      IdTypeBook = a.Author.TypeBook.IdTypeBook,
-                                      NameTypeBook = a.Author.TypeBook.NameTypeBook
-                                  },
-                                  Nationality = a.Author.Nationality
-                              }).ToList(),
-                    image = x.images.FirstOrDefault() != null ? x.images.FirstOrDefault()!.Url : string.Empty
-                }).ToListAsync();
+                 .AsNoTracking()
+                 .Select(x => new BooksAndComments
+                 {
+                     idBook = x.IdBook,
+                     nameBook = x.HeaderBook.NameHeaderBook,
+                     describe = x.HeaderBook.DescribeBook,
+                     image = x.images.Select(img => img.Url).FirstOrDefault() ?? string.Empty,
+                     valueOfbook = x.ValueOfBook,
+                     publisher = x.Publisher,
+                     isLiked = _context.FavoriteBooks.Any(a=>a.IdReader == reeaderId && a.IdBook == x.IdBook),
+                     reprintYear = x.ReprintYear,
+                     Evaluations = x.Evaluates.Select(c => new EvaluationDetails
+                     {
+                         IdEvaluation = c.IdEvaluate,
+                         IdReader = c.IdReader,
+                         Comment = c.EvaComment,
+                         Rating = c.EvaStar,
+                         Create_Date = c.CreateDate
+                     }).ToList(),
+                     Authors = x.HeaderBook.bookWritings.Select(k => new AuthorResponse
+                     {
+                         IdAuthor = k.IdAuthor,
+                         NameAuthor = k.Author.NameAuthor,
+                         IdTypeBook = new TypeBookResponse { IdTypeBook = k.Author.IdTypeBook, NameTypeBook = string.Empty },
+                         Nationality = k.Author.Nationality,
+                         Biography = k.Author.Biography,
+                         UrlAvatar = k.Author.Images.Select(x => x.Url).FirstOrDefault() ?? string.Empty,
+                     }).ToList()
+                 }).ToListAsync();
+
             return result;
         }
    
@@ -588,7 +578,7 @@ namespace LibraryManagement.Repository
                .Include(a => a.book).ThenInclude(x=>x.HeaderBook)
                .ThenInclude(x => x.bookWritings)
                .ThenInclude(c => c.Author)
-
+                
                .Include(x=>x.book)
                .ThenInclude(a => a.Evaluates)
 
@@ -634,36 +624,36 @@ namespace LibraryManagement.Repository
 
         public async Task<List<BooksAndCommentsWithoutLogin>> getAllBooksInDetailById( string idbook)
         {
-            var result = await _context.Books
-          .AsNoTracking()
-          .Where(x => x.IdBook == idbook)
-          .Select(x => new BooksAndCommentsWithoutLogin
-          {
-              idBook = x.IdBook,
-              nameBook = x.HeaderBook.NameHeaderBook,
-              describe = x.HeaderBook.DescribeBook,
-              image = x.images.Select(img => img.Url).FirstOrDefault() ?? string.Empty,
-              valueOfbook = x.ValueOfBook,
-              Publisher = x.Publisher,
-              reprintYear = x.ReprintYear, 
-              Evaluations = x.Evaluates.Select(c => new EvaluationDetails
+                var result = await _context.Books
+              .AsNoTracking()
+              .Where(x => x.IdBook == idbook)
+              .Select(x => new BooksAndCommentsWithoutLogin
               {
-                  IdEvaluation = c.IdEvaluate,
-                  IdReader = c.IdReader,
-                  Comment = c.EvaComment,
-                  Rating = c.EvaStar,
-                  Create_Date = c.CreateDate
-              }).ToList(),
-              Authors = x.HeaderBook.bookWritings.Select(k => new AuthorResponse
-              {
-                  IdAuthor = k.IdAuthor,
-                  NameAuthor = k.Author.NameAuthor,
-                  IdTypeBook = new TypeBookResponse { IdTypeBook = k.Author.IdTypeBook, NameTypeBook = string.Empty },
-                  Nationality = k.Author.Nationality,
-                  Biography = k.Author.Biography,
-                  UrlAvatar = k.Author.Images.Select(x=>x.Url).FirstOrDefault() ?? string.Empty,
-              }).ToList()
-          }).ToListAsync();
+                  idBook = x.IdBook,
+                  nameBook = x.HeaderBook.NameHeaderBook,
+                  describe = x.HeaderBook.DescribeBook,
+                  image = x.images.Select(img => img.Url).FirstOrDefault() ?? string.Empty,
+                  valueOfbook = x.ValueOfBook,
+                  Publisher = x.Publisher,
+                  reprintYear = x.ReprintYear, 
+                  Evaluations = x.Evaluates.Select(c => new EvaluationDetails
+                  {
+                      IdEvaluation = c.IdEvaluate,
+                      IdReader = c.IdReader,
+                      Comment = c.EvaComment,
+                      Rating = c.EvaStar,
+                      Create_Date = c.CreateDate
+                  }).ToList(),
+                  Authors = x.HeaderBook.bookWritings.Select(k => new AuthorResponse
+                  {
+                      IdAuthor = k.IdAuthor,
+                      NameAuthor = k.Author.NameAuthor,
+                      IdTypeBook = new TypeBookResponse { IdTypeBook = k.Author.IdTypeBook, NameTypeBook = string.Empty },
+                      Nationality = k.Author.Nationality,
+                      Biography = k.Author.Biography,
+                      UrlAvatar = k.Author.Images.Select(x=>x.Url).FirstOrDefault() ?? string.Empty,
+                  }).ToList()
+              }).ToListAsync();
 
             return result;
         }

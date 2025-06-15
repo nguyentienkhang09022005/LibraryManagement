@@ -74,7 +74,7 @@ namespace LibraryManagement.Controllers
         //}
 
         [HttpPost("getEvaluation")]
-        [Authorize]
+           [Authorize(Policy = "JwtOrCookie")]
         public async Task<IActionResult> getDetailedEvaluation(string idBook)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -85,7 +85,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpPost("LikeBook")]
-        [Authorize]
+           [Authorize(Policy = "JwtOrCookie")]
         public async Task<IActionResult> LikeBook(string idBook)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -95,7 +95,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpGet("getlikedbook")]
-        [Authorize]
+           [Authorize(Policy = "JwtOrCookie")]
         public async Task<IActionResult> getLikeHeaderBook()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -113,14 +113,14 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpGet("getallheaderbooks")]
-        [Authorize]
+           [Authorize(Policy = "JwtOrCookie")]
         public async Task<IActionResult> getAllHeaderbooks()
         {
             var result = await _bookService.GetAllHeaderBooks();
             return Ok(result);
         }
         [HttpGet("getbooksindetail")]
-        [Authorize]
+        [Authorize(Policy = "JwtOrCookie")]
         public async Task<IActionResult> getBooksAndComments()
         {
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -156,7 +156,7 @@ namespace LibraryManagement.Controllers
             }
         }
         [HttpPost("addEvaluation")]
-        [Authorize]
+           [Authorize(Policy = "JwtOrCookie")]
         public async Task<IActionResult> addEvaluation(AddEvaluation dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

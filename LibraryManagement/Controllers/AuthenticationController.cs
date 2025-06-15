@@ -2,7 +2,11 @@
 using LibraryManagement.Dto.Response;
 using LibraryManagement.Models;
 using LibraryManagement.Repository.IRepository;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
+using System.Security.Claims;
 
 namespace LibraryManagement.Controllers
 {
@@ -55,6 +59,29 @@ namespace LibraryManagement.Controllers
         public async Task<RefreshTokenResponse> RefreshToken([FromBody] string token)
         {
             return await _authenService.refreshTokenAsync(token);
+        }
+        [HttpGet("login-google")]
+        public IActionResult inGoogle(string returnUrl = "/api/Authentication/profile")
+        {
+            var properties = new AuthenticationProperties { RedirectUri = returnUrl };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+        [HttpGet("profile")]
+        public async Task<IActionResult> Profile()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Redirect("/auth/login-google");
+            }
+
+            // Lấy thông tin từ claim của Google
+            var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var name = User.FindFirst(ClaimTypes.Name)?.Value;
+            var avatar = User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value;
+            var response = await _authenService.LoginWithGoogleAsync(email, name, avatar);
+
+            return Ok(response);
         }
     } 
 }

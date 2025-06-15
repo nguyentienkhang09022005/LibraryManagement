@@ -18,7 +18,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpGet("list_reader")]
-        [Authorize]
+        [Authorize(Policy = "JwtOrCookie")]
         public async Task<IActionResult> gettAllReader()
         {
             var user = User.FindFirst(ClaimTypes.Email)?.Value;

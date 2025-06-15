@@ -35,10 +35,10 @@ namespace LibraryManagement.Models
         public DateTime CreateDate { get; set; } 
 
         [Column("reader_username")]
-        public string ReaderUsername { get; set; }
+        public string? ReaderUsername { get; set; }
 
         [Column("reader_password")]
-        public string ReaderPassword { get; set; }
+        public string? ReaderPassword { get; set; }
 
         [Column("total_debt")]
         public decimal TotalDebt { get; set; }
