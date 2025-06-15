@@ -120,7 +120,7 @@ namespace LibraryManagement.Controllers
             return Ok(result);
         }
         [HttpGet("getbooksindetail")]
-        [Authorize(Policy = "JwtOrCookie")]
+        [Authorize]
         public async Task<IActionResult> getBooksAndComments()
         {
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -188,6 +188,22 @@ namespace LibraryManagement.Controllers
             {
                 return BadRequest(ex.Message); 
             }
+        }
+        [HttpPut("editComment{idComment}")]
+        public async Task<IActionResult> editComment(string idComment, string comment, int rate)
+        {
+            var result = await _bookService.EditCommentAsync(idComment, comment, rate);
+            return (result) ? Ok(result) : BadRequest(result);
+        }
+        [HttpDelete("deleteComment")]
+        [Authorize(Policy = "JwtOrCookie")]
+        public async Task<IActionResult> deleteComment(string idComment)
+        {
+            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (user == null) return Unauthorized("Vui lòng đăng nhập");
+            var result = await _bookService.deleteComment(idComment, user);
+
+            return (result) ? Ok(result) : BadRequest(result);
         }
     }
 }

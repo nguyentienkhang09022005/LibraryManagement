@@ -1,6 +1,7 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Dto.Response;
 using LibraryManagement.Helpers;
+using LibraryManagement.Models;
 
 
 namespace LibraryManagement.Repository.InterFace
@@ -36,5 +37,8 @@ namespace LibraryManagement.Repository.InterFace
 
         public Task<List<EvaResponse>> getAllStar(string idbook);
 
+        public Task<bool> EditCommentAsync(string idComment, string response, int rate);
+
+        public Task<bool> deleteComment(string idComment, string idReader);
     } 
 }

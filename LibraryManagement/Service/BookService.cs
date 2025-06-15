@@ -722,5 +722,27 @@ namespace LibraryManagement.Repository
                 .ToListAsync();
             return values; 
         }
+
+        public async Task<bool> EditCommentAsync(string idComment, string comment, int rate)
+        {
+            var updatedCount = await _context.Evaluates
+                .Where(x => x.IdEvaluate.ToString() == idComment)
+                .ExecuteUpdateAsync(setter => setter
+                    .SetProperty(x => x.EvaComment, comment)
+                    .SetProperty(x => x.CreateDate, DateTime.UtcNow)
+                    .SetProperty(x=>x.EvaStar, rate)
+                );
+
+            return updatedCount > 0;
+        }
+
+        public async Task<bool> deleteComment(string idComment, string idReader)
+        {
+            var deleted = await _context.Evaluates
+               .Where(x => x.IdEvaluate.ToString() == idComment && x.IdReader == idReader)
+               .ExecuteDeleteAsync();
+
+            return deleted > 0;
+        }
     }
 }

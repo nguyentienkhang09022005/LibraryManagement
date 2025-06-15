@@ -106,9 +106,25 @@ builder.Services.AddAutoMapper(typeof(Program));
 // Tạo service sử dụng JWT
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    // Đặt default scheme là PolicyScheme tự động nhận JWT hoặc Cookie
+    options.DefaultScheme = "JwtOrCookie";
+    options.DefaultAuthenticateScheme = "JwtOrCookie";
+    options.DefaultChallengeScheme = "JwtOrCookie";
+})
+.AddPolicyScheme("JwtOrCookie", "JWT or Cookie", options =>
+{
+    options.ForwardDefaultSelector = context =>
+    {
+        // Nếu có header Bearer thì dùng JWT
+        var hasBearer = context.Request.Headers["Authorization"].FirstOrDefault()?.StartsWith("Bearer ") == true;
+        if (hasBearer)
+            return JwtBearerDefaults.AuthenticationScheme;
+
+        if (context.Request.Cookies.ContainsKey(".AspNetCore.Cookies"))
+            return CookieAuthenticationDefaults.AuthenticationScheme;
+
+        return CookieAuthenticationDefaults.AuthenticationScheme;
+    };
 })
 .AddCookie()
 .AddJwtBearer(options =>
@@ -145,17 +161,7 @@ builder.Services.AddAuthentication(options =>
     google.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("JwtOrCookie", policy =>
-    {
-        policy.AddAuthenticationSchemes(
-            JwtBearerDefaults.AuthenticationScheme,
-            CookieAuthenticationDefaults.AuthenticationScheme
-        );
-        policy.RequireAuthenticatedUser();
-    });
-});
+builder.Services.AddAuthorization();
 
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
