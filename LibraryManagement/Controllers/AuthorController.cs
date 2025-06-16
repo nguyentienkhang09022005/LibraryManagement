@@ -25,7 +25,7 @@ namespace LibraryManagement.Controllers
         // Endpoint lấy danh sách tác giả
 
         [HttpGet("list_author")]
-           [Authorize(Policy = "JwtOrCookie")]
+        [Authorize]
         public async Task<IActionResult> gettListAuthor()
         {
             var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ;
@@ -76,7 +76,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpGet("findAuthor")]
-           [Authorize(Policy = "JwtOrCookie")]
+           [Authorize]
         public async Task<IActionResult> findAuthor(string name)
         {
             var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

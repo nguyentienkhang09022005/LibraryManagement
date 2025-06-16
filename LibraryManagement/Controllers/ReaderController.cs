@@ -18,7 +18,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpGet("list_reader")]
-        [Authorize(Policy = "JwtOrCookie")]
+        [Authorize]
         public async Task<IActionResult> gettAllReader()
         {
             var user = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -69,7 +69,18 @@ namespace LibraryManagement.Controllers
             try
             {
                 var result = await _readerService.findReaderAsync(username);
-                if (result == null) return Unauthorized("Yêu cầu quyền admin");
+                return Ok(result);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+        [HttpGet("getReaderBy{idreader}")]
+        public async Task<IActionResult> getReaderById(string readerid) {
+            try
+            {
+                var result = await _readerService.findReaderInputAsync(readerid);
                 return Ok(result);
             }
             catch

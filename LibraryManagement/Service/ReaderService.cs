@@ -291,7 +291,7 @@ namespace LibraryManagement.Repository
         public async Task<FindReaderOutputDto> findReaderAsync(string dto)
         {
       
-            var listReader = await _context.Readers.Where(x => x.ReaderUsername == dto).Select(a => new FindReaderOutputDto
+            var listReader = await _context.Readers.AsNoTracking().Where(x => x.ReaderUsername == dto).Select(a => new FindReaderOutputDto
             {
                 username = a.ReaderUsername,
                 phone = a.Phone!, 
@@ -300,6 +300,20 @@ namespace LibraryManagement.Repository
                 DateCreate = a.CreateDate
             }
             ).FirstOrDefaultAsync();
+            return listReader!;
+        }
+
+        public async Task<FindReaderOutputDto> findReaderInputAsync(string idReader)
+        {
+            var listReader = await _context.Readers.AsNoTracking().Where(x => x.IdReader == idReader).Select(a => new FindReaderOutputDto
+            {
+                username = a.ReaderUsername,
+                phone = a.Phone!,
+                Email = a.Email!,
+                password = a.ReaderPassword,
+                DateCreate = a.CreateDate
+            }
+          ).FirstOrDefaultAsync();
             return listReader!;
         }
     }

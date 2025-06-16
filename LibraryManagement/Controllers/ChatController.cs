@@ -20,7 +20,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpPost("send")]
-           [Authorize(Policy = "JwtOrCookie")]
+           [Authorize]
         public async Task<IActionResult> Send([FromBody] MessageRequest message)
         {
             var senderId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -40,7 +40,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpGet("history")]
-           [Authorize(Policy = "JwtOrCookie")]
+           [Authorize]
         public async Task<IActionResult> History([FromQuery] string receiveUserId) {
             var sendUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (sendUserId == null) return NotFound("Không tìm thấy thông tin người dùng");

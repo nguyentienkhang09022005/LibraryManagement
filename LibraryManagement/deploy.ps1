@@ -14,7 +14,7 @@ Write-Host "Deploying with env vars: $envVars"
 
 # Deploy bằng gcloud
 gcloud run deploy librarymanagement-api `
-  --image tukhoa040505/librarymanagement-api:1.0.7 `
+  --image tukhoa040505/librarymanagement-api:1.0.11 `
   --platform managed `
   --region asia-southeast1 `
   --allow-unauthenticated `

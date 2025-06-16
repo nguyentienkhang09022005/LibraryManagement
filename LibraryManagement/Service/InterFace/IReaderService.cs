@@ -20,5 +20,7 @@ namespace LibraryManagement.Repository.IRepository
 
         public Task<FindReaderOutputDto> findReaderAsync(string dto);
         public Task<string> generateNextIdReaderAsync();
+
+        public Task<FindReaderOutputDto> findReaderInputAsync(string idReader);
     }
 }

@@ -74,7 +74,7 @@ namespace LibraryManagement.Controllers
         //}
 
         [HttpPost("getEvaluation")]
-           [Authorize(Policy = "JwtOrCookie")]
+           [Authorize]
         public async Task<IActionResult> getDetailedEvaluation(string idBook)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -85,7 +85,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpPost("LikeBook")]
-           [Authorize(Policy = "JwtOrCookie")]
+           [Authorize]
         public async Task<IActionResult> LikeBook(string idBook)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -95,7 +95,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpGet("getlikedbook")]
-           [Authorize(Policy = "JwtOrCookie")]
+           [Authorize]
         public async Task<IActionResult> getLikeHeaderBook()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -113,7 +113,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpGet("getallheaderbooks")]
-           [Authorize(Policy = "JwtOrCookie")]
+           [Authorize]
         public async Task<IActionResult> getAllHeaderbooks()
         {
             var result = await _bookService.GetAllHeaderBooks();
@@ -156,7 +156,7 @@ namespace LibraryManagement.Controllers
             }
         }
         [HttpPost("addEvaluation")]
-           [Authorize(Policy = "JwtOrCookie")]
+           [Authorize]
         public async Task<IActionResult> addEvaluation(AddEvaluation dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -196,7 +196,7 @@ namespace LibraryManagement.Controllers
             return (result) ? Ok(result) : BadRequest(result);
         }
         [HttpDelete("deleteComment")]
-        [Authorize(Policy = "JwtOrCookie")]
+        [Authorize]
         public async Task<IActionResult> deleteComment(string idComment)
         {
             var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

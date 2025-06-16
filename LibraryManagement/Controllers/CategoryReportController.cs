@@ -36,7 +36,7 @@ namespace LibraryManagement.Controllers
             return NotFound(result);
         }
         [HttpGet("getCategoryOverdueReport")]
-           [Authorize(Policy = "JwtOrCookie")]
+           [Authorize]
         public async Task<IActionResult> GetCategoryOverdueReport()
         {
             try
