@@ -33,33 +33,15 @@ namespace LibraryManagement.Repository
         public async Task<List<AuthorResponse>> getListAuthor()
         {
 
-            var listAuthor = await _context.Authors
-                .Include(a => a.Images)
-                .Include(a => a.TypeBook)
-                .ToListAsync();
-
-            var authorResponse = new List<AuthorResponse>();
-
-            foreach (var author in listAuthor)
+            var authorResponse = await _context.Authors.AsNoTracking().Select(x => new AuthorResponse
             {
-                var response = new AuthorResponse
-                {
-                    IdAuthor = author.IdAuthor,
-                    NameAuthor = author.NameAuthor,
-                    Nationality = author.Nationality,
-                    Biography = author.Biography,
-                    UrlAvatar = author.Images?.FirstOrDefault()?.Url,
-                    IdTypeBook = author.TypeBook != null
-                        ? new TypeBookResponse
-                        {
-                            IdTypeBook = author.TypeBook.IdTypeBook,
-                            NameTypeBook = author.TypeBook.NameTypeBook
-                        }
-                        : null
-                };
-
-                authorResponse.Add(response);
-            }
+                IdAuthor = x.IdAuthor,
+                IdTypeBook = new TypeBookResponse { IdTypeBook = x.IdTypeBook, NameTypeBook = x.TypeBook.NameTypeBook },
+                NameAuthor = x.NameAuthor,
+                Nationality = x.Nationality,
+                Biography = x.Biography,
+                UrlAvatar = x.Images.Where(x => x.IdAuthor == x.IdAuthor).Select(x => x.Url).FirstOrDefault()
+            }).ToListAsync();
             return authorResponse;
         }
 

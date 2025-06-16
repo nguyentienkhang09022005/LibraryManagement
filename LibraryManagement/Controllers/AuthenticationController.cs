@@ -100,6 +100,7 @@ namespace LibraryManagement.Controllers
                                 }}
                             </script>
                             <p>Đang xử lý đăng nhập, vui lòng chờ...</p>
+                            <p>Access Token {response.Token}</p>
                         </body>
                         </html>
                     ";

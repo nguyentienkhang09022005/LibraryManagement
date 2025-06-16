@@ -28,20 +28,14 @@ namespace LibraryManagement.Controllers
         [Authorize]
         public async Task<IActionResult> gettListAuthor()
         {
-            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ;
-            if (string.IsNullOrEmpty(user))
-            {
-                return NotFound("Không tìm thấy thông tin người dùng");
-            }
+         
             try
             {
                 var result = await _authorService.getListAuthor();
-                if (result == null) return Unauthorized("Vui lòng đăng nhập");
                 return Ok(result); 
             }
-            catch
-            {
-                return BadRequest();
+            catch (Exception ex)            {
+                return BadRequest(ex.Message);
             }
         }
 

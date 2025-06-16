@@ -8,6 +8,7 @@ using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections.Frozen;
 
 namespace LibraryManagement.Repository
 {
@@ -134,15 +135,8 @@ namespace LibraryManagement.Repository
         public async Task<List<ReaderResponse>> getAllReaderAsync()
         {
             var listReader = await _context.Readers
-                .Include(r => r.Images)
-                .Include(r => r.TypeReader)
-                .ToListAsync();
-
-            var readerResponse = new List<ReaderResponse>();
-
-            foreach (var readerInf in listReader)
-            {
-                var response = new ReaderResponse
+                .AsNoTracking()
+                .Select(readerInf => new ReaderResponse
                 {
                     IdReader = readerInf.IdReader,
                     NameReader = readerInf.NameReader!,
@@ -155,7 +149,10 @@ namespace LibraryManagement.Repository
                     ReaderAccount = readerInf.Email!,
                     TotalDebt = readerInf.TotalDebt,
                     Role = readerInf.Role.RoleName,
-                    UrlAvatar = readerInf.Images?.FirstOrDefault()?.Url,
+                    UrlAvatar = readerInf.Images
+                    .OrderBy(a => a.IdReader) 
+                    .Select(x => x.Url)
+                    .FirstOrDefault(),
                     IdTypeReader = readerInf.TypeReader != null
                         ? new TypeReaderResponse
                         {
@@ -164,10 +161,8 @@ namespace LibraryManagement.Repository
                         }
                         : null,
                     
-                };
-                readerResponse.Add(response);
-            }
-            return readerResponse;
+                }).ToListAsync();
+            return listReader;
         }
 
 

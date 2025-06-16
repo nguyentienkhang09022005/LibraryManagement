@@ -11,6 +11,7 @@ using LibraryManagement.Service.Interface;
 using LibraryManagement.Service.InterFace;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -159,6 +160,23 @@ builder.Services.AddAuthentication(options =>
     google.ClientSecret = builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__SECRET"] ?? Environment.GetEnvironmentVariable("GOOGLE__CLIENT__SECRET")!;
     google.CallbackPath = "/signin-google";
     google.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+    google.Events = new OAuthEvents
+    {
+        // Khi Google trả về lỗi, không redirect về lỗi mặc định, mà trả về 401 JSON
+        OnRemoteFailure = context =>
+        {
+            context.HandleResponse();
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+            var result = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                message = "Đăng nhập Google thất bại: " + (context.Failure?.Message ?? "Không rõ lỗi")
+            });
+            return context.Response.WriteAsync(result);
+        },
+     
+    };
 });
 
 builder.Services.AddAuthorization();
