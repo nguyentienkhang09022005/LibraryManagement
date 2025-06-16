@@ -81,7 +81,25 @@ namespace LibraryManagement.Controllers
             var avatar = User.Claims.FirstOrDefault(c => c.Type == "picture")?.Value;
             var response = await _authenService.LoginWithGoogleAsync(email, name, avatar);
 
-            return Ok(response);
+            var html = $@"
+                        <html>
+                        <body>
+                            <script>
+                                if (window.opener) {{
+                                    window.opener.postMessage({{
+                                        type: 'google-auth-token',
+                                        token: '{response.Token}',
+                                        refreshToken: '{response.refreshToken}',
+                                        iduser: '{response.iduser}'
+                                    }}, '*');
+                                    window.close();
+                                }}
+                            </script>
+                            <p>Đang xử lý đăng nhập, vui lòng chờ...</p>
+                        </body>
+                        </html>
+                    ";
+            return Content(html, "text/html");
         }
     } 
 }
