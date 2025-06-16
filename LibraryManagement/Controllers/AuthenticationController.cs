@@ -69,7 +69,7 @@ namespace LibraryManagement.Controllers
         [HttpGet("profile")]
         public async Task<IActionResult> Profile()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity!.IsAuthenticated)
             {
                 return Redirect("/auth/login-google");
             }
@@ -83,6 +83,10 @@ namespace LibraryManagement.Controllers
 
             var html = $@"
                         <html>
+                        <head>
+                            <meta charset='utf-8'>
+                            <title>Đăng nhập</title>
+                        </head>
                         <body>
                             <script>
                                 if (window.opener) {{

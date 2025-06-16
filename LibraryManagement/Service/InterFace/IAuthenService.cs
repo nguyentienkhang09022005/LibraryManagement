@@ -19,6 +19,7 @@ namespace LibraryManagement.Repository.IRepository
 
         public Task<RefreshTokenResponse> refreshTokenAsync(string Token);
 
-        public Task<AuthenticationResponse> LoginWithGoogleAsync(string email, string fullname, string avatar, DateTime? dateOfBirth = null);
+        public Task<AuthenticationResponse> LoginWithGoogleAsync(
+      string email, string fullname, string avatar, DateTime? dateOfBirth = null);
     }
 }
