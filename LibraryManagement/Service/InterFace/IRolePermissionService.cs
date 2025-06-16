@@ -8,5 +8,7 @@ namespace LibraryManagement.Service.Interface
     {
         public Task<ApiResponse<RolePermissionResponse>> addRolePermissionAsync(RolePermissionRequest request);
         public Task<ApiResponse<string>> deleteRolePermissionAsync(RolePermissionRequest request);
+
+        public Task<ApiResponse<RolePermissionResponse>> updateRolePermissionAsync(RolePermissionUpdateRequest request);
     }
 }

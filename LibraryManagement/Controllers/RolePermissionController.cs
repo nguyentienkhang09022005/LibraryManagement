@@ -33,5 +33,15 @@ namespace LibraryManagement.Controllers
                 return Ok(result);
             return NotFound(result);
         }
+
+        // Endpoint thay đổi phân quyền
+        [HttpPatch("update_role_permission")]
+        public async Task<IActionResult> updateRolePermission([FromBody] RolePermissionUpdateRequest request)
+        {
+            var result = await _rolePermissionService.updateRolePermissionAsync(request);
+            if (result.Success)
+                return Ok(result);
+            return NotFound(result);
+        }
     }
 }
