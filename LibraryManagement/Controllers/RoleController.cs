@@ -46,5 +46,45 @@ namespace LibraryManagement.Controllers
                 return Ok(result);
             return NotFound(result);
         }
+
+        [HttpGet("getAllRoles")]
+        public async Task<IActionResult> getAllRoles()
+        {
+            try
+            {
+                var result = await _roleService.listRolesAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+        [HttpGet("getAllPermisson")]
+        public async Task<IActionResult> getAllPermission()
+        {
+            try
+            {
+                var result = await _roleService.listPerMissionAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+        [HttpGet("getAllPermissonByRole")]
+        public async Task<IActionResult> getAllPermissionByRole(string rolename)
+        {
+            try
+            {
+                var result = await _roleService.listPermissionsByRoleAsync(rolename);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
     }
 }

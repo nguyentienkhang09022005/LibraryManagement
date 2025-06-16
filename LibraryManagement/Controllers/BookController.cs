@@ -120,7 +120,7 @@ namespace LibraryManagement.Controllers
             return Ok(result);
         }
         [HttpGet("getbooksindetail")]
-        [Authorize]
+        [Authorize(Roles ="Reader")]
         public async Task<IActionResult> getBooksAndComments()
         {
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -203,7 +203,7 @@ namespace LibraryManagement.Controllers
             if (user == null) return Unauthorized("Vui lòng đăng nhập");
             var result = await _bookService.deleteComment(idComment, user);
 
-            return (result) ? Ok(result) : BadRequest(result);
+            return (result) ? Ok("Xóa thành công") : BadRequest("Không thể xóa comment");
         }
     }
 }

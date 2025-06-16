@@ -255,7 +255,6 @@ namespace LibraryManagement.Repository
             }
             else
             {
-                // Nếu user đã có, có thể cập nhật avatar/name nếu muốn:
                 reader.NameReader = fullname;
                 if (dateOfBirth != null) reader.Dob = dateOfBirth.Value;
 

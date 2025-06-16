@@ -52,6 +52,30 @@ namespace LibraryManagement.Repository
             return ApiResponse<string>.SuccessResponse("Xóa role thành công", 200, roleName);
         }
 
+        public async Task<List<PermissionResponse>> listPerMissionAsync()
+        {
+            var result = await _context.Permissions.AsNoTracking().Select(x => new PermissionResponse
+            {
+                PermissionName = x.PermissionName,
+                Description = x.Description,
+            }).ToListAsync();
+            return result;
+        }
+
+        public async Task<List<PermissionResponse>> listPermissionsByRoleAsync(string role)
+        {
+            var result = await _context.RolePermissions.AsNoTracking().Where(x => x.RoleName == role)
+                .Select(x => new PermissionResponse { PermissionName = x.PermissionName, Description = x.Permission.Description })
+                .ToListAsync();
+            return result;
+        }
+
+        public async Task<List<RoleResponse>> listRolesAsync()
+        {
+            var result = await _context.Roles.AsNoTracking().Select(x=> new RoleResponse { RoleName = x.RoleName, Description =  x.Description } ).ToListAsync();
+            return result;
+        }
+
         // Hàm sửa nội dung role
         public async Task<ApiResponse<RoleResponse>> updateRoleAsync(RoleRequest request)
         {
