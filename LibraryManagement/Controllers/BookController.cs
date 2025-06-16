@@ -113,14 +113,13 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpGet("getallheaderbooks")]
-           [Authorize]
         public async Task<IActionResult> getAllHeaderbooks()
         {
             var result = await _bookService.GetAllHeaderBooks();
             return Ok(result);
         }
         [HttpGet("getbooksindetail")]
-        [Authorize(Roles ="Reader")]
+      
         public async Task<IActionResult> getBooksAndComments()
         {
             var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

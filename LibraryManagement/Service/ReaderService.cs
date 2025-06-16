@@ -154,6 +154,7 @@ namespace LibraryManagement.Repository
                     CreateDate = readerInf.CreateDate,
                     ReaderAccount = readerInf.Email!,
                     TotalDebt = readerInf.TotalDebt,
+                    Role = readerInf.Role.RoleName,
                     UrlAvatar = readerInf.Images?.FirstOrDefault()?.Url,
                     IdTypeReader = readerInf.TypeReader != null
                         ? new TypeReaderResponse
@@ -161,7 +162,8 @@ namespace LibraryManagement.Repository
                             idTypeReader = readerInf.TypeReader.IdTypeReader,
                             NameTypeReader = readerInf.TypeReader.NameTypeReader
                         }
-                        : null
+                        : null,
+                    
                 };
                 readerResponse.Add(response);
             }
