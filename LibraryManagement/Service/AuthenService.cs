@@ -76,6 +76,12 @@ namespace LibraryManagement.Repository
         // Hàm đăng ký
         public async Task<bool> SignUpWithOtpAsync(ConfirmOtp confirmOtp)
         {
+            var checkEmail = await _context.Readers.FirstOrDefaultAsync(e => e.Email == confirmOtp.Email);
+            if (checkEmail != null)
+            {
+                throw new Exception("Email existed");
+            }
+
             var newRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == AppRoles.Reader);
 
             if (!_tempOtp.TryGetValue($"OTP_{confirmOtp.Email}", out dynamic? cacheData)) return false;
@@ -96,6 +102,7 @@ namespace LibraryManagement.Repository
             var reader = new Reader
             {
                 IdReader = await generateNextIdReaderAsync(),
+                Email = confirmOtp.Email,
                 ReaderUsername = confirmOtp.Email,
                 ReaderPassword = BCrypt.Net.BCrypt.HashPassword(cacheData.Password),
                 IdTypeReader = DefaultTypeReaderId,

@@ -1,8 +1,8 @@
-﻿namespace LibraryManagement.Helpers
-{
-    public class Helper
+﻿    namespace LibraryManagement.Helpers
     {
-        public const int LoginGogle = 1;
-        public const int LoginNormal = 0;
+        public class Helper
+        {
+            public const int LoginGogle = 1;
+            public const int LoginNormal = 0;
+        }
     }
-}
