@@ -3,6 +3,7 @@ using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Service.InterFace;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using System.Diagnostics.Contracts;
 
 namespace LibraryManagement.Controllers
@@ -97,6 +98,19 @@ namespace LibraryManagement.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+        [HttpGet("getAmountByTypeBook")]
+        public async Task<IActionResult> getAmountByTypebook()
+        {
+            try
+            {
+                var result = await _loanBookService.getAmountByTypeBook();
+                return Ok(result);  
+            }
+            catch (Exception ex) {
+                return BadRequest(ex.Message);
+            }
+
         }
     }
 }

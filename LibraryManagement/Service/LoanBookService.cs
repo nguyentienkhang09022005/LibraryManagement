@@ -7,6 +7,8 @@ using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
+using ZstdSharp.Unsafe;
+
 namespace LibraryManagement.Repository
 {
     public class LoanBookService : ILoanBookService
@@ -158,6 +160,21 @@ namespace LibraryManagement.Repository
             _context.LoanSlipBooks.Remove(deleteLoanBook);
             await _context.SaveChangesAsync();
             return ApiResponse<string>.SuccessResponse("Đã xóa phiếu mượn sách thành công", 200, "");
+        }
+
+        public async Task<List<AmountOfEachTypeBook>> getAmountByTypeBook()
+        {
+            var result = await _context.LoanSlipBooks
+                        .AsNoTracking()
+                        .GroupBy(x => x.TheBook.Book.HeaderBook.TypeBook.NameTypeBook)
+                        .Select(x => new AmountOfEachTypeBook
+                        {
+                            TypeBook = x.Key,
+                            Count = x.Count()
+                        })
+                        .ToListAsync(); 
+            return result;
+
         }
 
         // Sửa phiếu mượn sách
