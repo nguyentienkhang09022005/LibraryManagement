@@ -61,16 +61,14 @@ namespace LibraryManagement.Repository
                 return ApiResponse<LoanBookResponse>.FailResponse("Thẻ độc giả đã quá hạn 6 tháng", 400);
             }
 
-            // Kiểm tra trong 4 ngày không được mượn quá 5 quyển sách
-            DateTime dateThreshold = DateTime.UtcNow.AddDays(-borrowingPeriodDays);
-            int borrowedInPeriod = await _context.LoanSlipBooks
-                .Where(l => l.IdReader == request.IdReader && l.BorrowDate >= dateThreshold)
+            // Kiểm tra độc giả chỉ được mượn tối đa 5 quyển sách
+            int currentlyBorrowed = await _context.LoanSlipBooks
+                .Where(l => l.IdReader == request.IdReader && l.ReturnDate > DateTime.UtcNow)
                 .CountAsync();
 
-
-            if (borrowedInPeriod >= borrowingLimit)
+            if (currentlyBorrowed >= borrowingLimit)
             {
-                return ApiResponse<LoanBookResponse>.FailResponse($"Trong {borrowingPeriodDays} ngày gần nhất, độc giả đã mượn tối đa {borrowingLimit} cuốn sách", 400);
+                return ApiResponse<LoanBookResponse>.FailResponse("Độc giả chỉ được mượn tối đa 5 cuốn sách cùng lúc", 400);
             }
 
             DateTime borrowDate = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
