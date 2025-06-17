@@ -55,6 +55,16 @@ namespace LibraryManagement.Service
                 .Where(ob => (ob.ReturnDate - ob.BorrowDate).TotalDays > ob.LoanPeriod)
                 .ToList();
 
+            var bookIds = overdueBooksFiltered.Select(b => b.IdTheBook).ToList();
+
+            var bookInfoMap = await _context.TheBooks
+                .Include(tb => tb.Book)
+                    .ThenInclude(b => b.HeaderBook)
+                .Where(tb => bookIds.Contains(tb.IdTheBook))
+                .ToDictionaryAsync(
+                    tb => tb.IdTheBook,
+                    tb => tb.Book.HeaderBook.NameHeaderBook
+                );
 
             // Tạo danh sách chi tiết mới
             var newDetails = overdueBooks.Select(book => new OverdueReportDetail
@@ -80,6 +90,7 @@ namespace LibraryManagement.Service
                 {
                     IdOverdueReport = d.IdOverdueReport,
                     IdTheBook = d.IdTheBook,
+                    NameHeaderBook = bookInfoMap.ContainsKey(d.IdTheBook) ? bookInfoMap[d.IdTheBook] : "Không rõ",
                     BorrowDate = d.BorrowDate,
                     LateDays = d.LateDays
                 }).ToList()

@@ -10,6 +10,7 @@
     {
         public Guid IdOverdueReport { get; set; }
         public string IdTheBook { get; set; }
+        public string NameHeaderBook { get; set; }
 
         public DateTime BorrowDate { get; set; }
 
