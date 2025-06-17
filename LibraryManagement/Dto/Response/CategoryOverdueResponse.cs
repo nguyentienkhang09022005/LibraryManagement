@@ -8,8 +8,5 @@
         public string BookName { get; set; }
         public DateTime DateBorrow { get; set; }
         public int DateLate { get; set; }
-        public string IDuser { get; set; }
-        public string username { get; set; }
-        public decimal totalfine { get; set; }
     }
 }

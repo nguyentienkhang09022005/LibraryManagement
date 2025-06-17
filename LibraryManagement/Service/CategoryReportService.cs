@@ -6,6 +6,7 @@ using LibraryManagement.Models;
 using LibraryManagement.Service.Interface;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace LibraryManagement.Service
 {
     public class CategoryReportService : ICategoryReportService
@@ -125,27 +126,16 @@ namespace LibraryManagement.Service
 
         public async Task<List<CategoryOverdueResponse>> getOverdueReport()
         {
-            var result = await (from obd in _context.OverdueReportDetails.AsNoTracking()
-                                .Include(d => d.OverdueReport)
-                                .Include(d => d.TheBook)
-                                    .ThenInclude(t => t.Book)
-                                        .ThenInclude(b => b.HeaderBook)
-                                join lsb in _context.LoanSlipBooks
-                                    on new { obd.IdTheBook, obd.BorrowDate } equals new { lsb.IdTheBook, lsb.BorrowDate }
-                                join r in _context.Readers
-                                    on lsb.IdReader equals r.IdReader
-                                select new CategoryOverdueResponse
-                                {
-                                    IdOverDueReport = obd.OverdueReport.IdOverdueReport,
-                                    reportDate = obd.OverdueReport.CreatedDate,
-                                    IDbook = obd.IdTheBook,
-                                    BookName = obd.TheBook.Book.HeaderBook.NameHeaderBook,
-                                    DateBorrow = obd.BorrowDate,
-                                    DateLate = obd.LateDays, 
-                                    IDuser = lsb.IdReader,
-                                    username = r.NameReader!,
-                                    totalfine = lsb.FineAmount
-                                })
+            var result = await _context.OverdueReportDetails.AsNoTracking()
+                             .Select(x => new CategoryOverdueResponse
+                             {
+                                 IdOverDueReport = x.IdOverdueReport,
+                                 reportDate = x.OverdueReport.CreatedDate,
+                                 IDbook = x.TheBook.IdBook,
+                                 BookName = x.TheBook.Book.HeaderBook.NameHeaderBook,
+                                 DateBorrow = x.BorrowDate,
+                                 DateLate = x.LateDays
+                             })
                             .OrderByDescending(x => x.reportDate)
                             .ThenByDescending(x => x.DateLate)
                             .ToListAsync();

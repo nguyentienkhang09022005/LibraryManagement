@@ -6,6 +6,7 @@ using LibraryManagement.Helpers;
 using LibraryManagement.Models;
 using LibraryManagement.Repository.InterFace;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace LibraryManagement.Repository
 {
@@ -81,6 +82,12 @@ namespace LibraryManagement.Repository
                 throw new Exception($"Không tìm thấy quy định: {nameParameter}");
             }
             return param.ValueParameter;
+        }
+
+        public async Task<List<Parameter>> getParametersAsync()
+        {
+           var result = await _context.Parameters.AsNoTracking().ToListAsync();
+            return result;
         }
     }
 }

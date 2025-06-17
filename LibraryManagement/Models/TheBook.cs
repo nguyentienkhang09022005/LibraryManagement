@@ -19,5 +19,7 @@ namespace LibraryManagement.Models
         public Book Book { get; set; }
 
         public ICollection<OverdueReportDetail> OverdueReportDetails { get; set; }
+
+        public ICollection<LoanSlipBook> LoanSlipBooks { get;set; }
     }
 }

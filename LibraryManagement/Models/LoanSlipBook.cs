@@ -32,6 +32,8 @@ namespace LibraryManagement.Models
 
         [ForeignKey("IdTheBook")]
         public TheBook TheBook { get; set; }
+
+      
     }
 
 }

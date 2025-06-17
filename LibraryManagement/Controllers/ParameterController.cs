@@ -1,6 +1,7 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
 using Microsoft.AspNetCore.Mvc;
+using ZstdSharp.Unsafe;
 
 namespace LibraryManagement.Controllers
 {
@@ -42,6 +43,19 @@ namespace LibraryManagement.Controllers
             if (result.Success)
                 return Ok(result);
             return NotFound(result);
+        }
+        [HttpGet("getallparameter")]
+        public async Task<IActionResult> getAllParameter()
+        {
+            try
+            {
+                var result = await _parameterService.getParametersAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
