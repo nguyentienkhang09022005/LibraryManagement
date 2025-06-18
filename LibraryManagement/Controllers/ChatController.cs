@@ -5,6 +5,7 @@ using LibraryManagement.Service.InterFace;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewComponents;
 using System.Security.Claims;
 
 namespace LibraryManagement.Controllers
@@ -46,6 +47,14 @@ namespace LibraryManagement.Controllers
             if (sendUserId == null) return NotFound("Không tìm thấy thông tin người dùng");
             return Ok(await _chatService.GetAllMessagesAsync(sendUserId, receiveUserId));
 
+        }
+        [HttpGet("getAllUserSentMessage")]
+        [Authorize]
+        public async Task<IActionResult> GetAllUserMessage()
+        {
+            var sender = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (sender == null) return NotFound("Không tìm thấy thông tin người dùng");
+            return Ok(await _chatService.getAllMessageClient(sender));
         }
     }
 }

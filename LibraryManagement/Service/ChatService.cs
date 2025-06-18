@@ -1,4 +1,5 @@
-﻿using LibraryManagement.Models;
+﻿using LibraryManagement.Dto.Request;
+using LibraryManagement.Models;
 using LibraryManagement.Service.InterFace;
 
 namespace LibraryManagement.Service
@@ -10,6 +11,9 @@ namespace LibraryManagement.Service
         {
             _messageRepo = repo;
         }
+
+        public Task<List<MessageClient>> getAllMessageClient(string senderId)
+        => _messageRepo.getAllMessageClient(senderId);  
 
         public Task<List<Message>> GetAllMessagesAsync(string userId1, string userId2)
             => _messageRepo.GetAllMessagesAsync(userId1, userId2);

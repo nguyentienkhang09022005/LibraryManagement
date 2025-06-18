@@ -14,5 +14,6 @@
         public string ReaderUsername { get; set; }     // reader_username
         public string RoleName { get; set; }           // role_name
         public string? TypeReader { get; set; }
+        public string AvatarUrl { get; set; }
     }
 }

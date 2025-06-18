@@ -183,6 +183,7 @@ namespace LibraryManagement.Repository
                     CreateDate = a.CreateDate, 
                     ReaderUsername = a.ReaderUsername, 
                     RoleName = a.RoleName,
+                    AvatarUrl = a.Images.Select(x=>x.Url).FirstOrDefault() ?? string.Empty,
                 }).FirstOrDefaultAsync() ;
                 return reader;
             }

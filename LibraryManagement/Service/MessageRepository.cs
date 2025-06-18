@@ -1,7 +1,11 @@
-﻿using LibraryManagement.Models;
+﻿using LibraryManagement.Data;
+using LibraryManagement.Dto.Request;
+using LibraryManagement.Models;
 using LibraryManagement.Service.InterFace;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
+using ZstdSharp.Unsafe;
 
 namespace LibraryManagement.Service
 {
@@ -10,8 +14,9 @@ namespace LibraryManagement.Service
        
         private readonly IHubContext<ChatHub> _hubContext;
         private readonly IMongoCollection<Message> _messages;
+        private readonly LibraryManagermentContext _context; 
 
-        public MessageRepository(IConfiguration configuration, IHubContext<ChatHub> hubContext )
+        public MessageRepository(IConfiguration configuration, IHubContext<ChatHub> hubContext, LibraryManagermentContext context )
         {
             var connectionString = configuration["MongoDB:ConnectionString"];
             var databaseName = configuration["MongoDB:DatabaseName"];
@@ -21,6 +26,7 @@ namespace LibraryManagement.Service
             var database = client.GetDatabase(databaseName);
             _messages = database.GetCollection<Message>(collectionName);
             _hubContext = hubContext;
+            _context = context;
             EnsureIndexes();
         }
         private void EnsureIndexes()
@@ -77,5 +83,48 @@ namespace LibraryManagement.Service
             await _hubContext.Clients.User(message.ReceiverId)
                 .SendAsync("ReceiveMessage", message.SenderId, message.Content, message.SentAt);
         }
+
+        public async Task<List<MessageClient>> getAllMessageClient(string senderId)
+        {
+            // 1. Lấy toàn bộ PartnerId unique chỉ với 1 truy vấn
+            var userIds = await _messages.Aggregate()
+                .Match(m => m.SenderId == senderId || m.ReceiverId == senderId)
+                .Project(m => new
+                {
+                    PartnerId = m.SenderId == senderId ? m.ReceiverId : m.SenderId
+                })
+                .Group(x => x.PartnerId, g => new { UserId = g.Key })
+                .ToListAsync();
+
+            var allUserIds = userIds
+                .Select(x => x.UserId)
+                .Where(id => !string.IsNullOrEmpty(id) && id != senderId)
+                .ToList();
+
+            if (allUserIds.Count == 0)
+                return new List<MessageClient>();
+
+            // 2. Truy vấn nhanh SQL chỉ lấy trường cần
+            var userInfos = await _context.Readers
+                .AsNoTracking()
+                .Where(x => allUserIds.Contains(x.IdReader))
+                .Select(x => new { x.IdReader, x.NameReader })
+                .ToListAsync();
+
+            var userInfoDict = userInfos.ToDictionary(x => x.IdReader, x => x.NameReader);
+
+            var result = allUserIds
+                .Select(id => new MessageClient
+                {
+                    ReceiveUserId = id,
+                    ReceiveUserName = userInfoDict.TryGetValue(id, out var name) ? name : "(Không rõ tên)",
+                    AvatarUrl = _context.Images.AsNoTracking().Where(x=>x.IdReader == id).Select(x=>x.Url).FirstOrDefault() ?? string.Empty,
+                })
+                .ToList();
+
+            return result;
+        }
+
+
     }
 }
