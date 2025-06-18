@@ -116,6 +116,16 @@ namespace LibraryManagement.Repository
            
             await _context.Readers.AddAsync(reader);
             await _context.SaveChangesAsync();
+
+            string imageUrl = "https://res.cloudinary.com/df41zs8il/image/upload/v1750223521/default-avatar-icon-of-social-media-user-vector_a3a2de.jpg";
+
+            var image = new Image
+            {
+                IdReader = reader.IdReader,
+                Url = imageUrl,
+            };
+            _context.Images.Add(image);
+            await _context.SaveChangesAsync();
             return true;
         }
 
