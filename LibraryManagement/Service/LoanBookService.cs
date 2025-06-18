@@ -1,4 +1,5 @@
-﻿using LibraryManagement.Data;
+﻿using Google.Apis.Util;
+using LibraryManagement.Data;
 using LibraryManagement.Dto.Request;
 using LibraryManagement.Dto.Response;
 using LibraryManagement.Helpers;
@@ -197,6 +198,25 @@ namespace LibraryManagement.Repository
                 FineAmount = a.FineAmount
             }).ToListAsync();
             return result; 
+        }
+
+        public async Task<List<LoanSlipBookResponse>> getLoanSlipBookByReader(string idReader)
+        {
+            var result = await _context.LoanSlipBooks.AsNoTracking().Where(x => x.IdReader == idReader)
+                                    .Select(x => new LoanSlipBookResponse
+                                    {
+                                        IdLoanSlipBook = x.IdLoanSlipBook,
+                                        IdTheBook = x.IdTheBook,
+                                        IdReader = x.IdReader,
+                                        IdBook = x.TheBook.IdBook,
+                                        NameBook = x.TheBook.Book.HeaderBook.NameHeaderBook,
+                                        BorrowDate = x.BorrowDate,
+                                        ReturnDate = x.ReturnDate,
+                                        LoanPeriod = x.LoanPeriod,
+                                        FineAmount = x.FineAmount
+                                    }).ToListAsync();
+            return result;
+            
         }
 
         public async Task<List<GetLoanSlipBookByType>> getLoanSlipBookByType(string? genre)

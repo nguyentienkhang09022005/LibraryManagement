@@ -204,5 +204,18 @@ namespace LibraryManagement.Controllers
 
             return (result) ? Ok("Xóa thành công") : BadRequest("Không thể xóa comment");
         }
+        [HttpGet("GetTheBookStatus")]
+        public async Task<IActionResult> GetTheBookStatus(string idThebook)
+        {
+            try
+            {
+                var result = await _bookService.GetTheBookStatus(idThebook);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message) ;
+            }
+        }
     }
 }

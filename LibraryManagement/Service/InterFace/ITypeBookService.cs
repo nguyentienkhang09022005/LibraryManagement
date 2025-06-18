@@ -12,6 +12,8 @@ namespace LibraryManagement.Repository.InterFace
 
         public Task<List<TypeBookResponseAndBook>> getTypebookAndBooks();
 
-        public Task<List<TypeBookResponse>> getAllTypeBook(); 
+        public Task<List<TypeBookResponse>> getAllTypeBook();
+
+     
     }
 }

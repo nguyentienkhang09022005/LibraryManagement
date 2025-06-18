@@ -112,5 +112,17 @@ namespace LibraryManagement.Controllers
             }
 
         }
+        [HttpGet("GetReceiptHistory")]
+        public async Task<IActionResult> getReceiptHistory(string idReader)
+        {
+            try
+            {
+                var result = await _loanBookService.getLoanSlipBookByReader(idReader);
+                return Ok(result);
+            }
+            catch (Exception ex) {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

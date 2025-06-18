@@ -40,5 +40,7 @@ namespace LibraryManagement.Repository.InterFace
         public Task<bool> EditCommentAsync(string idComment, string response, int rate);
 
         public Task<bool> deleteComment(string idComment, string idReader);
+
+        public Task<List<TheBookStatus>> GetTheBookStatus(string idThebook);
     } 
 }

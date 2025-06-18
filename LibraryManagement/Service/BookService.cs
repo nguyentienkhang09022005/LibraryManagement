@@ -745,5 +745,17 @@ namespace LibraryManagement.Repository
 
             return deleted > 0;
         }
+
+        public async Task<List<TheBookStatus>> GetTheBookStatus(string idThebook)
+        {
+            var result = await _context.TheBooks.AsNoTracking().Select(x =>
+            new TheBookStatus
+            {
+                IdTheBook = x.IdTheBook,
+                IsAvailable = x.Status
+            }
+            ).ToListAsync();
+            return result;
+        }
     }
 }
