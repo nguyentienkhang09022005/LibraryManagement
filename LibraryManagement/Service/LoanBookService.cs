@@ -162,10 +162,11 @@ namespace LibraryManagement.Repository
             return ApiResponse<string>.SuccessResponse("Đã xóa phiếu mượn sách thành công", 200, "");
         }
 
-        public async Task<List<AmountOfEachTypeBook>> getAmountByTypeBook()
+        public async Task<List<AmountOfEachTypeBook>> getAmountByTypeBook(int month)
         {
             var result = await _context.LoanSlipBooks
                         .AsNoTracking()
+                        .Where(x=>x.BorrowDate.Month == month)
                         .GroupBy(x => x.TheBook.Book.HeaderBook.TypeBook.NameTypeBook)
                         .Select(x => new AmountOfEachTypeBook
                         {
@@ -192,6 +193,7 @@ namespace LibraryManagement.Repository
                 NameBook = a.TheBook.Book.HeaderBook.NameHeaderBook,
                 BorrowDate = a.BorrowDate,
                 ReturnDate = a.ReturnDate,
+                LoanPeriod = a.LoanPeriod,
                 FineAmount = a.FineAmount
             }).ToListAsync();
             return result; 

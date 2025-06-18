@@ -9,5 +9,7 @@ namespace LibraryManagement.Repository.InterFace
         Task<ApiResponse<PenaltyTicketResponse>> addPenaltyTicketAsync(PenaltyTicketRequest request);
         Task<ApiResponse<PenaltyTicketResponse>> updatePenaltyTicketAsync(PenaltyTicketRequest request, Guid idPenaltyTicket);
         Task<ApiResponse<string>> deletePenaltyTicketAsync(Guid idPenaltyTicket);
+
+        Task<List<TicketResponse>> GetTicketResponsesAsync(string idUser);
     }
 }

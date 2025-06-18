@@ -44,5 +44,18 @@ namespace LibraryManagement.Controllers
                 return Ok(result);
             return NotFound(result);
         }
+        [HttpGet("getPenatiesById{idUser}")]
+        public async Task<IActionResult> getPenatiesById(string idUser)
+        {
+            try
+            {
+                var result = await _penaltyTicketService.GetTicketResponsesAsync(idUser);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
     }
 }

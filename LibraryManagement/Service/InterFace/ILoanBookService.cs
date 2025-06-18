@@ -14,6 +14,6 @@ namespace LibraryManagement.Repository.InterFace
 
         Task<List<GetLoanSlipBookByType>> getLoanSlipBookByType(string genre);
 
-        Task<List<AmountOfEachTypeBook>> getAmountByTypeBook();
+        Task<List<AmountOfEachTypeBook>> getAmountByTypeBook(int month);
     }
 }

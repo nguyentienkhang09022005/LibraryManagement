@@ -100,11 +100,11 @@ namespace LibraryManagement.Controllers
             }
         }
         [HttpGet("getAmountByTypeBook")]
-        public async Task<IActionResult> getAmountByTypebook()
+        public async Task<IActionResult> getAmountByTypebook(int month)
         {
             try
             {
-                var result = await _loanBookService.getAmountByTypeBook();
+                var result = await _loanBookService.getAmountByTypeBook(month);
                 return Ok(result);  
             }
             catch (Exception ex) {

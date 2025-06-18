@@ -9,6 +9,7 @@
         public string NameBook { get; set; }
         public DateTime BorrowDate { get; set; }
         public DateTime ReturnDate { get; set; }
+        public int LoanPeriod {get; set; }
         public decimal FineAmount { get; set; }
     }
 }

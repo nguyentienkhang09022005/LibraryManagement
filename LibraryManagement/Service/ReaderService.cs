@@ -66,11 +66,7 @@ namespace LibraryManagement.Repository
             }
 
             // Chuỗi url ảnh từ cloudinary
-            string imageUrl = null;
-            if (request.AvatarImage != null)
-            {
-                imageUrl = await _upLoadImageFileService.UploadImageAsync(request.AvatarImage);
-            }
+            string imageUrl = "https://res.cloudinary.com/df41zs8il/image/upload/v1750223521/default-avatar-icon-of-social-media-user-vector_a3a2de.jpg";
 
             var newReader = new Reader
             {
@@ -169,13 +165,12 @@ namespace LibraryManagement.Repository
         // Hàm sửa độc giả
         public async Task<ApiResponse<ReaderResponse>> updateReaderAsync(ReaderUpdateRequest request, string idReader)
         {
-            var updateReader = await _context.Readers.FirstOrDefaultAsync(reader => reader.IdReader == idReader);
-            if (updateReader == null)
-            {
+            // Kiểm tra tồn tại
+            var readerExists = await _context.Readers.AnyAsync(r => r.IdReader == idReader);
+            if (!readerExists)
                 return ApiResponse<ReaderResponse>.FailResponse("Không tìm thấy độc giả", 404);
-            }
 
-            // Kiểm tra tuổi nếu Dob được cung cấp
+            // Validate DOB và tuổi
             if (request.Dob.HasValue)
             {
                 int readerAge = DateTime.Now.Year - request.Dob.Value.Year;
@@ -184,93 +179,75 @@ namespace LibraryManagement.Repository
                 int minAge = await _parameterService.getValueAsync("MinReaderAge");
                 int maxAge = await _parameterService.getValueAsync("MaxReaderAge");
                 if (readerAge < minAge || readerAge > maxAge)
-                {
                     return ApiResponse<ReaderResponse>.FailResponse($"Tuổi độc giả phải từ {minAge} đến {maxAge} tuổi", 400);
-                }
-
-                updateReader.Dob = DateTime.SpecifyKind(request.Dob.Value, DateTimeKind.Utc);
             }
 
-            // Cập nhật từng trường nếu được truyền lên
-            if (request.IdTypeReader.HasValue && request.IdTypeReader.Value != Guid.Empty)
-                updateReader.IdTypeReader = request.IdTypeReader.Value;
-
-            if (!string.IsNullOrEmpty(request.NameReader))
-                updateReader.NameReader = request.NameReader;
-
+            // Kiểm tra giá trị Sex có hợp lệ hay không
             if (!string.IsNullOrEmpty(request.Sex))
-                updateReader.Sex = request.Sex;
-
-            if (!string.IsNullOrEmpty(request.Address))
-                updateReader.Address = request.Address;
-
-            if (!string.IsNullOrEmpty(request.Email))
             {
-                updateReader.Email = request.Email;
-                updateReader.ReaderUsername = request.Email;
+                // Giả sử chỉ cho phép "Male" hoặc "Female" (có thể check trong db hoặc hardcode tuỳ logic)
+                var allowed = new[] { "Male", "Female" };
+                if (!allowed.Contains(request.Sex))
+                    return ApiResponse<ReaderResponse>.FailResponse("Giới tính không hợp lệ", 400);
             }
 
-            if (!string.IsNullOrEmpty(request.Phone))
-                updateReader.Phone = request.Phone;
-
+            // Xử lý hash password nếu có
+            string? hashedPassword = null;
             if (!string.IsNullOrEmpty(request.ReaderPassword))
-                updateReader.ReaderPassword = BCrypt.Net.BCrypt.HashPassword(request.ReaderPassword);
+                hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.ReaderPassword);
 
-            // Cập nhật ảnh nếu có
+            // Dùng ExecuteUpdateAsync để update trực tiếp
+         
+
+            await _context.Readers
+                .AsNoTracking()
+                .Where(x=>x.IdReader == idReader)
+                .ExecuteUpdateAsync(setters => setters
+                .SetProperty(r => r.NameReader, r => !string.IsNullOrEmpty(request.NameReader) ? request.NameReader : r.NameReader)
+                .SetProperty(r => r.Dob, r => request.Dob.HasValue ? DateTime.SpecifyKind(request.Dob.Value, DateTimeKind.Utc) : r.Dob)
+                .SetProperty(r => r.IdTypeReader, r => request.IdTypeReader.HasValue && request.IdTypeReader.Value != Guid.Empty ? request.IdTypeReader.Value : r.IdTypeReader)
+                .SetProperty(r => r.Sex, r => !string.IsNullOrEmpty(request.Sex) ? request.Sex : r.Sex)
+                .SetProperty(r => r.Address, r => !string.IsNullOrEmpty(request.Address) ? request.Address : r.Address)
+                .SetProperty(r => r.Email, r => !string.IsNullOrEmpty(request.Email) ? request.Email : r.Email)
+                .SetProperty(r => r.ReaderUsername, r => !string.IsNullOrEmpty(request.Email) ? request.Email : r.ReaderUsername)
+                .SetProperty(r => r.Phone, r => !string.IsNullOrEmpty(request.Phone) ? request.Phone : r.Phone)
+                .SetProperty(r => r.ReaderPassword, r => !string.IsNullOrEmpty(request.ReaderPassword) ? hashedPassword : r.ReaderPassword)
+            );
+
+            // Xử lý avatar (không dùng executeUpdateAsync được, vẫn phải query entity)
             if (request.AvatarImage != null)
             {
                 string imageUrl = await _upLoadImageFileService.UploadImageAsync(request.AvatarImage);
                 if (!string.IsNullOrEmpty(imageUrl))
                 {
-                    var existingAvatar = await _context.Images.FirstOrDefaultAsync(av => av.IdReader == updateReader.IdReader);
-                    if (existingAvatar != null)
-                    {
-                        existingAvatar.Url = imageUrl;
-                        _context.Images.Update(existingAvatar);
-                    }
-                    else
-                    {
-                        var image = new Image
-                        {
-                            IdReader = updateReader.IdReader,
-                            Url = imageUrl,
-                        };
-                        _context.Images.Add(image);
-                    }
+                    await _context.Images.AsNoTracking()
+                            .Where(x => x.IdReader == idReader)
+                            .ExecuteUpdateAsync(setter =>
+                            setter.SetProperty(a => a.Url, imageUrl));
                 }
             }
-
-            await _context.SaveChangesAsync();
-
-            var typeReader = await _context.TypeReaders
-                .Where(tr => tr.IdTypeReader == updateReader.IdTypeReader)
-                .Select(tr => new TypeReaderResponse
-                {
-                    idTypeReader = tr.IdTypeReader,
-                    NameTypeReader = tr.NameTypeReader
-                })
-                .FirstOrDefaultAsync();
-
-            var imageEntity = await _context.Images.FirstOrDefaultAsync(i => i.IdReader == updateReader.IdReader);
-
-            var readerResponse = new ReaderResponse
-            {
-                IdReader = updateReader.IdReader,
-                IdTypeReader = typeReader,
-                NameReader = updateReader.NameReader,
-                Sex = updateReader.Sex,
-                Address = updateReader.Address,
-                Email = updateReader.Email,
-                Dob = updateReader.Dob,
-                Phone = updateReader.Phone,
-                CreateDate = updateReader.CreateDate,
-                ReaderAccount = updateReader.ReaderUsername,
-                TotalDebt = updateReader.TotalDebt,
-                UrlAvatar = imageEntity?.Url
-            };
+            var readerResponse = await _context.Readers.AsNoTracking()
+                   .Where(x => x.IdReader == idReader)
+                   .Select(x => new ReaderResponse
+                   {
+                       IdReader = x.IdReader,
+                       IdTypeReader = new TypeReaderResponse { idTypeReader = x.IdTypeReader, NameTypeReader = x.TypeReader.NameTypeReader },
+                       NameReader = x.NameReader,
+                       Sex = x.Sex,
+                       Address = x.Address,
+                       Email = x.Email,
+                       Dob = x.Dob,
+                       Phone = x.Phone,
+                       CreateDate = x.CreateDate,
+                       ReaderAccount = x.ReaderUsername,
+                       TotalDebt = x.TotalDebt,
+                       UrlAvatar = x.Images.Select(x=>x.Url).FirstOrDefault()
+                   }).FirstOrDefaultAsync();
+           
 
             return ApiResponse<ReaderResponse>.SuccessResponse("Thay đổi thông tin độc giả thành công", 200, readerResponse);
         }
+
 
         // Hàm xóa độc giả
         public async Task<ApiResponse<string>> deleteReaderAsync(string idReader)

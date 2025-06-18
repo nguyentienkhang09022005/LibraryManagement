@@ -84,6 +84,21 @@ namespace LibraryManagement.Repository
             return ApiResponse<string>.SuccessResponse("Xóa phiếu thu thành công", 200, null);
         }
 
+        public async Task<List<TicketResponse>> GetTicketResponsesAsync(string idUser)
+        {
+            var result = await _context.PenaltyTickets.AsNoTracking()
+                .Where(x => x.IdReader == idUser)
+                .Select(x => new TicketResponse
+                {
+                    CreatedDate = x.CreatedDate,
+                    AmountCollected = x.AmountCollected,
+                    AmountRemaining = x.AmountRemaining,
+                    TotalDebit = x.Reader.TotalDebt,
+                })
+                .ToListAsync();
+            return result;
+        }
+
         // Sửa phiếu thu tiền phạt
         public async Task<ApiResponse<PenaltyTicketResponse>> updatePenaltyTicketAsync(PenaltyTicketRequest request, Guid idPenaltyTicket)
         {

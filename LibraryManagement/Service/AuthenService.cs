@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection.Metadata;
 using System.Security.Claims;
 using System.Text;
 
@@ -24,6 +25,8 @@ namespace LibraryManagement.Repository
         private readonly IFluentEmail _fluentEmail;
         private readonly IConfiguration _configuration;
         private readonly IMemoryCache _tempOtp;
+
+        private const string DefaultAvatar = "https://res.cloudinary.com/df41zs8il/image/upload/v1750223521/default-avatar-icon-of-social-media-user-vector_a3a2de.jpg";
 
         private static readonly Guid DefaultTypeReaderId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6");
 
@@ -232,14 +235,15 @@ namespace LibraryManagement.Repository
                     _context.Roles.Add(newRole);
                     await _context.SaveChangesAsync();
                 }
-
+                
                 reader = new Reader
                 {
                     IdReader = await generateNextIdReaderAsync(),
                     NameReader = fullname,
-                    Dob = dateOfBirth ?? DateTime.MinValue,
+                    Dob = dateOfBirth ?? new DateTime(1970,1,1).ToUniversalTime(),
                     ReaderUsername = email,
                     ReaderPassword = string.Empty,
+                    Address = string.Empty,
                     IdTypeReader = DefaultTypeReaderId,
                     RoleName = newRole.RoleName,
                     CreateDate = DateTime.UtcNow,
@@ -248,7 +252,7 @@ namespace LibraryManagement.Repository
                 };
 
                  await _context.Readers.AddAsync(reader);
-
+                if (string.IsNullOrEmpty(avatar)) avatar = DefaultAvatar;
                 // Lưu Avatar nếu bạn muốn
                 if (!string.IsNullOrEmpty(avatar))
                 {
@@ -266,8 +270,6 @@ namespace LibraryManagement.Repository
             {
                 reader.NameReader = fullname;
                 if (dateOfBirth != null) reader.Dob = dateOfBirth.Value;
-
-                // Cập nhật avatar nếu bạn muốn, ví dụ:
                 var existAvatar = await _context.Images.FirstOrDefaultAsync(x => x.IdReader == reader.IdReader);
                 if (existAvatar == null && !string.IsNullOrEmpty(avatar))
                 {

@@ -527,6 +527,7 @@ namespace LibraryManagement.Repository
                 .Select(a => new GetHeaderbookResponse
                 {
                     IdHeaderbook = a.IdHeaderBook,
+                    IdTypeBook = a.TypeBook.IdTypeBook,
                     NameBook = a.NameHeaderBook,
                     Describe = a.DescribeBook
                 }).ToListAsync();
