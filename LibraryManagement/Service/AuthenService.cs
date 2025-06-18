@@ -195,6 +195,19 @@ namespace LibraryManagement.Repository
         // Hàm refresh Token
         public async Task<RefreshTokenResponse> refreshTokenAsync(string Token)
         {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(Token);
+
+            // Trích xuất jti từ token
+            var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+
+            // Kiểm tra token đã bị thu hồi chưa
+            var isRevoked = await _context.InvalidatedTokens.AnyAsync(t => t.IdToken == jti);
+            if (isRevoked)
+            {
+                throw new Exception("Refresh token has been revoked");
+            }
+
             var user = await AuthenticationAsync(Token);
            
             if (user == null)
@@ -293,6 +306,38 @@ namespace LibraryManagement.Repository
                 refreshToken = refreshToken,
                 iduser = reader.IdReader.ToString()
             };
+        }
+
+        // Hàm logout
+        public async Task LogoutAsync(LogoutRequest request)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(request.refreshToken);
+
+                // Lấy jti từ token
+                var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == "jti")?.Value;
+                var expiry = jwtToken.ValidTo;
+
+                if (string.IsNullOrEmpty(jti))
+                {
+                    throw new Exception("Token không chứa jti");
+                }
+
+                var invalidatedToken = new InvalidateToken
+                {
+                    IdToken = jti,
+                    ExpiryTime = expiry
+                };
+
+                _context.InvalidatedTokens.Add(invalidatedToken);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Logout failed: cannot parse refresh token", ex);
+            }
         }
     }
 }
