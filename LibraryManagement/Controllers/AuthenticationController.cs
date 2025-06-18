@@ -25,9 +25,9 @@ namespace LibraryManagement.Controllers
         [HttpPost("SignUpSendOtp")]
         public async Task<IActionResult> SendOtpSignUp(SignUpModel request)
         {
-            var result =  await _authenService.SendEmailConfirmation(request);
+            var result = await _authenService.SendEmailConfirmation(request);
             if (result == false) return BadRequest("Người dùng này đã tồn tại");
-            return Ok(); 
+            return Ok();
         }
 
 
@@ -39,19 +39,19 @@ namespace LibraryManagement.Controllers
             return Ok("Đăng kí thành công");
         }
         // Endpoint đăng nhập
-        [HttpPost("SignIn")]   
+        [HttpPost("SignIn")]
         public async Task<AuthenticationResponse> SignIn(AuthenticationRequest request)
         {
             return await _authenService.SignInAsync(request);
         }
         [HttpPost("Authentication")]
-        public async Task<IActionResult> Authentication([FromBody]string token)
+        public async Task<IActionResult> Authentication([FromBody] string token)
         {
             var reader = await _authenService.AuthenticationAsync(token);
             if (reader == null) return NotFound();
 
             return Ok(reader);
-                
+
         }
 
         // Endpoint Refresh Token
@@ -106,5 +106,25 @@ namespace LibraryManagement.Controllers
                     ";
             return Content(html, "text/html");
         }
-    } 
+
+        // Endpoint đăng xuất
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+        {
+            if (string.IsNullOrEmpty(request.refreshToken))
+            {
+                return BadRequest("Refresh token is required");
+            }
+
+            try
+            {
+                await _authenService.LogoutAsync(request);
+                return Ok(new { message = "Logout successful" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+    }
 }
