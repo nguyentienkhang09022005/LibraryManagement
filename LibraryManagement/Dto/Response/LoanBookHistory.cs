@@ -9,5 +9,6 @@
         public DateTime DateBorrow { get; set; }
         public DateTime DateReturn { get; set; }
         public string AvatarUrl{ get; set; }
+        public bool IsReturned { get; set; }
     }
 }

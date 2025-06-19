@@ -214,7 +214,8 @@ namespace LibraryManagement.Repository
                                         BorrowDate = x.BorrowDate,
                                         ReturnDate = x.ReturnDate,
                                         LoanPeriod = x.LoanPeriod,
-                                        FineAmount = x.FineAmount
+                                        FineAmount = x.FineAmount,
+                                        IsReturned = x.IsReturned
                                     }).ToListAsync();
             return result;
             
@@ -272,7 +273,8 @@ namespace LibraryManagement.Repository
                     Genre = x.TheBook.Book.HeaderBook.TypeBook.NameTypeBook,
                     DateBorrow = x.BorrowDate,
                     DateReturn = x.ReturnDate,
-                    AvatarUrl = (x.TheBook.Book.images.FirstOrDefault() == null) ? string.Empty : x.TheBook.Book.images.FirstOrDefault()!.Url
+                    AvatarUrl = (x.TheBook.Book.images.FirstOrDefault() == null) ? string.Empty : x.TheBook.Book.images.FirstOrDefault()!.Url,
+                    IsReturned = x.IsReturned
                 }).ToListAsync();
             return result;
         }
