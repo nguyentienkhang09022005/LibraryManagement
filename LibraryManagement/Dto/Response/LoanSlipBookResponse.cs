@@ -11,5 +11,6 @@
         public DateTime ReturnDate { get; set; }
         public int LoanPeriod {get; set; }
         public decimal FineAmount { get; set; }
+        public bool IsReturned { get; set; }
     }
 }

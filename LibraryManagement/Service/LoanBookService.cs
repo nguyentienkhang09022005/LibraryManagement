@@ -195,7 +195,8 @@ namespace LibraryManagement.Repository
                 BorrowDate = a.BorrowDate,
                 ReturnDate = a.ReturnDate,
                 LoanPeriod = a.LoanPeriod,
-                FineAmount = a.FineAmount
+                FineAmount = a.FineAmount,
+                IsReturned = a.IsReturned
             }).ToListAsync();
             return result; 
         }
