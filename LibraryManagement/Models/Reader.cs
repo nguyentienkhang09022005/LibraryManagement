@@ -43,9 +43,6 @@ namespace LibraryManagement.Models
         [Column("total_debt")]
         public decimal TotalDebt { get; set; }
 
-        [Column("check_login")]
-        public int CheckLogin { get; set; }
-
         [ForeignKey("IdTypeReader")]
         public TypeReader TypeReader { get; set; }
 

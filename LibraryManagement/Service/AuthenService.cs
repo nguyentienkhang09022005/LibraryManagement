@@ -111,7 +111,6 @@ namespace LibraryManagement.Repository
                 IdTypeReader = DefaultTypeReaderId,
                 RoleName = newRole.RoleName,
                 CreateDate = DateTime.UtcNow,
-                CheckLogin = Helper.LoginNormal,
             };
            
             await _context.Readers.AddAsync(reader);
@@ -272,7 +271,6 @@ namespace LibraryManagement.Repository
                     RoleName = newRole.RoleName,
                     CreateDate = DateTime.UtcNow,
                     Email = email,
-                    CheckLogin = Helper.LoginGogle,
                 };
 
                  await _context.Readers.AddAsync(reader);
