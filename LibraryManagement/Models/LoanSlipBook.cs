@@ -27,6 +27,9 @@ namespace LibraryManagement.Models
         [Column("fine_amount")]
         public decimal FineAmount { get; set; }
 
+        [Column("is_returned")]
+        public bool IsReturned { get; set; } = false;
+
         [ForeignKey("IdReader")]
         public Reader Reader { get; set; }
 

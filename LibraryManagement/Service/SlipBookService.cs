@@ -37,6 +37,11 @@ namespace LibraryManagement.Service
                 return ApiResponse<SlipBookResponse>.FailResponse("Không tìm thấy phiếu mượn", 404);
             }
 
+            if (loanbook.IsReturned)
+            {
+                return ApiResponse<SlipBookResponse>.FailResponse("Phiếu mượn này đã được trả trước đó", 400);
+            }
+
             DateTime borrowDate = DateTime.SpecifyKind(loanbook.BorrowDate, DateTimeKind.Utc);
             DateTime scheduledReturnDate = DateTime.SpecifyKind(loanbook.ReturnDate, DateTimeKind.Utc);
             DateTime actualReturnDate = DateTime.UtcNow;
@@ -67,6 +72,7 @@ namespace LibraryManagement.Service
             // Cập nhật bảng LoanSlipBook
             loanbook.LoanPeriod = (actualReturnDate.Date - borrowDate.Date).Days;
             loanbook.FineAmount = fineAmount;
+            loanbook.IsReturned = true;
             _context.LoanSlipBooks.Attach(loanbook);
             _context.Entry(loanbook).Property(l => l.LoanPeriod).IsModified = true;
             _context.Entry(loanbook).Property(l => l.FineAmount).IsModified = true;
