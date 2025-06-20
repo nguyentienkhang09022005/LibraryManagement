@@ -185,8 +185,7 @@ namespace LibraryManagement.Repository
             // Kiểm tra giá trị Sex có hợp lệ hay không
             if (!string.IsNullOrEmpty(request.Sex))
             {
-                // Giả sử chỉ cho phép "Male" hoặc "Female" (có thể check trong db hoặc hardcode tuỳ logic)
-                var allowed = new[] { "Male", "Female" };
+                var allowed = new[] { "Nam", "Nữ" };
                 if (!allowed.Contains(request.Sex))
                     return ApiResponse<ReaderResponse>.FailResponse("Giới tính không hợp lệ", 400);
             }
@@ -214,7 +213,6 @@ namespace LibraryManagement.Repository
                 .SetProperty(r => r.ReaderPassword, r => !string.IsNullOrEmpty(request.ReaderPassword) ? hashedPassword : r.ReaderPassword)
             );
 
-            // Xử lý avatar (không dùng executeUpdateAsync được, vẫn phải query entity)
             if (request.AvatarImage != null)
             {
                 string imageUrl = await _upLoadImageFileService.UploadImageAsync(request.AvatarImage);
@@ -243,8 +241,6 @@ namespace LibraryManagement.Repository
                        TotalDebt = x.TotalDebt,
                        UrlAvatar = x.Images.Select(x=>x.Url).FirstOrDefault()
                    }).FirstOrDefaultAsync();
-           
-
             return ApiResponse<ReaderResponse>.SuccessResponse("Thay đổi thông tin độc giả thành công", 200, readerResponse);
         }
 
