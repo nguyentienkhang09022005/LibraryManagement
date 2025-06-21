@@ -23,7 +23,9 @@ namespace LibraryManagement.Service
             var createdDateUtc = DateTime.SpecifyKind(request.CreatedDate.Date, DateTimeKind.Utc);
 
             var overdueReport = await _context.OverdueReports
+                .Include(or => or.OverdueReportDetails)
                 .FirstOrDefaultAsync(or => or.CreatedDate == createdDateUtc);
+
             if (overdueReport == null)
             {
                 overdueReport = new OverdueReport()
@@ -55,7 +57,7 @@ namespace LibraryManagement.Service
                 .Where(ob => (ob.ReturnDate - ob.BorrowDate).TotalDays > ob.LoanPeriod)
                 .ToList();
 
-            var bookIds = overdueBooksFiltered.Select(b => b.IdTheBook).ToList();
+            var bookIds = overdueBooks.Select(b => b.IdTheBook).Distinct().ToList();
 
             var bookInfoMap = await _context.TheBooks
                 .Include(tb => tb.Book)
