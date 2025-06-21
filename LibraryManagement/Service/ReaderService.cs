@@ -9,6 +9,7 @@ using LibraryManagement.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Frozen;
+using System.Text.RegularExpressions;
 
 namespace LibraryManagement.Repository
 {
@@ -180,6 +181,13 @@ namespace LibraryManagement.Repository
                 int maxAge = await _parameterService.getValueAsync("MaxReaderAge");
                 if (readerAge < minAge || readerAge > maxAge)
                     return ApiResponse<ReaderResponse>.FailResponse($"Tuổi độc giả phải từ {minAge} đến {maxAge} tuổi", 400);
+            }
+
+            // Validate số điện thoại
+            if (!string.IsNullOrEmpty(request.Phone))
+            {
+                if (!Regex.IsMatch(request.Phone, @"^\d{10,12}$"))
+                    return ApiResponse<ReaderResponse>.FailResponse("Số điện thoại phải gồm từ 10 đến 12 chữ số", 400);
             }
 
             // Kiểm tra giá trị Sex có hợp lệ hay không

@@ -1,7 +1,4 @@
-﻿using LibraryManagement.Models;
-using Microsoft.AspNetCore.Identity;
-
-namespace LibraryManagement.Dto.Request
+﻿namespace LibraryManagement.Dto.Request
 {
     public class ReaderCreationRequest
     {
