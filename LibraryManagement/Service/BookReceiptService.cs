@@ -117,54 +117,53 @@ namespace LibraryManagement.Repository
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
 
-
-            // Lưu dữ liệu xuống phiếu nhập sách
+            // Lưu phiếu nhập sách
             var bookReceipt = new BookReceipt
             {
                 IdReader = request.IdReader,
             };
-
             _context.BookReceipts.Add(bookReceipt);
 
-            var detailResponses = new List<DetailBookReceiptResponse>(); // Danh sách chi tiết trả về
+            // Lưu chi tiết phiếu nhập
+            var detail = request.detailsRequest;
 
-            foreach (var detail in request.listDetailsRequest)
+            var detailEntry = new DetailBookReceipt
             {
-                // Lưu dữ liệu xuống chi tiết phiếu nhập sách
-                var detailEntry = new DetailBookReceipt
-                {
-                    IdBookReceipt = bookReceipt.IdBookReceipt,
-                    IdBook = book.IdBook,
-                    Quantity = detail.Quantity,
-                    UnitPrice = request.headerBook.bookCreateRequest.ValueOfBook
-                };
-                _context.DetailBookReceipts.Add(detailEntry);
+                IdBookReceipt = bookReceipt.IdBookReceipt,
+                IdBook = book.IdBook,
+                Quantity = detail.Quantity,
+                UnitPrice = request.headerBook.bookCreateRequest.ValueOfBook
+            };
+            _context.DetailBookReceipts.Add(detailEntry);
 
-                var firstId = await generateNextIdTheBookAsync();
-                var nextID = int.Parse(firstId.Substring(2));
-                for (int i = 0; i < detail.Quantity; i++) // Tạo THEBOOK thông qua số lượng từ BOOK
+            // Tạo TheBook dựa trên số lượng
+            var firstId = await generateNextIdTheBookAsync();
+            var nextID = int.Parse(firstId.Substring(2));
+            for (int i = 0; i < detail.Quantity; i++)
+            {
+                var theBook = new TheBook
                 {
-                    var theBook = new TheBook
-                    {
-                        IdTheBook = $"tb{(nextID + i):D5}",
-                        IdBook = book.IdBook,
-                        Status = "Có sẵn" 
-                    };
-                    _context.TheBooks.Add(theBook);
-                }
-                detailResponses.Add(new DetailBookReceiptResponse // Lưu vào response để trả về danh sách
-                {
-                    Quantity = detail.Quantity,
-                    UnitPrice = request.headerBook.bookCreateRequest.ValueOfBook
-                });
+                    IdTheBook = $"tb{(nextID + i):D5}",
+                    IdBook = book.IdBook,
+                    Status = "Có sẵn"
+                };
+                _context.TheBooks.Add(theBook);
             }
+
             await _context.SaveChangesAsync();
 
             var response = new BooKReceiptResponse
             {
                 IdBookReceipt = bookReceipt.IdBookReceipt,
                 ReceivedDate = bookReceipt.ReceivedDate,
-                listDetailsResponse = detailResponses
+                listDetailsResponse = new List<DetailBookReceiptResponse>
+                {
+                    new DetailBookReceiptResponse
+                    {
+                        Quantity = detail.Quantity,
+                        UnitPrice = request.headerBook.bookCreateRequest.ValueOfBook
+                    }
+                }
             };
             return ApiResponse<BooKReceiptResponse>.SuccessResponse("Tạo phiếu nhập sách thành công", 201, response);
         }

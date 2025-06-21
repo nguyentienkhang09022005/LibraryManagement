@@ -4,7 +4,7 @@
     {
         public HeaderBookCreationRequest headerBook { get; set; }
         public string IdReader { get; set; }
-        public List<DetailBookReceiptRequest> listDetailsRequest { get; set; }
+        public DetailBookReceiptRequest detailsRequest { get; set; }
     }
 
     public class DetailBookReceiptRequest
