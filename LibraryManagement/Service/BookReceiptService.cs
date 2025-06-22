@@ -73,6 +73,19 @@ namespace LibraryManagement.Repository
             }    
 
             var headerBook = await _context.HeaderBooks.FirstOrDefaultAsync(hb => hb.NameHeaderBook == request.headerBook.NameHeaderBook);
+            // Nếu đã tồn tại đầu sách, kiểm tra xem đã có Book cùng năm tái bản chưa
+            if (headerBook != null)
+            {
+                var existedBook = await _context.Books
+                    .AnyAsync(b => b.IdHeaderBook == headerBook.IdHeaderBook &&
+                                   b.ReprintYear == request.headerBook.bookCreateRequest.ReprintYear);
+
+                if (existedBook)
+                {
+                    return ApiResponse<BooKReceiptResponse>.FailResponse("Cuốn sách đã tồn tại với cùng tên và năm tái bản", 400);
+                }
+            }
+
             // Tạo HeaderBook
             if (headerBook == null)
             {
