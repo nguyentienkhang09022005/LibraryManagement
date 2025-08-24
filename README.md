@@ -61,9 +61,9 @@ Trò chuyện trực tiếp với thủ thư.
 
 🏗️ Kiến trúc hệ thống
 
-Ứng dụng phát triển theo mô hình Client – Server với kiến trúc MVC + RESTful API.
+Ứng dụng phát triển theo mô hình Client – Server với kiến trúc WebApi (RESTful API).
 
-Frontend: Giao diện người dùng (Web/Mobile).
+Frontend: Giao diện người dùng (Web).
 
 Backend: Xử lý logic nghiệp vụ, quản lý dữ liệu, xác thực JWT.
 
