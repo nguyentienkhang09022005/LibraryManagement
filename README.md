@@ -99,11 +99,11 @@ Mục tiêu chính:
 
 🎯 Kết luận
 
-- Dự án Quản lý Thư viện đã đáp ứng được các yêu cầu cơ bản của một hệ thống quản lý thư viện hiện đại: trực quan, dễ sử dụng, bảo mật, và dễ dàng mở rộng.
-- Trong tương lai, hệ thống có thể phát triển thêm:
+Dự án Quản lý Thư viện đã đáp ứng được các yêu cầu cơ bản của một hệ thống quản lý thư viện hiện đại: trực quan, dễ sử dụng, bảo mật, và dễ dàng mở rộng.
+Trong tương lai, hệ thống có thể phát triển thêm:
 
-Ứng dụng mobile native.
+- Ứng dụng mobile native.
 
-Tích hợp AI gợi ý sách cho độc giả.
+- Tích hợp AI gợi ý sách cho độc giả.
 
-Kết nối liên thông nhiều thư viện khác nhau.
+- Kết nối liên thông nhiều thư viện khác nhau.
