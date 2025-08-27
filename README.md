@@ -14,72 +14,72 @@ Phần mềm giúp giảm thiểu công việc thủ công, tối ưu quy trình
 
 Mục tiêu chính:
 
-Giảm tải công việc thủ công cho thủ thư.
+- Giảm tải công việc thủ công cho thủ thư.
 
-Hỗ trợ người dùng mượn – trả – tra cứu sách nhanh chóng.
+- Hỗ trợ người dùng mượn – trả – tra cứu sách nhanh chóng.
 
-Đảm bảo tính bảo mật – tiện dụng – hiệu quả – tiến hóa.
+- Đảm bảo tính bảo mật – tiện dụng – hiệu quả – tiến hóa.
 
-Cung cấp báo cáo và thống kê chi tiết.
+- Cung cấp báo cáo và thống kê chi tiết.
 
 ---
 
 ✨ Tính năng nổi bật
 👩‍💼 Đối với Admin
 
-Quản lý người dùng, phân quyền theo vai trò.
+- Quản lý người dùng, phân quyền theo vai trò.
 
-Quản lý quyền truy cập và chỉnh sửa chính sách, quy định.
+- Quản lý quyền truy cập và chỉnh sửa chính sách, quy định.
 
 📖 Đối với Thủ thư / Quản lý
 
-Quản lý sách, tác giả, độc giả.
+- Quản lý sách, tác giả, độc giả.
 
-Tiếp nhận sách mới.
+- Tiếp nhận sách mới.
 
-Xử lý mượn – trả – phạt.
+- Xử lý mượn – trả – phạt.
 
-Lập các loại báo cáo (mượn theo thể loại, trả trễ).
+- Lập các loại báo cáo (mượn theo thể loại, trả trễ).
 
-Thống kê trực quan bằng biểu đồ.
+- Thống kê trực quan bằng biểu đồ.
 
-Trò chuyện với độc giả.
+- Trò chuyện với độc giả.
 
 👨‍🎓 Đối với Độc giả
 
-Đăng ký/đăng nhập/đổi mật khẩu bằng OTP & Google OAuth.
+- Đăng ký/đăng nhập/đổi mật khẩu bằng OTP & Google OAuth.
 
-Tra cứu sách nhanh chóng.
+- Tra cứu sách nhanh chóng.
 
-Quản lý danh sách mượn, trả, phạt, sách yêu thích.
+- Quản lý danh sách mượn, trả, phạt, sách yêu thích.
 
-Đánh giá và bình luận sách.
+- Đánh giá và bình luận sách.
 
-Trò chuyện trực tiếp với thủ thư.
+- Trò chuyện trực tiếp với thủ thư.
 
 ---
 
 🏗️ Kiến trúc hệ thống
 
-Ứng dụng phát triển theo mô hình Client – Server với kiến trúc WebApi (RESTful API).
+- Ứng dụng phát triển theo mô hình Client – Server với kiến trúc WebApi (RESTful API).
 
-Frontend: Giao diện người dùng (Web).
+- Frontend: Giao diện người dùng (Web).
 
-Backend: Xử lý logic nghiệp vụ, quản lý dữ liệu, xác thực JWT.
+- Backend: Xử lý logic nghiệp vụ, quản lý dữ liệu, xác thực JWT.
 
-Database: Thiết kế chuẩn hóa với nhiều bảng (Readers, Books, Authors, LoanSlip, Penalty, Reports, Roles, Permissions, OTP, …).
+- Database: Thiết kế chuẩn hóa với nhiều bảng (Readers, Books, Authors, LoanSlip, Penalty, Reports, Roles, Permissions, OTP, …).
 
 ---
 
 🛠️ Công nghệ sử dụng
 
-Ngôn ngữ: C#, .NET, Java (Backend), ReactJS (Frontend)
+- Ngôn ngữ: C#, .NET, ReactJS (Frontend)
 
-Cơ sở dữ liệu: PostgreSQL
+- Cơ sở dữ liệu: PostgreSQL
 
-Bảo mật: JWT Authentication, OAuth2 Google Login
+- Bảo mật: JWT Authentication, OAuth2 Google Login
 
-Triển khai: RESTful API, mô hình phân quyền Role-Permission
+- Triển khai: RESTful API, mô hình phân quyền Role-Permission
 
 ---
 
@@ -99,8 +99,8 @@ Triển khai: RESTful API, mô hình phân quyền Role-Permission
 
 🎯 Kết luận
 
-Dự án Quản lý Thư viện đã đáp ứng được các yêu cầu cơ bản của một hệ thống quản lý thư viện hiện đại: trực quan, dễ sử dụng, bảo mật, và dễ dàng mở rộng.
-Trong tương lai, hệ thống có thể phát triển thêm:
+- Dự án Quản lý Thư viện đã đáp ứng được các yêu cầu cơ bản của một hệ thống quản lý thư viện hiện đại: trực quan, dễ sử dụng, bảo mật, và dễ dàng mở rộng.
+- Trong tương lai, hệ thống có thể phát triển thêm:
 
 Ứng dụng mobile native.
 
