@@ -7,16 +7,16 @@
       "RelativeMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|solutionrelative:librarymanagement\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|d:\\projectasp.net\\library\\librarymanagement\\librarymanagement\\.env||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|solutionrelative:librarymanagement\\.env||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|d:\\projectasp.net\\library\\librarymanagement\\librarymanagement\\.dockerignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|solutionrelative:librarymanagement\\.dockerignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|d:\\projectasp.net\\library\\librarymanagement\\librarymanagement\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|solutionrelative:librarymanagement\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|d:\\projectasp.net\\library\\librarymanagement\\librarymanagement\\.env||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|solutionrelative:librarymanagement\\.env||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|d:\\projectasp.net\\library\\librarymanagement\\librarymanagement\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
@@ -52,20 +52,20 @@
               "RelativeDocumentMoniker": "LibraryManagement\\Dockerfile",
               "ToolTip": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\Dockerfile",
               "RelativeToolTip": "LibraryManagement\\Dockerfile",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2025-10-16T14:36:13.308Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": ".env",
               "DocumentMoniker": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\.env",
               "RelativeDocumentMoniker": "LibraryManagement\\.env",
               "ToolTip": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\.env",
               "RelativeToolTip": "LibraryManagement\\.env",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2025-10-16T14:31:23.977Z",
               "EditorCaption": ""
@@ -80,12 +80,11 @@
               "RelativeToolTip": "LibraryManagement\\appsettings.json",
               "ViewState": "AgIAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-10-16T14:30:33.155Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-16T14:30:33.155Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": ".gitignore",
               "DocumentMoniker": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\.gitignore",
               "RelativeDocumentMoniker": "LibraryManagement\\.gitignore",
@@ -93,12 +92,11 @@
               "RelativeToolTip": "LibraryManagement\\.gitignore",
               "ViewState": "AgIAAEEAAAAAAAAAAAAswFMAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-10-16T14:30:19.59Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-16T14:30:19.59Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": ".dockerignore",
               "DocumentMoniker": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\.dockerignore",
               "RelativeDocumentMoniker": "LibraryManagement\\.dockerignore",
@@ -106,8 +104,7 @@
               "RelativeToolTip": "LibraryManagement\\.dockerignore",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-10-16T14:30:17.466Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-16T14:30:17.466Z"
             }
           ]
         },
