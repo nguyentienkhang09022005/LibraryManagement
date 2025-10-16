@@ -1,0 +1,131 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|d:\\projectasp.net\\library\\librarymanagement\\librarymanagement\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|solutionrelative:librarymanagement\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|d:\\projectasp.net\\library\\librarymanagement\\librarymanagement\\.env||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|solutionrelative:librarymanagement\\.env||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|d:\\projectasp.net\\library\\librarymanagement\\librarymanagement\\.dockerignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|solutionrelative:librarymanagement\\.dockerignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|d:\\projectasp.net\\library\\librarymanagement\\librarymanagement\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|solutionrelative:librarymanagement\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|d:\\projectasp.net\\library\\librarymanagement\\librarymanagement\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A62817EF-88E4-4D56-9107-B0721768E475}|LibraryManagement\\LibraryManagement.csproj|solutionrelative:librarymanagement\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 220,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{74946827-37a0-11d2-a273-00c04f8ef4ff}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Dockerfile",
+              "DocumentMoniker": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\Dockerfile",
+              "RelativeDocumentMoniker": "LibraryManagement\\Dockerfile",
+              "ToolTip": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\Dockerfile",
+              "RelativeToolTip": "LibraryManagement\\Dockerfile",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-10-16T14:36:13.308Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": ".env",
+              "DocumentMoniker": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\.env",
+              "RelativeDocumentMoniker": "LibraryManagement\\.env",
+              "ToolTip": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\.env",
+              "RelativeToolTip": "LibraryManagement\\.env",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-10-16T14:31:23.977Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\appsettings.json",
+              "RelativeDocumentMoniker": "LibraryManagement\\appsettings.json",
+              "ToolTip": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\appsettings.json",
+              "RelativeToolTip": "LibraryManagement\\appsettings.json",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-16T14:30:33.155Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": ".gitignore",
+              "DocumentMoniker": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\.gitignore",
+              "RelativeDocumentMoniker": "LibraryManagement\\.gitignore",
+              "ToolTip": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\.gitignore*",
+              "RelativeToolTip": "LibraryManagement\\.gitignore*",
+              "ViewState": "AgIAAEEAAAAAAAAAAAAswFMAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-10-16T14:30:19.59Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": ".dockerignore",
+              "DocumentMoniker": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\.dockerignore",
+              "RelativeDocumentMoniker": "LibraryManagement\\.dockerignore",
+              "ToolTip": "D:\\ProjectASP.NET\\Library\\LibraryManagement\\LibraryManagement\\.dockerignore",
+              "RelativeToolTip": "LibraryManagement\\.dockerignore",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-10-16T14:30:17.466Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
