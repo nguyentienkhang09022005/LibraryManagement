@@ -1,11 +1,9 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Dto.Response;
-using LibraryManagement.Models;
 using LibraryManagement.Repository.IRepository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using System.Security.Claims;
 
 namespace LibraryManagement.Controllers
@@ -21,30 +19,36 @@ namespace LibraryManagement.Controllers
             _authenService = authenService;
         }
 
-        // Endpoint đăng ký
-        [HttpPost("SignUpSendOtp")]
-        public async Task<IActionResult> SendOtpSignUp(SignUpModel request)
+        [HttpPost("register-send-otp")]
+        public async Task<IActionResult> SendOtpSignUp(RegisterRequest request)
         {
             var result = await _authenService.SendEmailConfirmation(request);
-            if (result == false) return BadRequest("Người dùng này đã tồn tại");
-            return Ok();
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
 
-        [HttpPost("SignUpWithReceivedOtp")]
-        public async Task<IActionResult> ConfirmOtpSignUp(ConfirmOtp confirmOtp)
+        [HttpPost("register-confirm-otp")]
+        public async Task<IActionResult> ConfirmOtpSignUp(ConfirmOtpRequest confirmOtpRequest)
         {
-            var result = await _authenService.SignUpWithOtpAsync(confirmOtp);
-            if (result == false) return BadRequest();
-            return Ok("Đăng kí thành công");
+            var result = await _authenService.RegisterAsync(confirmOtpRequest);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
-        // Endpoint đăng nhập
-        [HttpPost("SignIn")]
+
+        [HttpPost("login")]
         public async Task<AuthenticationResponse> SignIn(AuthenticationRequest request)
         {
-            return await _authenService.SignInAsync(request);
+            return await _authenService.LoginAsync(request);
         }
-        [HttpPost("Authentication")]
+
+        [HttpPost("authentication")]
         public async Task<IActionResult> Authentication([FromBody] string token)
         {
             var reader = await _authenService.AuthenticationAsync(token);
@@ -54,12 +58,12 @@ namespace LibraryManagement.Controllers
 
         }
 
-        // Endpoint Refresh Token
-        [HttpPost("RefreshToken")]
+        [HttpPost("refresh-token")]
         public async Task<RefreshTokenResponse> RefreshToken([FromBody] string token)
         {
             return await _authenService.refreshTokenAsync(token);
         }
+
         [HttpGet("login-google")]
         public IActionResult inGoogle(string returnUrl = "/api/Authentication/profile")
         {

@@ -33,11 +33,9 @@ DotNetEnv.Env.Load();
 builder.Configuration["ConnectionStrings:PostgreSQLConnection"] = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__PostgreSQLConnection");
 builder.Configuration["JWT:SecretKey"] = Environment.GetEnvironmentVariable("JWT__SecretKey");
 
-builder.Configuration["EmailSettings:SmtpServer"] = Environment.GetEnvironmentVariable("EMAILSETTINGS__SMTPSERVER");
-builder.Configuration["EmailSettings:SmtpPort"] = Environment.GetEnvironmentVariable("EMAILSETTINGS__SMTPPORT");
-builder.Configuration["EmailSettings:SenderEmail"] = Environment.GetEnvironmentVariable("EMAILSETTINGS__SENDEREMAIL");
-builder.Configuration["EmailSettings:SenderPassword"] = Environment.GetEnvironmentVariable("EMAILSETTINGS__SENDERPASSWORD");
-builder.Configuration["EmailSettings:EnableSSL"] = Environment.GetEnvironmentVariable("EMAILSETTINGS__ENABLESSL");
+builder.Configuration["SendGrid:ApiKey"] = Environment.GetEnvironmentVariable("SENDER_APIKEY");
+builder.Configuration["SendGrid:Email"] = Environment.GetEnvironmentVariable("SENDER_EMAIL");
+builder.Configuration["SendGrid:Name"] = Environment.GetEnvironmentVariable("SENDER_NAME");
 
 builder.Configuration["CloudinarySettings:CloudName"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__CLOUDNAME");
 builder.Configuration["CloudinarySettings:ApiKey"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APIKEY");
@@ -182,10 +180,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-var emailConfig = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
-
 // Life cycle DI
 builder.Services.AddScoped<IReaderService, ReaderService>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
@@ -212,6 +206,12 @@ builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
+// SendGrid and FluentEmail Registration
+builder.Services
+    .AddFluentEmail(builder.Configuration["SendGrid:Email"], builder.Configuration["SendGrid:Name"])
+    .AddRazorRenderer()
+    .AddSendGridSender(builder.Configuration["SendGrid:ApiKey"]);
+
 // Cấu hình up ảnh lên Cloudinary
 var account = new Account(
     Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__CLOUDNAME"),
@@ -221,15 +221,6 @@ var account = new Account(
 builder.Services.AddSingleton(new Cloudinary(account));
 builder.Services.AddScoped<IUpLoadImageFileService, UpLoadImageFileService>();
 
-
-
-builder.Services.AddFluentEmail("noreply@gmail.com", "no reply")
-                .AddSmtpSender(new System.Net.Mail.SmtpClient(emailConfig!.SmtpServer)
-                {
-                    Port = emailConfig.SmtpPort,
-                    Credentials = new NetworkCredential(emailConfig.SenderEmail, emailConfig.SenderPassword), 
-                    EnableSsl =  emailConfig.EnableSSL
-                });
 builder.Services.AddMemoryCache();
 
 builder.Services.AddSignalR(); 

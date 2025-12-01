@@ -21,7 +21,7 @@ namespace LibraryManagement.Service
         // Hàm tạo otp
         public async Task<bool> SendForgotPasswordOtpAsync(string email)
         {
-            var reader = await _context.Readers.FirstOrDefaultAsync(r => r.ReaderUsername == email);
+            var reader = await _context.Readers.FirstOrDefaultAsync(r => r.Email == email);
             if (reader == null)
                 throw new Exception("User not found");
 
@@ -60,7 +60,7 @@ namespace LibraryManagement.Service
         // Hàm xác thực otp và email
         public async Task<bool> VerifyForgotPasswordOtpAsync(VerifyOtpRequest request)
         {
-            var reader = await _context.Readers.FirstOrDefaultAsync(r => r.ReaderUsername == request.Email);
+            var reader = await _context.Readers.FirstOrDefaultAsync(r => r.Email == request.Email);
             if (reader == null)
                 throw new Exception("User not found");
 
@@ -87,7 +87,7 @@ namespace LibraryManagement.Service
             if (request.NewPassword != request.RepeatPassword)
                 throw new Exception("Mật khẩu không khớp");
 
-            var reader = await _context.Readers.FirstOrDefaultAsync(r => r.ReaderUsername == request.Email);
+            var reader = await _context.Readers.FirstOrDefaultAsync(r => r.Email == request.Email);
             if (reader == null)
                 throw new Exception("User not found");
 

@@ -34,9 +34,6 @@ namespace LibraryManagement.Models
         [Column("create_date")]
         public DateTime CreateDate { get; set; } 
 
-        [Column("reader_username")]
-        public string? ReaderUsername { get; set; }
-
         [Column("reader_password")]
         public string? ReaderPassword { get; set; }
 

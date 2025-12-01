@@ -87,7 +87,6 @@ namespace LibraryManagement.Repository
                 Dob = DateTime.SpecifyKind(request.Dob, DateTimeKind.Utc),
                 Phone = request.Phone,
                 CreateDate = DateTime.UtcNow,
-                ReaderUsername = request.Email,
                 ReaderPassword = BCrypt.Net.BCrypt.HashPassword(request.ReaderPassword),
                 RoleName = AppRoles.Reader
             };
@@ -128,7 +127,6 @@ namespace LibraryManagement.Repository
                 Dob = newReader.Dob,
                 Phone = newReader.Phone,
                 CreateDate = newReader.CreateDate,
-                ReaderAccount = newReader.ReaderUsername,
                 TotalDebt = newReader.TotalDebt,
                 UrlAvatar = imageUrl
             };
@@ -223,7 +221,6 @@ namespace LibraryManagement.Repository
                 .SetProperty(r => r.Sex, r => !string.IsNullOrEmpty(request.Sex) ? request.Sex : r.Sex)
                 .SetProperty(r => r.Address, r => !string.IsNullOrEmpty(request.Address) ? request.Address : r.Address)
                 .SetProperty(r => r.Email, r => !string.IsNullOrEmpty(request.Email) ? request.Email : r.Email)
-                .SetProperty(r => r.ReaderUsername, r => !string.IsNullOrEmpty(request.Email) ? request.Email : r.ReaderUsername)
                 .SetProperty(r => r.Phone, r => !string.IsNullOrEmpty(request.Phone) ? request.Phone : r.Phone)
                 .SetProperty(r => r.ReaderPassword, r => !string.IsNullOrEmpty(request.ReaderPassword) ? hashedPassword : r.ReaderPassword)
             );
@@ -252,7 +249,6 @@ namespace LibraryManagement.Repository
                        Dob = x.Dob,
                        Phone = x.Phone,
                        CreateDate = x.CreateDate,
-                       ReaderAccount = x.ReaderUsername,
                        TotalDebt = x.TotalDebt,
                        UrlAvatar = x.Images.Select(x=>x.Url).FirstOrDefault()
                    }).FirstOrDefaultAsync();
@@ -276,9 +272,8 @@ namespace LibraryManagement.Repository
         public async Task<FindReaderOutputDto> findReaderAsync(string dto)
         {
       
-            var listReader = await _context.Readers.AsNoTracking().Where(x => x.ReaderUsername == dto).Select(a => new FindReaderOutputDto
+            var listReader = await _context.Readers.AsNoTracking().Where(x => x.Email == dto).Select(a => new FindReaderOutputDto
             {
-                username = a.ReaderUsername,
                 phone = a.Phone!, 
                 Email = a.Email!,
                 password = a.ReaderPassword,
@@ -292,7 +287,6 @@ namespace LibraryManagement.Repository
         {
             var listReader = await _context.Readers.AsNoTracking().Where(x => x.IdReader == idReader).Select(a => new FindReaderOutputDto
             {
-                username = a.ReaderUsername,
                 phone = a.Phone!,
                 Email = a.Email!,
                 password = a.ReaderPassword,

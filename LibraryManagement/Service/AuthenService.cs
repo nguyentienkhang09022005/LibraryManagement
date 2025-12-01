@@ -4,6 +4,7 @@ using LibraryManagement.Data;
 using LibraryManagement.Dto.Request;
 using LibraryManagement.Dto.Response;
 using LibraryManagement.Helpers;
+using LibraryManagement.Helpers.Constant;
 using LibraryManagement.Helpers.Interface;
 using LibraryManagement.Models;
 using LibraryManagement.Repository.IRepository;
@@ -22,23 +23,30 @@ namespace LibraryManagement.Repository
         private readonly LibraryManagermentContext _context;
         private readonly ITokenGenerator _tokenGenerator;
         private readonly IMapper _mapper;
-        private readonly IFluentEmail _fluentEmail;
+        private readonly IFluentEmail _email;
         private readonly IConfiguration _configuration;
-        private readonly IMemoryCache _tempOtp;
+        private readonly IMemoryCache _memoryCache;
+        private readonly ILogger<AuthenService> _logger;
+
+
 
         private const string DefaultAvatar = "https://res.cloudinary.com/df41zs8il/image/upload/v1750223521/default-avatar-icon-of-social-media-user-vector_a3a2de.jpg";
 
-        private static readonly Guid DefaultTypeReaderId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6");
-
-        public AuthenService(LibraryManagermentContext context, ITokenGenerator tokenGenerator,
-            IMapper mapper, IFluentEmail email, IMemoryCache memoryCache, IConfiguration configuration)
+        public AuthenService(LibraryManagermentContext context, 
+                             ITokenGenerator tokenGenerator,
+                             IMapper mapper, 
+                             IFluentEmail email, 
+                             IMemoryCache memoryCache, 
+                             IConfiguration configuration,
+                             ILogger<AuthenService> logger)
         {
-            _configuration = configuration; 
-            _tempOtp = memoryCache;
-            _fluentEmail = email; 
+            _configuration = configuration;
+            _memoryCache = memoryCache;
+            _email = email; 
             _context = context;
             _tokenGenerator = tokenGenerator;
             _mapper = mapper;
+            _logger = logger;
         }
 
         // Hàm tạo id Reader
@@ -60,9 +68,9 @@ namespace LibraryManagement.Repository
         }
 
         // Hàm đăng nhập
-        public async Task<AuthenticationResponse> SignInAsync(AuthenticationRequest request)
+        public async Task<AuthenticationResponse> LoginAsync(AuthenticationRequest request)
         {
-            var reader = await _context.Readers.FirstOrDefaultAsync(reader => reader.ReaderUsername == request.username);
+            var reader = await _context.Readers.FirstOrDefaultAsync(reader => reader.Email == request.email);
             if (reader == null || !BCrypt.Net.BCrypt.Verify(request.password, reader.ReaderPassword))
                 throw new Exception("Unauthenticated");
 
@@ -77,85 +85,124 @@ namespace LibraryManagement.Repository
         }
 
         // Hàm đăng ký
-        public async Task<bool> SignUpWithOtpAsync(ConfirmOtp confirmOtp)
+        public async Task<ApiResponse<string>> RegisterAsync(ConfirmOtpRequest confirmOtpRequest)
         {
-            var checkEmail = await _context.Readers.FirstOrDefaultAsync(e => e.Email == confirmOtp.Email);
-            if (checkEmail != null)
+            try 
             {
-                throw new Exception("Email existed");
-            }
-
-            var newRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == AppRoles.Reader);
-
-            if (!_tempOtp.TryGetValue($"OTP_{confirmOtp.Email}", out dynamic? cacheData)) return false;
-
-            if (cacheData.Otp != confirmOtp.Otp) return false; 
-
-            if (newRole == null) // Nếu role Reader chưa có trong csdl
-            {
-                newRole = new Role
+                var checkEmail = await _context.Readers.FirstOrDefaultAsync(e => e.Email == confirmOtpRequest.Email);
+                if (checkEmail != null)
                 {
-                    RoleName = AppRoles.Reader,
-                    Description = "Reader Role"
+                    throw new Exception("Email đã tồn tại");
+                }
+
+                var newRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == AppRoles.Reader);
+
+                var cacheKey = $"OTP_Register_{confirmOtpRequest.Email}";
+                if (!_memoryCache.TryGetValue<RegisterCacheData>(cacheKey, out var cacheData))
+                {
+                    return ApiResponse<string>.FailResponse("OTP không hợp lệ hoặc đã hết hạn!", 400);
+                }
+
+                if (cacheData.Otp != confirmOtpRequest.Otp)
+                {
+                    return ApiResponse<string>.FailResponse("OTP không đúng!", 400);
+                }
+
+                if (newRole == null) // Nếu role Reader chưa có trong csdl
+                {
+                    newRole = new Role
+                    {
+                        RoleName = AppRoles.Reader,
+                        Description = "Reader Role"
+                    };
+                    _context.Roles.Add(newRole);
+                    await _context.SaveChangesAsync();
+                }
+
+                var reader = new Reader
+                {
+                    IdReader = await generateNextIdReaderAsync(),
+                    Email = confirmOtpRequest.Email,
+                    ReaderPassword = BCrypt.Net.BCrypt.HashPassword(cacheData.Password),
+                    IdTypeReader = ConstantTypeReader.ReaderTypeId,
+                    RoleName = newRole.RoleName,
+                    CreateDate = DateTime.UtcNow,
                 };
-                _context.Roles.Add(newRole);
+
+                await _context.Readers.AddAsync(reader);
                 await _context.SaveChangesAsync();
+
+                string imageUrl = DefaultAvatar;
+
+                var image = new Image
+                {
+                    IdReader = reader.IdReader,
+                    Url = imageUrl,
+                };
+                _context.Images.Add(image);
+                await _context.SaveChangesAsync();
+                return ApiResponse<string>.SuccessResponse("Đăng ký thành công!", 200, string.Empty);
             }
-
-            var reader = new Reader
+            catch (Exception ex)
             {
-                IdReader = await generateNextIdReaderAsync(),
-                Email = confirmOtp.Email,
-                ReaderUsername = confirmOtp.Email,
-                ReaderPassword = BCrypt.Net.BCrypt.HashPassword(cacheData.Password),
-                IdTypeReader = DefaultTypeReaderId,
-                RoleName = newRole.RoleName,
-                CreateDate = DateTime.UtcNow,
-            };
-           
-            await _context.Readers.AddAsync(reader);
-            await _context.SaveChangesAsync();
-
-            string imageUrl = "https://res.cloudinary.com/df41zs8il/image/upload/v1750223521/default-avatar-icon-of-social-media-user-vector_a3a2de.jpg";
-
-            var image = new Image
-            {
-                IdReader = reader.IdReader,
-                Url = imageUrl,
-            };
-            _context.Images.Add(image);
-            await _context.SaveChangesAsync();
-            return true;
+                return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
+            }
         }
 
         // Hàm gửi OTP xác thực
-        public async Task<bool> SendEmailConfirmation(SignUpModel signup)
+        public async Task<ApiResponse<string>> SendEmailConfirmation(RegisterRequest registerRequest)
         {
-            var user = await _context.Readers.FirstOrDefaultAsync(x => x.ReaderUsername == signup.Email);
-            if (user != null)
+            var checkEmail = await _context.Readers.FirstOrDefaultAsync(x => x.Email == registerRequest.Email);
+            if (checkEmail != null)
             {
-                return false; 
+                return ApiResponse<string>.FailResponse("Email đã tồn tại!", 409);
+            }
+
+            if (string.IsNullOrWhiteSpace(registerRequest.Email) || !registerRequest.Email.Contains("@"))
+            {
+                return ApiResponse<string>.FailResponse("Email không hợp lệ!", 400);
+            }
+
+            if (registerRequest.Password != registerRequest.ConfirmPassword)
+            {
+                return ApiResponse<string>.FailResponse("Mật khẩu xác nhận không khớp!", 400);
             }
             try
             {
                 var otp = new Random().Next(100000, 999999).ToString();
 
-                _tempOtp.Set($"OTP_{signup.Email}", new
+                var cacheKey = $"OTP_Register_{registerRequest.Email}";
+
+                var cacheData = new RegisterCacheData
                 {
                     Otp = otp,
-                    Password = signup.Password
-                }, TimeSpan.FromMinutes(1));
-                await _fluentEmail.To(signup.Email)
-                    .SetFrom("noreply@gmail.com")
-                    .Subject("Mã OTP xác thực của bạn là:")
-                    .Body($"<p>Mã OTP của bạn là: <strong>{otp}</strong> (hiệu lực trong 1 phút).</p>", true)
-                    .SendAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
+                    Email = registerRequest.Email,
+                    Password = registerRequest.Password
+                };
 
+                _memoryCache.Set(cacheKey, cacheData, new MemoryCacheEntryOptions()
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2) // OTP hết hạn sau 2 phút
+                });
+
+                // Gửi OTP đến mail
+                var response = await _email
+                    .To(registerRequest.Email)
+                    .Subject("Mã OTP xác thực đăng ký tài khoản")
+                    .Tag("otp-register")
+                    .Body($"<p>Mã OTP của bạn là: <strong>{otp}</strong> (hiệu lực trong 2 phút).</p>", true)
+                    .SendAsync();
+
+                if (!response.Successful)
+                {
+                    return ApiResponse<string>.FailResponse("Gửi OTP thất bại! Vui lòng thử lại sau.", 500);
+                }
+
+                return ApiResponse<string>.SuccessResponse("OTP đã được gửi đến bạn!", 200, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
             }
         }
 
@@ -180,7 +227,7 @@ namespace LibraryManagement.Repository
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var email = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
                 if (string.IsNullOrEmpty(email)) return null;
-                var reader = await _context.Readers.Where(x => x.ReaderUsername == email).Select( a => new ReaderAuthenticationResponse
+                var reader = await _context.Readers.Where(x => x.Email == email).Select( a => new ReaderAuthenticationResponse
                 {
                     IdReader = a.IdReader, 
                     IdTypeReader = a.IdTypeReader,
@@ -190,7 +237,6 @@ namespace LibraryManagement.Repository
                     Email = a.Email, 
                     Dob = a.Dob,
                     CreateDate = a.CreateDate, 
-                    ReaderUsername = a.ReaderUsername, 
                     RoleName = a.RoleName,
                     AvatarUrl = a.Images.Select(x=>x.Url).FirstOrDefault() ?? string.Empty,
                 }).FirstOrDefaultAsync() ;
@@ -238,13 +284,13 @@ namespace LibraryManagement.Repository
             };
         }
 
-        public async Task<AuthenticationResponse> LoginWithGoogleAsync(
-      string email, string fullname, string avatar, DateTime? dateOfBirth = null)
+        public async Task<AuthenticationResponse> LoginWithGoogleAsync(string email, 
+                                                                       string fullname, 
+                                                                       string avatar, 
+                                                                       DateTime? dateOfBirth)
         {
-            // 1. Tìm user trong DB
-            var reader = await _context.Readers.FirstOrDefaultAsync(x => x.ReaderUsername == email);
+            var reader = await _context.Readers.FirstOrDefaultAsync(x => x.Email == email);
 
-            // 2. Nếu chưa có, tạo mới
             if (reader == null)
             {
                 var newRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == AppRoles.Reader);
@@ -264,10 +310,9 @@ namespace LibraryManagement.Repository
                     IdReader = await generateNextIdReaderAsync(),
                     NameReader = fullname,
                     Dob = dateOfBirth ?? new DateTime(1970,1,1).ToUniversalTime(),
-                    ReaderUsername = email,
                     ReaderPassword = string.Empty,
                     Address = string.Empty,
-                    IdTypeReader = DefaultTypeReaderId,
+                    IdTypeReader = ConstantTypeReader.ReaderTypeId,
                     RoleName = newRole.RoleName,
                     CreateDate = DateTime.UtcNow,
                     Email = email,
@@ -305,7 +350,6 @@ namespace LibraryManagement.Repository
                 await _context.SaveChangesAsync();
             }
 
-            // 3. Trả về token JWT
             var token = _tokenGenerator.GenerateToken(reader);
             var refreshToken = _tokenGenerator.GenerateRefreshToken(reader);
 

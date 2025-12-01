@@ -34,7 +34,7 @@ namespace LibraryManagement.Helpers
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Email, reader.ReaderUsername),
+                new Claim(ClaimTypes.Email, reader.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.Role, reader.RoleName.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, reader.IdReader.ToString()),
@@ -74,7 +74,7 @@ namespace LibraryManagement.Helpers
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Email, reader.ReaderUsername),
+                new Claim(ClaimTypes.Email, reader.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
