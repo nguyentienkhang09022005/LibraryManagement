@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Reflection.Metadata;
 using System.Security.Claims;
 using System.Text;
 
@@ -22,7 +21,6 @@ namespace LibraryManagement.Repository
     {
         private readonly LibraryManagermentContext _context;
         private readonly ITokenGenerator _tokenGenerator;
-        private readonly IMapper _mapper;
         private readonly IFluentEmail _email;
         private readonly IConfiguration _configuration;
         private readonly IMemoryCache _memoryCache;
@@ -34,7 +32,6 @@ namespace LibraryManagement.Repository
 
         public AuthenService(LibraryManagermentContext context, 
                              ITokenGenerator tokenGenerator,
-                             IMapper mapper, 
                              IFluentEmail email, 
                              IMemoryCache memoryCache, 
                              IConfiguration configuration,
@@ -45,7 +42,6 @@ namespace LibraryManagement.Repository
             _email = email; 
             _context = context;
             _tokenGenerator = tokenGenerator;
-            _mapper = mapper;
             _logger = logger;
         }
 
@@ -68,24 +64,35 @@ namespace LibraryManagement.Repository
         }
 
         // Hàm đăng nhập
-        public async Task<AuthenticationResponse> LoginAsync(AuthenticationRequest request)
+        public async Task<ApiResponse<AuthenticationResponse>> LoginAsync(AuthenticationRequest request)
         {
-            var reader = await _context.Readers.FirstOrDefaultAsync(reader => reader.Email == request.email);
-            if (reader == null || !BCrypt.Net.BCrypt.Verify(request.password, reader.ReaderPassword))
-                throw new Exception("Unauthenticated");
-
-            var _token = _tokenGenerator.GenerateToken(reader);
-            var _refreshToken = _tokenGenerator.GenerateRefreshToken(reader);
-            return new AuthenticationResponse
+            try
             {
-                Token = _token,
-                refreshToken = _refreshToken, 
-                iduser = reader.IdReader.ToString(),
-            };
+                var reader = await _context.Readers.FirstOrDefaultAsync(reader => reader.Email == request.email);
+                if (reader == null || !BCrypt.Net.BCrypt.Verify(request.password, reader.ReaderPassword))
+                    throw new Exception("Unauthenticated");
+
+                var _token = _tokenGenerator.GenerateToken(reader);
+                var _refreshToken = _tokenGenerator.GenerateRefreshToken(reader);
+
+                return ApiResponse<AuthenticationResponse>.SuccessResponse(
+                    "Đăng nhập thành công!",
+                    200,
+                    new AuthenticationResponse
+                    {
+                        Token = _token,
+                        refreshToken = _refreshToken,
+                        iduser = reader.IdReader.ToString(),
+                    });
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<AuthenticationResponse>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
+            }
         }
 
         // Hàm đăng ký
-        public async Task<ApiResponse<string>> RegisterAsync(ConfirmOtpRequest confirmOtpRequest)
+        public async Task<ApiResponse<string>> ConfirmOtpRegisterAsync(ConfirmOtpRequest confirmOtpRequest)
         {
             try 
             {
@@ -95,7 +102,8 @@ namespace LibraryManagement.Repository
                     throw new Exception("Email đã tồn tại");
                 }
 
-                var newRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == AppRoles.Reader);
+                var newRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == ConstantRoles.Reader);
+                var newTypeReader = await _context.TypeReaders.FirstOrDefaultAsync(type => type.NameTypeReader == ConstantTypeReader.TypeReader);
 
                 var cacheKey = $"OTP_Register_{confirmOtpRequest.Email}";
                 if (!_memoryCache.TryGetValue<RegisterCacheData>(cacheKey, out var cacheData))
@@ -112,10 +120,21 @@ namespace LibraryManagement.Repository
                 {
                     newRole = new Role
                     {
-                        RoleName = AppRoles.Reader,
+                        RoleName = ConstantRoles.Reader,
                         Description = "Reader Role"
                     };
                     _context.Roles.Add(newRole);
+                    await _context.SaveChangesAsync();
+                }
+
+                if (newTypeReader == null) // Nếu role Reader chưa có trong csdl
+                {
+                    newTypeReader = new TypeReader
+                    {
+                        IdTypeReader = Guid.NewGuid(),
+                        NameTypeReader = ConstantTypeReader.TypeReader
+                    };
+                    _context.TypeReaders.Add(newTypeReader);
                     await _context.SaveChangesAsync();
                 }
 
@@ -124,7 +143,7 @@ namespace LibraryManagement.Repository
                     IdReader = await generateNextIdReaderAsync(),
                     Email = confirmOtpRequest.Email,
                     ReaderPassword = BCrypt.Net.BCrypt.HashPassword(cacheData.Password),
-                    IdTypeReader = ConstantTypeReader.ReaderTypeId,
+                    IdTypeReader = newTypeReader.IdTypeReader,
                     RoleName = newRole.RoleName,
                     CreateDate = DateTime.UtcNow,
                 };
@@ -132,12 +151,10 @@ namespace LibraryManagement.Repository
                 await _context.Readers.AddAsync(reader);
                 await _context.SaveChangesAsync();
 
-                string imageUrl = DefaultAvatar;
-
                 var image = new Image
                 {
                     IdReader = reader.IdReader,
-                    Url = imageUrl,
+                    Url = DefaultAvatar,
                 };
                 _context.Images.Add(image);
                 await _context.SaveChangesAsync();
@@ -150,7 +167,7 @@ namespace LibraryManagement.Repository
         }
 
         // Hàm gửi OTP xác thực
-        public async Task<ApiResponse<string>> SendEmailConfirmation(RegisterRequest registerRequest)
+        public async Task<ApiResponse<string>> RegisterAsync(RegisterRequest registerRequest)
         {
             var checkEmail = await _context.Readers.FirstOrDefaultAsync(x => x.Email == registerRequest.Email);
             if (checkEmail != null)
@@ -207,25 +224,25 @@ namespace LibraryManagement.Repository
         }
 
         // Hàm đăng nhập bằng Access Token
-        public async Task<ReaderAuthenticationResponse?> AuthenticationAsync(string accessToken)
+        public async Task<ApiResponse<ReaderAuthenticationResponse>> AuthenticationAsync(string accessToken)
         {
-            if (string.IsNullOrEmpty(accessToken)) return null;
-
             var tokenHanlder = new JwtSecurityTokenHandler();
             var secretKey = Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]); 
 
             try
             {
-                tokenHanlder.ValidateToken(accessToken, new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                tokenHanlder.ValidateToken(accessToken, new TokenValidationParameters
                 {
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     IssuerSigningKey = new SymmetricSecurityKey(secretKey),
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken  );
+                }, out SecurityToken validatedToken);
+
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var email = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+
                 if (string.IsNullOrEmpty(email)) return null;
                 var reader = await _context.Readers.Where(x => x.Email == email).Select( a => new ReaderAuthenticationResponse
                 {
@@ -240,48 +257,59 @@ namespace LibraryManagement.Repository
                     RoleName = a.RoleName,
                     AvatarUrl = a.Images.Select(x=>x.Url).FirstOrDefault() ?? string.Empty,
                 }).FirstOrDefaultAsync() ;
-                return reader;
+                return ApiResponse<ReaderAuthenticationResponse>.SuccessResponse("Đăng nhập thành công!", 200, reader);
             }
-            catch
+            catch (Exception ex)
             {
-                return null; 
+                return ApiResponse<ReaderAuthenticationResponse>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
             }
         }
 
         // Hàm refresh Token
-        public async Task<RefreshTokenResponse> refreshTokenAsync(string Token)
+        public async Task<ApiResponse<RefreshTokenResponse>> RefreshTokenAsync(string Token)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var jwtToken = tokenHandler.ReadJwtToken(Token);
-
-            // Trích xuất jti từ token
-            var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-
-            // Kiểm tra token đã bị thu hồi chưa
-            var isRevoked = await _context.InvalidatedTokens.AnyAsync(t => t.IdToken == jti);
-            if (isRevoked)
+            try
             {
-                throw new Exception("Refresh token has been revoked");
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var jwtToken = tokenHandler.ReadJwtToken(Token);
+
+                // Trích xuất jti từ token
+                var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+
+                // Kiểm tra token đã bị thu hồi chưa
+                var isRevoked = await _context.InvalidatedTokens.AnyAsync(t => t.IdToken == jti);
+                if (isRevoked)
+                {
+                    throw new Exception("Refresh token has been revoked");
+                }
+
+                var verifyToken = await AuthenticationAsync(Token);
+
+                if (verifyToken == null)
+                {
+                    throw new Exception("Token không hợp lệ hoặc đã hết hạn!");
+                }
+                var reader = await _context.Readers.FirstOrDefaultAsync(x => x.IdReader == verifyToken.Data.IdReader);
+                if (reader == null)
+                {
+                    throw new Exception("Invalid or Expired Token");
+                }
+
+                var accessTokenResponse = _tokenGenerator.GenerateToken(reader);
+
+                return ApiResponse<RefreshTokenResponse>.SuccessResponse(
+                    "Refresh Token thành công!", 
+                    200,
+                    new RefreshTokenResponse
+                    {
+                        AccessToken = accessTokenResponse
+                    });
             }
-
-            var user = await AuthenticationAsync(Token);
-           
-            if (user == null)
+            catch (Exception ex)
             {
-                throw new Exception("Invalid or Expired Token");
+                return ApiResponse<RefreshTokenResponse>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
             }
-             var reader = await _context.Readers.FirstOrDefaultAsync(x => x.IdReader == user.IdReader);
-            if ( reader == null)
-            {
-                throw new Exception("Invalid or Expired Token");
-            }
-
-            var accessTokenResponse = _tokenGenerator.GenerateToken(reader);
-
-            return new RefreshTokenResponse
-            {
-                AccessToken = accessTokenResponse
-            };
+            
         }
 
         public async Task<AuthenticationResponse> LoginWithGoogleAsync(string email, 
@@ -293,18 +321,30 @@ namespace LibraryManagement.Repository
 
             if (reader == null)
             {
-                var newRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == AppRoles.Reader);
+                var newRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == ConstantRoles.Reader);
                 if (newRole == null)
                 {
                     newRole = new Role
                     {
-                        RoleName = AppRoles.Reader,
+                        RoleName = ConstantRoles.Reader,
                         Description = "Reader Role"
                     };
                     _context.Roles.Add(newRole);
                     await _context.SaveChangesAsync();
                 }
-                
+
+                var newTypeReader = await _context.TypeReaders.FirstOrDefaultAsync(type => type.NameTypeReader == ConstantTypeReader.TypeReader);
+                if (newTypeReader == null) 
+                {
+                    newTypeReader = new TypeReader
+                    {
+                        IdTypeReader = Guid.NewGuid(),
+                        NameTypeReader = ConstantTypeReader.TypeReader
+                    };
+                    _context.TypeReaders.Add(newTypeReader);
+                    await _context.SaveChangesAsync();
+                }
+
                 reader = new Reader
                 {
                     IdReader = await generateNextIdReaderAsync(),
@@ -312,7 +352,7 @@ namespace LibraryManagement.Repository
                     Dob = dateOfBirth ?? new DateTime(1970,1,1).ToUniversalTime(),
                     ReaderPassword = string.Empty,
                     Address = string.Empty,
-                    IdTypeReader = ConstantTypeReader.ReaderTypeId,
+                    IdTypeReader = newTypeReader.IdTypeReader,
                     RoleName = newRole.RoleName,
                     CreateDate = DateTime.UtcNow,
                     Email = email,
@@ -362,12 +402,12 @@ namespace LibraryManagement.Repository
         }
 
         // Hàm logout
-        public async Task LogoutAsync(LogoutRequest request)
+        public async Task<ApiResponse<string>> LogoutAsync(LogoutRequest request)
         {
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(request.refreshToken);
+                var jwtToken = tokenHandler.ReadJwtToken(request.token);
 
                 // Lấy jti từ token
                 var jti = jwtToken.Claims.FirstOrDefault(c => c.Type == "jti")?.Value;
@@ -386,10 +426,12 @@ namespace LibraryManagement.Repository
 
                 _context.InvalidatedTokens.Add(invalidatedToken);
                 await _context.SaveChangesAsync();
+
+                return ApiResponse<string>.SuccessResponse("Đăng xuất thành công!", 200, string.Empty);
             }
             catch (Exception ex)
             {
-                throw new Exception("Logout failed: cannot parse refresh token", ex);
+                return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
             }
         }
     }

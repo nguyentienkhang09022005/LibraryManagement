@@ -1,5 +1,4 @@
 ﻿using LibraryManagement.Dto.Request;
-using LibraryManagement.Dto.Response;
 using LibraryManagement.Repository.IRepository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -20,9 +19,9 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpPost("register-send-otp")]
-        public async Task<IActionResult> SendOtpSignUp(RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            var result = await _authenService.SendEmailConfirmation(request);
+            var result = await _authenService.RegisterAsync(request);
             if (result.Success)
             {
                 return StatusCode(result.StatusCode, result);
@@ -32,9 +31,9 @@ namespace LibraryManagement.Controllers
 
 
         [HttpPost("register-confirm-otp")]
-        public async Task<IActionResult> ConfirmOtpSignUp(ConfirmOtpRequest confirmOtpRequest)
+        public async Task<IActionResult> ConfirmOtpRegister([FromBody] ConfirmOtpRequest confirmOtpRequest)
         {
-            var result = await _authenService.RegisterAsync(confirmOtpRequest);
+            var result = await _authenService.ConfirmOtpRegisterAsync(confirmOtpRequest);
             if (result.Success)
             {
                 return StatusCode(result.StatusCode, result);
@@ -43,25 +42,37 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<AuthenticationResponse> SignIn(AuthenticationRequest request)
+        public async Task<IActionResult> SignIn([FromBody] AuthenticationRequest request)
         {
-            return await _authenService.LoginAsync(request);
+            var result = await _authenService.LoginAsync(request);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpPost("authentication")]
-        public async Task<IActionResult> Authentication([FromBody] string token)
+        public async Task<IActionResult> Authentication([FromBody] IntrospectRequest request)
         {
-            var reader = await _authenService.AuthenticationAsync(token);
-            if (reader == null) return NotFound();
-
-            return Ok(reader);
+            var result = await _authenService.AuthenticationAsync(request.token);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
 
         }
 
         [HttpPost("refresh-token")]
-        public async Task<RefreshTokenResponse> RefreshToken([FromBody] string token)
+        public async Task<IActionResult> RefreshToken([FromBody] IntrospectRequest request)
         {
-            return await _authenService.refreshTokenAsync(token);
+            var result = await _authenService.RefreshTokenAsync(request.token);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("login-google")]
@@ -70,6 +81,7 @@ namespace LibraryManagement.Controllers
             var properties = new AuthenticationProperties { RedirectUri = returnUrl };
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
+
         [HttpGet("profile")]
         public async Task<IActionResult> Profile()
         {
@@ -111,24 +123,15 @@ namespace LibraryManagement.Controllers
             return Content(html, "text/html");
         }
 
-        // Endpoint đăng xuất
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
         {
-            if (string.IsNullOrEmpty(request.refreshToken))
+            var result = await _authenService.LogoutAsync(request);
+            if (result.Success)
             {
-                return BadRequest("Refresh token is required");
+                return StatusCode(result.StatusCode, result);
             }
-
-            try
-            {
-                await _authenService.LogoutAsync(request);
-                return Ok(new { message = "Logout successful" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

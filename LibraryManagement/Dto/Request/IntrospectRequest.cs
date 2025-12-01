@@ -1,6 +1,6 @@
 ﻿namespace LibraryManagement.Dto.Request
 {
-    public class LogoutRequest
+    public class IntrospectRequest
     {
         public string token { get; set; }
     }

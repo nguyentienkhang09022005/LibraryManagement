@@ -6,19 +6,18 @@ namespace LibraryManagement.Repository.IRepository
 {
     public interface IAuthenService
     {
-        Task<ApiResponse<string>> RegisterAsync(ConfirmOtpRequest confirmOtpRequest);
+        Task<ApiResponse<string>> ConfirmOtpRegisterAsync(ConfirmOtpRequest confirmOtpRequest);
 
-        public Task<AuthenticationResponse> LoginAsync(AuthenticationRequest request);
+        Task<ApiResponse<AuthenticationResponse>> LoginAsync(AuthenticationRequest request);
 
-        Task<ApiResponse<string>> SendEmailConfirmation(RegisterRequest registerRequest);
+        Task<ApiResponse<string>> RegisterAsync(RegisterRequest registerRequest);
 
-        public Task<ReaderAuthenticationResponse?> AuthenticationAsync(string accessToken);
+        Task<ApiResponse<ReaderAuthenticationResponse>> AuthenticationAsync(string accessToken);
 
-
-        public Task<RefreshTokenResponse> refreshTokenAsync(string Token);
+        Task<ApiResponse<RefreshTokenResponse>> RefreshTokenAsync(string Token);
 
         public Task<AuthenticationResponse> LoginWithGoogleAsync(string email, string fullname, string avatar, DateTime? dateOfBirth = null);
 
-        public Task LogoutAsync(LogoutRequest request);
+        Task<ApiResponse<string>> LogoutAsync(LogoutRequest request);
     }
 }

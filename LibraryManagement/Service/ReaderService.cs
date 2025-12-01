@@ -3,12 +3,11 @@ using LibraryManagement.Data;
 using LibraryManagement.Dto.Request;
 using LibraryManagement.Dto.Response;
 using LibraryManagement.Helpers;
+using LibraryManagement.Helpers.Constant;
 using LibraryManagement.Models;
 using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Collections.Frozen;
 using System.Text.RegularExpressions;
 
 namespace LibraryManagement.Repository
@@ -88,7 +87,7 @@ namespace LibraryManagement.Repository
                 Phone = request.Phone,
                 CreateDate = DateTime.UtcNow,
                 ReaderPassword = BCrypt.Net.BCrypt.HashPassword(request.ReaderPassword),
-                RoleName = AppRoles.Reader
+                RoleName = ConstantRoles.Reader
             };
 
             _context.Readers.Add(newReader);
@@ -148,7 +147,6 @@ namespace LibraryManagement.Repository
                     Dob = readerInf.Dob,
                     Phone = readerInf.Phone!,
                     CreateDate = readerInf.CreateDate,
-                    ReaderAccount = readerInf.Email!,
                     TotalDebt = readerInf.TotalDebt,
                     Role = readerInf.Role.RoleName,
                     UrlAvatar = readerInf.Images

@@ -6,6 +6,7 @@ namespace LibraryManagement.Dto.Request
     {
         [Required]
         public string email { get; set; }
+
         [Required]
         public string password { get; set; }
     }
