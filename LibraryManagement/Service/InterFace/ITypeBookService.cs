@@ -6,14 +6,14 @@ namespace LibraryManagement.Repository.InterFace
 {
     public interface ITypeBookService
     {
-        public Task<ApiResponse<TypeBookResponse>> addTypeBookAsync(TypeBookRequest request);
-        public Task<ApiResponse<TypeBookResponse>> updateTypeBookAsync(TypeBookRequest request, Guid idTypeBook);
-        public Task<ApiResponse<string>> deleteTypeBook(Guid idTypeBook);
+        Task<ApiResponse<TypeBookResponse>> AddTypeBookAsync(TypeBookRequest request);
 
-        public Task<List<TypeBookResponseAndBook>> getTypebookAndBooks();
+        Task<ApiResponse<TypeBookResponse>> UpdateTypeBookAsync(TypeBookRequest request, Guid idTypeBook);
 
-        public Task<List<TypeBookResponse>> getAllTypeBook();
+        Task<ApiResponse<string>> DeleteTypeBook(Guid idTypeBook);
 
-     
+        Task<ApiResponse<List<TypeBookResponseAndBook>>> GetTypebookAndHeaders();
+
+        Task<ApiResponse<List<TypeBookResponse>>> GetAllTypeBook();
     }
 }

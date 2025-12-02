@@ -1,6 +1,6 @@
 ﻿namespace LibraryManagement.Dto.Request
 {
-    public class FindAuthorInputDto
+    public class AuthorFindNameRequest
     {
         public string nameAuthor { get; set; }  
     }

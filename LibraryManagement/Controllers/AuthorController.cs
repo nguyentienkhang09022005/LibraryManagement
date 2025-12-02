@@ -1,11 +1,7 @@
-﻿using LibraryManagement.Data;
-using LibraryManagement.Dto.Request;
+﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using ZstdSharp.Unsafe;
 
 namespace LibraryManagement.Controllers
 {
@@ -14,74 +10,77 @@ namespace LibraryManagement.Controllers
     public class AuthorController : ControllerBase
     {
         private readonly IAuthorService _authorService;
-        private readonly LibraryManagermentContext _context; 
 
-        public AuthorController(IAuthorService authorService, LibraryManagermentContext context)
+        public AuthorController(IAuthorService authorService)
         {
             _authorService = authorService;
-            _context = context;
         }
 
-        // Endpoint lấy danh sách tác giả
-
-        [HttpGet("list_author")]
-        [Authorize]
+        [HttpGet("list-author")]
         public async Task<IActionResult> gettListAuthor()
         {
-         
-            try
+            var result = await _authorService.GetListAuthor();
+            if (result.Success)
             {
-                var result = await _authorService.getListAuthor();
-                return Ok(result); 
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)            {
-                return BadRequest(ex.Message);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("add-author")]
+        public async Task<IActionResult> addAuthor([FromForm] AuthorCreationRequest request)
+        {
+            var result = await _authorService.AddAuthorAsync(request);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
             }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpoint thêm tác giả
-        [HttpPost("add_author")]
-        public async Task<IActionResult> addAuthor([FromForm] AuthorRequest request)
+        [HttpPatch("update-author")]
+        public async Task<IActionResult> updateAuthor([FromForm] AuthorUpdateRequest request, 
+                                                      [FromQuery] Guid idAuthor)
         {
-            var result = await _authorService.addAuthorAsync(request);
+            var result = await _authorService.UpdateAuthorAsync(request, idAuthor);
             if (result.Success)
-                return Created("", result);
-            return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpoint sửa tác giả
-        [HttpPatch("update_author/{idAuthor}")]
-        public async Task<IActionResult> updateAuthor([FromForm] AuthorUpdateRequest request, Guid idAuthor)
+        [HttpDelete("delete-author")]
+        public async Task<IActionResult> deleteAuthor([FromQuery] Guid idAuthor)
         {
-            var result = await _authorService.updateAuthorAsync(request, idAuthor);
+            var result = await _authorService.DeleteAuthorAsync(idAuthor);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpoint xóa tác giả
-        [HttpDelete("delete_author/{idAuthor}")]
-        public async Task<IActionResult> deleteAuthor(Guid idAuthor)
+        [HttpGet("find-author-by-name")]
+        public async Task<IActionResult> findAuthor([FromQuery] AuthorFindNameRequest request)
         {
-            var result = await _authorService.deleteAuthorAsync(idAuthor);
+            var result = await _authorService.FindAuthor(request);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        [HttpGet("findAuthor")]
-           [Authorize]
-        public async Task<IActionResult> findAuthor(string name)
+        [HttpGet("inf-author")]
+        public async Task<IActionResult> getAuthorById([FromQuery] Guid idAuthor)
         {
-            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(user)) return NotFound("Không tìm thấy tài khoản"); 
-            var result = await _authorService.findAuthor(new FindAuthorInputDto { nameAuthor = name});
-            return Ok(result);
-        }
-        [HttpGet("getauthorbyid{idauthor}")]
-        public async Task<IActionResult> getAuthorById(Guid idauthor)
-        {
-            return Ok(await _authorService.GetAuthorById(idauthor));
+            var result = await _authorService.GetAuthorById(idAuthor);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

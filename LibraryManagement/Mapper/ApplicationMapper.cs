@@ -10,7 +10,7 @@ namespace LibraryManagement.Mapper
         public ApplicationMapper()
         {
             // Mapper Author
-            CreateMap<AuthorRequest, Author>();
+            CreateMap<AuthorCreationRequest, Author>();
             CreateMap<Author, AuthorResponse>()
                 .ForMember(dest => dest.IdTypeBook, opt => opt.Ignore())
                 .ForMember(dest => dest.UrlAvatar, opt => opt.Ignore());

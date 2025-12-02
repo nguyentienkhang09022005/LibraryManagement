@@ -1,6 +1,6 @@
 ﻿namespace LibraryManagement.Dto.Request
 {
-    public class AuthorRequest
+    public class AuthorCreationRequest
     {
         public Guid IdTypeBook { get; set; }
         public string NameAuthor { get; set; }

@@ -15,45 +15,45 @@ namespace LibraryManagement.Controllers
             _typeBookService = typeBookService;
         }
 
-        // Endpoint thêm loại sách
-        [HttpPost("add_typebook")]
+        [HttpPost("add-typebook")]
         public async Task<IActionResult> addTypeBook([FromBody] TypeBookRequest request)
         {
-            var result = await _typeBookService.addTypeBookAsync(request);
+            var result = await _typeBookService.AddTypeBookAsync(request);
             if (result.Success)
                 return Created("", result);
             return BadRequest(result);
         }
 
-        // Endpoint sửa loại sách
-        [HttpPut("update_typebook/{idTypeBook}")]
-        public async Task<IActionResult> updateTypeBook([FromBody] TypeBookRequest request, Guid idTypeBook)
+        [HttpPut("update-typebook")]
+        public async Task<IActionResult> updateTypeBook([FromBody] TypeBookRequest request, 
+                                                        [FromQuery] Guid idTypeBook)
         {
-            var result = await _typeBookService.updateTypeBookAsync(request, idTypeBook);
+            var result = await _typeBookService.UpdateTypeBookAsync(request, idTypeBook);
             if (result.Success)
                 return Ok(result);
             return NotFound(result);
         }
 
-        // Endpoint xóa loại sách
-        [HttpDelete("delete_typebook/{idTypeBook}")]
-        public async Task<IActionResult> deleteTypeBook(Guid idTypeBook)
+        [HttpDelete("delete-typebook")]
+        public async Task<IActionResult> deleteTypeBook([FromQuery] Guid idTypeBook)
         {
-            var result = await _typeBookService.deleteTypeBook(idTypeBook);
+            var result = await _typeBookService.DeleteTypeBook(idTypeBook);
             if (result.Success)
                 return Ok(result);
             return NotFound(result);
         }
-        [HttpGet("getTypeBook")]
-        public async Task<IActionResult> getTypeBookAndHeader()
+
+        [HttpGet("list-typebook-and-header")]
+        public async Task<IActionResult> getTypeBookAndHeaders()
         {
-            var result = await _typeBookService.getTypebookAndBooks();
+            var result = await _typeBookService.GetTypebookAndHeaders();
             return Ok(result); 
         }
-        [HttpGet("getAllTypeBook")]
+
+        [HttpGet("list-all-typebook")]
         public async Task<IActionResult> getAlltypeBook()
         {
-            return Ok(await _typeBookService.getAllTypeBook());
+            return Ok(await _typeBookService.GetAllTypeBook());
         }
     }
 }

@@ -5,10 +5,7 @@ using LibraryManagement.Dto.Response;
 using LibraryManagement.Helpers;
 using LibraryManagement.Models;
 using LibraryManagement.Repository.InterFace;
-using LibraryManagement.Repository.IRepository;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.CompilerServices;
 
 namespace LibraryManagement.Repository
 {
@@ -16,37 +13,37 @@ namespace LibraryManagement.Repository
     {
         private readonly LibraryManagermentContext _context;
         private readonly IMapper _mapper;
-        private readonly IAuthenService _account;
         private readonly IUpLoadImageFileService _upLoadImageFileService;
 
-        public AuthorService(LibraryManagermentContext context, IMapper mapper, 
-                                                                IAuthenService account, 
-                                                                IUpLoadImageFileService upLoadImageFileService)
+        public AuthorService(LibraryManagermentContext context, 
+                             IMapper mapper, 
+                             IUpLoadImageFileService upLoadImageFileService)
         {
             _context = context;
             _mapper = mapper;
-            _account = account;    
             _upLoadImageFileService = upLoadImageFileService;
         }
 
-        // Lấy danh sách tác giả
-        public async Task<List<AuthorResponse>> getListAuthor()
+        public async Task<ApiResponse<List<AuthorResponse>>> GetListAuthor()
         {
 
-            var authorResponse = await _context.Authors.AsNoTracking().Select(x => new AuthorResponse
+            var authorResponse = await _context.Authors.AsNoTracking().Select(a => new AuthorResponse
             {
-                IdAuthor = x.IdAuthor,
-                IdTypeBook = new TypeBookResponse { IdTypeBook = x.IdTypeBook, NameTypeBook = x.TypeBook.NameTypeBook },
-                NameAuthor = x.NameAuthor,
-                Nationality = x.Nationality,
-                Biography = x.Biography,
-                UrlAvatar = x.Images.Where(x => x.IdAuthor == x.IdAuthor).Select(x => x.Url).FirstOrDefault()
+                IdAuthor = a.IdAuthor,
+                IdTypeBook = new TypeBookResponse { IdTypeBook = a.IdTypeBook, NameTypeBook = a.TypeBook.NameTypeBook },
+                NameAuthor = a.NameAuthor,
+                Nationality = a.Nationality,
+                Biography = a.Biography,
+                UrlAvatar = a.Images.Where(i => i.IdAuthor == i.IdAuthor).Select(i => i.Url).FirstOrDefault()
             }).ToListAsync();
-            return authorResponse;
+            return ApiResponse<List<AuthorResponse>>.SuccessResponse(
+                    "Lấy danh sách tác giả thành công!",
+                    200,
+                    authorResponse);
         }
 
         // Thêm tác giả
-        public async Task<ApiResponse<AuthorResponse>> addAuthorAsync(AuthorRequest request)
+        public async Task<ApiResponse<AuthorResponse>> AddAuthorAsync(AuthorCreationRequest request)
         {
             var newAuthor = _mapper.Map<Author>(request);
 
@@ -81,29 +78,32 @@ namespace LibraryManagement.Repository
                 NameTypeBook = typeBook!.NameTypeBook,
             };
             authorResponse.UrlAvatar = imageUrl;
-            return ApiResponse<AuthorResponse>.SuccessResponse("Thêm tác giả thành công", 201, authorResponse);
+            return ApiResponse<AuthorResponse>.SuccessResponse(
+                "Thêm tác giả thành công!", 
+                201, 
+                authorResponse);
         }
 
         // Xóa tác giả
-        public async Task<ApiResponse<string>> deleteAuthorAsync(Guid idAuthor)
+        public async Task<ApiResponse<string>> DeleteAuthorAsync(Guid idAuthor)
         {
             var deleteAuthor = await _context.Authors.FirstOrDefaultAsync(author => author.IdAuthor == idAuthor);
             if (deleteAuthor == null)
             {
-                return ApiResponse<string>.FailResponse("Không tìm thấy tác giả", 404);
+                return ApiResponse<string>.FailResponse("Không tìm thấy tác giả!", 404);
             }
             _context.Authors.Remove(deleteAuthor);
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.SuccessResponse("Đã xóa tác giả", 200, "");
+            return ApiResponse<string>.SuccessResponse("Đã xóa tác giả!", 200, "");
         }
 
         // Sửa tác giả
-        public async Task<ApiResponse<AuthorResponse>> updateAuthorAsync(AuthorUpdateRequest request, Guid idAuthor)
+        public async Task<ApiResponse<AuthorResponse>> UpdateAuthorAsync(AuthorUpdateRequest request, Guid idAuthor)
         {
             var updateAuthor = await _context.Authors.FirstOrDefaultAsync(author => author.IdAuthor == idAuthor);
             if (updateAuthor == null)
             {
-                return ApiResponse<AuthorResponse>.FailResponse("Không tìm thấy tác giả", 404);
+                return ApiResponse<AuthorResponse>.FailResponse("Không tìm thấy tác giả!", 404);
             }
 
             // Chỉ cập nhật khi có dữ liệu truyền lên
@@ -162,13 +162,20 @@ namespace LibraryManagement.Repository
                 .Select(i => i.Url)
                 .FirstOrDefaultAsync());
 
-            return ApiResponse<AuthorResponse>.SuccessResponse("Thay đổi thông tin tác giả thành công", 200, authorResponse);
+            return ApiResponse<AuthorResponse>.SuccessResponse("Thay đổi thông tin tác giả thành công!", 200, authorResponse);
         }
 
-        public async Task<List<AuthorResponse>> findAuthor(FindAuthorInputDto dto)
+        public async Task<ApiResponse<List<AuthorResponse>>> FindAuthor(AuthorFindNameRequest authorFindNameRequest)
         {
-            var authors = await _context.Authors.AsNoTracking().Where(x => x.NameAuthor.ToLower().Contains(dto.nameAuthor))
-                .Select(a=>new AuthorResponse
+            var updateAuthor = await _context.Authors.FirstOrDefaultAsync(author => author.NameAuthor == authorFindNameRequest.nameAuthor);
+            if (updateAuthor == null)
+            {
+                return ApiResponse<List<AuthorResponse>>.FailResponse("Không tìm thấy tác giả", 404);
+            }
+            var authors = await _context.Authors
+                .AsNoTracking()
+                .Where(a => a.NameAuthor.ToLower().Contains(authorFindNameRequest.nameAuthor.ToLower()))
+                .Select(a => new AuthorResponse
                 {
 
                     IdAuthor = a.IdAuthor,
@@ -181,10 +188,13 @@ namespace LibraryManagement.Repository
                     },
                     Nationality = a.Nationality
                 }).ToListAsync();
-            return authors;
+            return ApiResponse<List<AuthorResponse>>.SuccessResponse(
+                "Tìm kiếm tác giả thành công!", 
+                200,
+                authors);
         }
 
-        public async Task<GetAuthorByIdResponse> GetAuthorById(Guid idauthor)
+        public async Task<ApiResponse<GetAuthorByIdResponse>> GetAuthorById(Guid idauthor)
         {
             var authors = await _context.Authors.AsNoTracking().Where(x => x.IdAuthor == idauthor)
                .Select( a => new GetAuthorByIdResponse
@@ -213,7 +223,10 @@ namespace LibraryManagement.Repository
                        UrlImage = _context.Images.Where(x=>x.IdBook == book.IdBook).Select(x=>x.Url).FirstOrDefault()??string.Empty
                    })).ToList(),
                }).FirstOrDefaultAsync() ?? null!;
-            return authors;
+            return ApiResponse<GetAuthorByIdResponse>.SuccessResponse(
+                "Lấy thông tin tác giả thành công!",
+                200,
+                authors);
         }
     }
 }
