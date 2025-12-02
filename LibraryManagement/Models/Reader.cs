@@ -29,7 +29,7 @@ namespace LibraryManagement.Models
         public string? Phone { get; set; }
 
         [Column("dob")]
-        public DateTime Dob { get; set; }
+        public DateTime? Dob { get; set; }
 
         [Column("create_date")]
         public DateTime CreateDate { get; set; } 

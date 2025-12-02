@@ -116,7 +116,7 @@ namespace LibraryManagement.Repository
                     return ApiResponse<string>.FailResponse("OTP không đúng!", 400);
                 }
 
-                if (newRole == null) // Nếu role Reader chưa có trong csdl
+                if (newRole == null) 
                 {
                     newRole = new Role
                     {
@@ -127,7 +127,7 @@ namespace LibraryManagement.Repository
                     await _context.SaveChangesAsync();
                 }
 
-                if (newTypeReader == null) // Nếu role Reader chưa có trong csdl
+                if (newTypeReader == null)
                 {
                     newTypeReader = new TypeReader
                     {

@@ -14,16 +14,16 @@
         
         public string? Email { get; set; }         
         
-        public DateTime Dob { get; set; }          
+        public DateTime? Dob { get; set; }          
         
-        public DateTime CreateDate { get; set; }      
+        public DateTime? CreateDate { get; set; }      
         
-        public DateTime ExpiryDate { get; set; }     
+        public DateTime? ExpiryDate { get; set; }     
                 
-        public string RoleName { get; set; }    
+        public string? RoleName { get; set; }    
         
         public string? TypeReader { get; set; }
 
-        public string AvatarUrl { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 }
