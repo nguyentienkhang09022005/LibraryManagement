@@ -1,8 +1,7 @@
-﻿namespace LibraryManagement.Dto.Request
+﻿namespace LibraryManagement.Dto.Response
 {
-    public class TheBookStatus
+    public class TheBookStatusResponse
     {
-
         public string IdTheBook {  get; set; }
         public string IsAvailable{ get; set; }
     }

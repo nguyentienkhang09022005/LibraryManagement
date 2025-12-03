@@ -1,8 +1,8 @@
 ﻿namespace LibraryManagement.Dto.Request
 {
-    public class DeleteEvaluationInput
+    public class GetHeaderBookRequest
     {
         public string token { get; set; }
-        public Guid IdValuation { get; set; }
+        public string name_headerbook { get; set; } 
     }
 }

@@ -1,15 +1,7 @@
 ﻿using LibraryManagement.Data;
 using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
-using System.Formats.Asn1;
-using System.Runtime.InteropServices;
-using System.Security.Claims;
-using ZstdSharp.Unsafe;
 
 namespace LibraryManagement.Controllers
 {
@@ -26,196 +18,218 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint tạo sách
-        [HttpPost("add_book")]
+        [HttpPost("add-book")]
         public async Task<IActionResult> addHeaderBook([FromForm] HeaderBookCreationRequest request)
         {
-            var result = await _bookService.addBookAsync(request);
+            var result = await _bookService.AddBookAsync(request);
             if (result.Success)
-                return Created("", result);
-            return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint xóa sách
-        [HttpDelete("delete_book/{idBook}")]
-        public async Task<IActionResult> deleteHeaderBook(string idBook)
+        [HttpDelete("delete-book")]
+        public async Task<IActionResult> deleteHeaderBook([FromQuery] string idBook)
         {
-            var result = await _bookService.deleteBookAsync(idBook);
+            var result = await _bookService.DeleteBookAsync(idBook);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint sửa sách
-        [HttpPatch("update_book/{idBook}")]
-        public async Task<IActionResult> updateHeaderBook([FromForm] HeaderBookUpdateRequest request, string idBook)
+        [HttpPatch("update-book")]
+        public async Task<IActionResult> updateHeaderBook([FromForm] HeaderBookUpdateRequest request, 
+                                                          [FromQuery] string idBook)
         {
-
-            var result = await _bookService.updateBookAsync(request, idBook);
+            var result = await _bookService.UpdateBookAsync(request, idBook);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint thay đổi trạng thái cuốn sách
-        [HttpPatch("change_status")]
+        [HttpPatch("change-status")]
         public async Task<IActionResult> changeStatusOfTheBook(ChangeStatusOfTheBookRequest request)
         {
-            var result = await _bookService.changeStatusOfTheBookAsync(request);
+            var result = await _bookService.ChangeStatusOfTheBookAsync(request);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        //[HttpPost("getBookAndCommentsByid")]
-        //public async Task<IActionResult> getBooksAndCommentbyId([FromBody] GetHeaderBookDtoInput dto)
-        //{
-        //    var result = await _bookService.getHeaderbookandCommentsByid(dto);
-        //    return Ok(result); 
-        //}
-
-        [HttpPost("getEvaluation")]
-           [Authorize]
-        public async Task<IActionResult> getDetailedEvaluation(string idBook)
+        [HttpPost("detail-evaluation")]
+        public async Task<IActionResult> getDetailedEvaluation([FromBody] EvaluationRequest evaluationRequest)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return NotFound("Không tìm thấy thông tin người dùng");
-            var result = await _bookService.getBooksEvaluation(new EvaluationDetailInput { idUser = userId, IdBook = idBook });
-
-            return Ok(result);
+            var result = await _bookService.GetBooksEvaluation(evaluationRequest);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        [HttpPost("LikeBook")]
-           [Authorize]
-        public async Task<IActionResult> LikeBook(string idBook)
+        [HttpPost("like-book")]
+        public async Task<IActionResult> LikeBook([FromBody] EvaluationRequest evaluationRequest)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return NotFound("Không tìm thấy thông tin người dùng");
-            var result = await _bookService.LikeBook(new EvaluationDetailInput { idUser = userId!, IdBook = idBook });
-            return Ok(result);
+            var result = await _bookService.LikeBook(evaluationRequest);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        [HttpGet("getlikedbook")]
-           [Authorize]
-        public async Task<IActionResult> getLikeHeaderBook()
+        [HttpGet("list-liked-book")]
+        public async Task<IActionResult> getLikeHeaderBook([FromQuery] string idReader)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null || string.IsNullOrEmpty(userId)) return NotFound("Không tìm thấy thông tin người dùng");
-            var result = await _bookService.getFavoriteBook(userId);
-            return Ok(result);
+            var result = await _bookService.GetFavoriteBook(idReader);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
 
         }
-        [HttpDelete("deleteEvaluation")]
-        public async Task<IActionResult> deleteEvaluation([FromBody] DeleteEvaluationInput dto)
+
+        [HttpDelete("delete-evaluation")]
+        public async Task<IActionResult> deleteEvaluation([FromBody] DeleteEvaluationRequest request)
         {
-            var user = await _bookService.DeleteEvaluation(dto);
-            if (user == false) return Unauthorized();
-            return Ok("Xóa thành công");
+            var result = await _bookService.DeleteEvaluation(request);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        [HttpGet("getallheaderbooks")]
+        [HttpGet("list-headerbook")]
         public async Task<IActionResult> getAllHeaderbooks()
         {
             var result = await _bookService.GetAllHeaderBooks();
-            return Ok(result);
-        }
-        [HttpGet("getbooksindetail")]
-      
-        public async Task<IActionResult> getBooksAndComments()
-        {
-            var userID = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userID)) return NotFound("Không tìm thấy thông tin người dùng");
-            var result = await _bookService.getAllBooksInDetail(userID);
-            return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result);
-        }
-        [HttpGet("getbooksindetailbyid{idbook}")]
-
-        public async Task<IActionResult> getBooksAndCommentsById(string idbook)
-        {
-            var result = await _bookService.getAllBooksInDetailById(idbook);
-            return (result == null) ? Unauthorized("Vui lòng đăng nhập") : Ok(result);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        [HttpGet("findBooks{namebook}")]
-        public async Task<IActionResult> findBooks(string namebook)
+        [HttpGet("books-in-detail")]
+        public async Task<IActionResult> getBooksAndComments([FromQuery] string idUser)
         {
-            var result = await _bookService.findBook(namebook);
-            return Ok(result);
+            var result = await _bookService.GetAllBooksInDetail(idUser);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpGet("getHeaderbookByThebokId{thebookId}")]
-        public async Task<IActionResult> getHeaderBookByThebookId(string thebookId)
+
+        [HttpGet("books-in-detail-by-id")]
+        public async Task<IActionResult> getBooksAndCommentsById([FromQuery] string idbook)
         {
-            try
+            var result = await _bookService.GetAllBooksInDetailById(idbook);
+            if (result.Success)
             {
-                var result = await _bookService.GetAllHeaderBooksByTheBook(thebookId);
-                return Ok(result);
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpPost("addEvaluation")]
-           [Authorize]
-        public async Task<IActionResult> addEvaluation(AddEvaluation dto)
+
+        [HttpGet("find-books")]
+        public async Task<IActionResult> findBooks([FromQuery] string namebook)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return NotFound("Không tìm thấy thông tin người dùng");
-            var result = await _bookService.addEvaluation(userId, dto);
-            return (result.Success) ? Ok(result) : BadRequest(result);
+            var result = await _bookService.FindBook(namebook);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpGet("getAllComments{idBook}")]
-        public async Task<IActionResult> getAllComments(string idBook)
+
+        [HttpGet("headerbook-by-thebook-id")]
+        public async Task<IActionResult> getHeaderBookByThebookId([FromQuery] string idTheBook)
         {
-            try
+            var result = await _bookService.GetAllHeaderBooksByTheBook(idTheBook);
+            if (result.Success)
             {
-                var result = await _bookService.getAllCommentByIdBook(idBook);
-                return Ok(result); 
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpGet("getStarById{idbook}")]
-        public async Task<IActionResult> getStarByid(string idbook)
+
+        [HttpPost("add-evaluation")]
+        public async Task<IActionResult> addEvaluation([FromBody] AddEvaluationRequest request, [FromQuery] string idUser)
         {
-            try
+            var result = await _bookService.AddEvaluation(idUser, request);
+            if (result.Success)
             {
-                return Ok(await _bookService.getAllStar(idbook));
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message); 
-            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpPut("editComment{idComment}")]
+
+        [HttpGet("all-comments")]
+        public async Task<IActionResult> getAllComments([FromQuery] string idBook)
+        {
+            var result = await _bookService.GetAllCommentByIdBook(idBook);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("star-by-id")]
+        public async Task<IActionResult> getStarByid([FromQuery] string idbook)
+        {
+            var result = await _bookService.GetAllStar(idbook);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPut("edit-comment")]
         public async Task<IActionResult> editComment(string idComment, string comment, int rate)
         {
             var result = await _bookService.EditCommentAsync(idComment, comment, rate);
-            return (result) ? Ok(result) : BadRequest(result);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpDelete("deleteComment")]
-        [Authorize]
-        public async Task<IActionResult> deleteComment(string idComment)
-        {
-            var user = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (user == null) return Unauthorized("Vui lòng đăng nhập");
-            var result = await _bookService.deleteComment(idComment, user);
 
-            return (result) ? Ok("Xóa thành công") : BadRequest("Không thể xóa comment");
-        }
-        [HttpGet("GetTheBookStatus")]
-        public async Task<IActionResult> GetTheBookStatus(string idThebook)
+        [HttpDelete("delete-comment")]
+        public async Task<IActionResult> deleteComment([FromQuery] string idComment, [FromQuery] string idReader)
         {
-            try
+            var result = await _bookService.DeleteComment(idComment, idReader);
+            if (result.Success)
             {
-                var result = await _bookService.GetTheBookStatus(idThebook);
-                return Ok(result);
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("the-book-status")]
+        public async Task<IActionResult> GetTheBookStatus([FromQuery] string idThebook)
+        {
+            var result = await _bookService.GetTheBookStatus(idThebook);
+            if (result.Success)
             {
-                return BadRequest(ex.Message) ;
+                return StatusCode(result.StatusCode, result);
             }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

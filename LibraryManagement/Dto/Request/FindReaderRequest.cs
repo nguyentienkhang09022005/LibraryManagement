@@ -1,6 +1,6 @@
 ﻿namespace LibraryManagement.Dto.Request
 {
-    public class FindReaderInputDto
+    public class FindReaderRequest
     {
 
         public string username { get; set; }= null!;

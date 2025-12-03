@@ -20,30 +20,34 @@ namespace LibraryManagement.Repository
             _mapper = mapper;
         }
 
-        // Hàm thêm loại độc giả
-        public async Task<ApiResponse<TypeReaderResponse>> addTypeReaderAsync(TypeReaderRequest request)
+        public async Task<ApiResponse<TypeReaderResponse>> AddTypeReaderAsync(TypeReaderRequest request)
         {
             var newTypeReader = _mapper.Map<TypeReader>(request);
             _context.TypeReaders.Add(newTypeReader);
             await _context.SaveChangesAsync();
             var typeReaderResponse = _mapper.Map<TypeReaderResponse>(newTypeReader);
-            return ApiResponse<TypeReaderResponse>.SuccessResponse("Thêm loại độc giả thành công", 201, typeReaderResponse);
+            return ApiResponse<TypeReaderResponse>.SuccessResponse(
+                "Thêm loại độc giả thành công!", 
+                201, 
+                typeReaderResponse);
         }
 
-        // Hàm xóa loại độc giả
-        public async Task<ApiResponse<string>> deleteTypeReaderAsync(Guid idTypeReader)
+        public async Task<ApiResponse<string>> DeleteTypeReaderAsync(Guid idTypeReader)
         {
             var deleteTypeReader = await _context.TypeReaders.FirstOrDefaultAsync(typereader => typereader.IdTypeReader == idTypeReader);
             if (deleteTypeReader == null)
             {
-                return ApiResponse<string>.FailResponse("Không tìm thấy loại độc giả", 404);
+                return ApiResponse<string>.FailResponse("Không tìm thấy loại độc giả!", 404);
             }
             _context.TypeReaders.Remove(deleteTypeReader);
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.SuccessResponse("Đã xóa loại độc giả", 200, "");
+            return ApiResponse<string>.SuccessResponse(
+                "Đã xóa loại độc giả!", 
+                200, 
+                string.Empty);
         }
 
-        public async Task<List<TypeReaderResponse>> getAllTypeReader()
+        public async Task<ApiResponse<List<TypeReaderResponse>>> GetAllTypeReader()
         {
             var result = await _context.TypeReaders.AsNoTracking()
                 .Select(x => new TypeReaderResponse
@@ -51,26 +55,31 @@ namespace LibraryManagement.Repository
                     idTypeReader = x.IdTypeReader,
                     NameTypeReader = x.NameTypeReader
                 }).ToListAsync();
-            return result; 
+            return ApiResponse<List<TypeReaderResponse>>.SuccessResponse(
+                "Lấy danh sách loại độc giả thành công!",
+                200,
+                result);
         }
 
-
-
-        // Hàm sửa loại độc giả
-        public async Task<ApiResponse<TypeReaderResponse>> updateTypeReaderAsync(TypeReaderRequest request, Guid idTypeReader)
+        public async Task<ApiResponse<TypeReaderResponse>> UpdateTypeReaderAsync(TypeReaderRequest request, 
+                                                                                 Guid idTypeReader)
         {
             var updateTypeReader = await _context.TypeReaders.FirstOrDefaultAsync(typereader => typereader.IdTypeReader == idTypeReader);
             if (updateTypeReader == null)
             {
-                return ApiResponse<TypeReaderResponse>.FailResponse("Không tìm thấy loại độc giả", 404);
+                return ApiResponse<TypeReaderResponse>.FailResponse(
+                    "Không tìm thấy loại độc giả!", 
+                    404);
             }
             _mapper.Map(request, updateTypeReader);
 
             _context.TypeReaders.Update(updateTypeReader);
             await _context.SaveChangesAsync();
             var typeReaderResponse = _mapper.Map<TypeReaderResponse>(updateTypeReader);
-            return ApiResponse<TypeReaderResponse>.SuccessResponse("Thay đổi thông tin loại độc giả thành công", 200, typeReaderResponse);
+            return ApiResponse<TypeReaderResponse>.SuccessResponse(
+                "Thay đổi thông tin loại độc giả thành công!", 
+                200, 
+                typeReaderResponse);
         }
-
     }
 }

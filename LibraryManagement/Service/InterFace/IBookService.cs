@@ -1,46 +1,47 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Dto.Response;
 using LibraryManagement.Helpers;
-using LibraryManagement.Models;
-
 
 namespace LibraryManagement.Repository.InterFace
 {
     public interface IBookService
     {
-        public Task<ApiResponse<HeaderBookResponse>> addBookAsync(HeaderBookCreationRequest request);
-        public Task<ApiResponse<HeaderBookUpdateResponse>> updateBookAsync(HeaderBookUpdateRequest request, string idBook);
-        public Task<ApiResponse<string>> deleteBookAsync(string idBook);
-        public Task<ApiResponse<ChangeStatusOfTheBookResponse>> changeStatusOfTheBookAsync(ChangeStatusOfTheBookRequest request);
+        public Task<ApiResponse<HeaderBookResponse>> AddBookAsync(HeaderBookCreationRequest request);
 
-        public Task<List<EvaluationDetails>> getBooksEvaluation(EvaluationDetailInput dto);
+        public Task<ApiResponse<HeaderBookUpdateResponse>> UpdateBookAsync(HeaderBookUpdateRequest request, string idBook);
         
-        public Task<ApiResponse<bool>> LikeBook(EvaluationDetailInput dto);
+        public Task<ApiResponse<string>> DeleteBookAsync(string idBook);
+        
+        public Task<ApiResponse<ChangeStatusOfTheBookResponse>> ChangeStatusOfTheBookAsync(ChangeStatusOfTheBookRequest request);
 
-        public Task<List<BooksAndComments>> getFavoriteBook(string idUser);
+        public Task<ApiResponse<List<EvaluationDetails>>> GetBooksEvaluation(EvaluationRequest evaluationRequest);
+        
+        public Task<ApiResponse<bool>> LikeBook(EvaluationRequest evaluationRequest);
 
-        public Task<bool> DeleteEvaluation(DeleteEvaluationInput dto);
+        public Task<ApiResponse<List<BooksAndComments>>> GetFavoriteBook(string idReader);
 
-        public Task<List<GetHeaderbookResponse>> GetAllHeaderBooks();
+        public Task<ApiResponse<bool>> DeleteEvaluation(DeleteEvaluationRequest deleteEvaluationRequest);
 
-        public Task<List<GetHeaderbookResponse>> GetAllHeaderBooksByTheBook(string idThebook);
+        public Task<ApiResponse<List<GetHeaderbookResponse>>> GetAllHeaderBooks();
 
-        public Task<List<BooksAndComments>> getAllBooksInDetail(string readerId);
+        public Task<ApiResponse<List<GetHeaderbookResponse>>> GetAllHeaderBooksByTheBook(string idThebook);
 
+        public Task<ApiResponse<List<BooksAndComments>>> GetAllBooksInDetail(string idReader);
 
-        public Task<List<BooksAndCommentsWithoutLogin>> findBook(string namebook);
-        public Task<List<BooksAndCommentsWithoutLogin>> getAllBooksInDetailById(string idbook);
+        public Task<ApiResponse<List<BooksAndCommentsResponse>>> FindBook(string namebook);
 
-        public Task<ApiResponse<bool>> addEvaluation(string idreader,AddEvaluation dto);
+        public Task<ApiResponse<List<BooksAndCommentsResponse>>> GetAllBooksInDetailById(string idbook);
 
-        public Task<List<CommentResponse>> getAllCommentByIdBook(string idbook);
+        public Task<ApiResponse<bool>> AddEvaluation(string idreader, AddEvaluationRequest addEvaluationRequest);
 
-        public Task<List<EvaResponse>> getAllStar(string idbook);
+        public Task<ApiResponse<List<CommentResponse>>> GetAllCommentByIdBook(string idbook);
 
-        public Task<bool> EditCommentAsync(string idComment, string response, int rate);
+        public Task<ApiResponse<List<EvaResponse>>> GetAllStar(string idbook);
 
-        public Task<bool> deleteComment(string idComment, string idReader);
+        public Task<ApiResponse<bool>> EditCommentAsync(string idComment, string response, int rate);
 
-        public Task<List<TheBookStatus>> GetTheBookStatus(string idThebook);
+        public Task<ApiResponse<bool>> DeleteComment(string idComment, string idReader);
+
+        public Task<ApiResponse<List<TheBookStatusResponse>>> GetTheBookStatus(string idThebook);
     } 
 }

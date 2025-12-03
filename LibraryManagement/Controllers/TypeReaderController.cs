@@ -15,47 +15,49 @@ namespace LibraryManagement.Controllers
             _typeReaderServie = typeReaderServie;
         }
 
-        // Endpoint thêm loại độc giả
-        [HttpPost("add_typereader")]
+        [HttpPost("add-typereader")]
         public async Task<IActionResult> addTypeReader([FromBody] TypeReaderRequest request)
         {
-            var result = await _typeReaderServie.addTypeReaderAsync(request);
+            var result = await _typeReaderServie.AddTypeReaderAsync(request);
             if (result.Success)
-                return Created("", result);
-            return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpoint sửa loại độc giả
-        [HttpPut("update_typereader/{idTypeReader}")]
-        public async Task<IActionResult> updateTypeReader([FromBody] TypeReaderRequest request, Guid idTypeReader)
+        [HttpPut("update-typereader")]
+        public async Task<IActionResult> updateTypeReader([FromBody] TypeReaderRequest request, 
+                                                          [FromQuery] Guid idTypeReader)
         {
-            var result = await _typeReaderServie.updateTypeReaderAsync(request, idTypeReader);
+            var result = await _typeReaderServie.UpdateTypeReaderAsync(request, idTypeReader);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpoint xóa loại độc giả
-        [HttpDelete("delete_typereader/{idTypeReader}")]
-        public async Task<IActionResult> deleteTypeReader(Guid idTypeReader)
+        [HttpDelete("delete-typereader")]
+        public async Task<IActionResult> deleteTypeReader([FromQuery] Guid idTypeReader)
         {
-            var result = await _typeReaderServie.deleteTypeReaderAsync(idTypeReader);
+            var result = await _typeReaderServie.DeleteTypeReaderAsync(idTypeReader);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpGet("getAllTypeReader")]
+
+        [HttpGet("get-all-typereader")]
         public async Task<IActionResult> getAllTypeReader()
         {
-            try
+            var result = await _typeReaderServie.GetAllTypeReader();
+            if (result.Success)
             {
-                return Ok(await _typeReaderServie.getAllTypeReader());
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
+            return StatusCode(result.StatusCode, result);
         }
     }
 } 

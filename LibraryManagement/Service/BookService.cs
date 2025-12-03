@@ -7,11 +7,7 @@ using LibraryManagement.Models;
 using LibraryManagement.Repository.InterFace;
 using LibraryManagement.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
-using ZstdSharp.Unsafe;
+using Sprache;
 
 namespace LibraryManagement.Repository
 {
@@ -39,7 +35,7 @@ namespace LibraryManagement.Repository
         }
 
         // Hàm thêm mới đầu sách
-        public async Task<ApiResponse<HeaderBookResponse>> addBookAsync(HeaderBookCreationRequest request)
+        public async Task<ApiResponse<HeaderBookResponse>> AddBookAsync(HeaderBookCreationRequest request)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -50,7 +46,7 @@ namespace LibraryManagement.Repository
                 int publishGap = await _parameterRepository.getValueAsync("PublishGap");
                 if (publishBookGap > publishGap)
                 {
-                    return ApiResponse<HeaderBookResponse>.FailResponse($"Khoảng cách năm xuất bản phải nhỏ hơn {publishGap}", 400);
+                    return ApiResponse<HeaderBookResponse>.FailResponse($"Khoảng cách năm xuất bản phải nhỏ hơn {publishGap}!", 400);
                 }
 
                 // Tạo đầu sách
@@ -64,7 +60,7 @@ namespace LibraryManagement.Repository
 
                 if (typeBook == null)
                 {
-                    return ApiResponse<HeaderBookResponse>.FailResponse("Không tìm thấy loại sách phù hợp", 404);
+                    return ApiResponse<HeaderBookResponse>.FailResponse("Không tìm thấy loại sách phù hợp!", 404);
                 }
 
                 // Kiểm tra sách đã tồn tại thông qua tên đầu sách và năm tái bản
@@ -73,9 +69,8 @@ namespace LibraryManagement.Repository
                                 && b.ReprintYear == request.bookCreateRequest.ReprintYear);
                 if (existedBook)
                 {
-                    return ApiResponse<HeaderBookResponse>.FailResponse("Cuốn sách đã tồn tại với cùng tên và năm tái bản", 400);
+                    return ApiResponse<HeaderBookResponse>.FailResponse("Cuốn sách đã tồn tại với cùng tên và năm tái bản!", 400);
                 }
-
 
                 if (headerBook == null)
                 {
@@ -192,7 +187,7 @@ namespace LibraryManagement.Repository
                 };
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                return ApiResponse<HeaderBookResponse>.SuccessResponse("Tạo sách thành công", 201, response);
+                return ApiResponse<HeaderBookResponse>.SuccessResponse("Tạo sách thành công!", 201, response);
             }
             catch
             {
@@ -202,13 +197,13 @@ namespace LibraryManagement.Repository
         }
 
         // Hàm xóa sách
-        public async Task<ApiResponse<string>> deleteBookAsync(string idBook)
+        public async Task<ApiResponse<string>> DeleteBookAsync(string idBook)
         {
             // Tìm Book
             var book = await _context.Books.FirstOrDefaultAsync(b => b.IdBook == idBook.ToString());
             if (book == null)
             {
-                return ApiResponse<string>.FailResponse("Không tìm thấy sách", 404);
+                return ApiResponse<string>.FailResponse("Không tìm thấy sách!", 404);
             }
 
             // Tìm các cuốn sách thuộc Book
@@ -239,16 +234,16 @@ namespace LibraryManagement.Repository
                 }
             }
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.SuccessResponse("Xóa sách thành công", 200, null!);
+            return ApiResponse<string>.SuccessResponse("Xóa sách thành công!", 200, null!);
         }
 
         // Hàm cập nhật sách
-        public async Task<ApiResponse<HeaderBookUpdateResponse>> updateBookAsync(HeaderBookUpdateRequest request, string idBook)
+        public async Task<ApiResponse<HeaderBookUpdateResponse>> UpdateBookAsync(HeaderBookUpdateRequest request, string idBook)
         {
             var checkBook = await _context.Books.FirstOrDefaultAsync(b => b.IdBook == idBook);
             if (checkBook == null)
             {
-                return ApiResponse<HeaderBookUpdateResponse>.FailResponse("Không tìm thấy sách", 404);
+                return ApiResponse<HeaderBookUpdateResponse>.FailResponse("Không tìm thấy sách!", 404);
             }
 
             HeaderBook headerBook = await _context.HeaderBooks
@@ -291,7 +286,7 @@ namespace LibraryManagement.Repository
                 var typeBook = await _context.TypeBooks.FindAsync(request.IdTypeBook.Value);
                 if (typeBook == null)
                 {
-                    return ApiResponse<HeaderBookUpdateResponse>.FailResponse("Không tìm thấy loại sách phù hợp", 404);
+                    return ApiResponse<HeaderBookUpdateResponse>.FailResponse("Không tìm thấy loại sách phù hợp!", 404);
                 }
                 headerBook.IdTypeBook = typeBook.IdTypeBook;
                 _context.HeaderBooks.Update(headerBook);
@@ -327,7 +322,7 @@ namespace LibraryManagement.Repository
                     int publishGap = await _parameterRepository.getValueAsync("PublishGap");
                     if (publishBookGap > publishGap)
                     {
-                        return ApiResponse<HeaderBookUpdateResponse>.FailResponse($"Khoảng cách năm xuất bản phải nhỏ hơn {publishGap}", 400);
+                        return ApiResponse<HeaderBookUpdateResponse>.FailResponse($"Khoảng cách năm xuất bản phải nhỏ hơn {publishGap}!", 400);
                     }
 
                     checkBook.ReprintYear = bookReq.ReprintYear.Value;
@@ -409,21 +404,21 @@ namespace LibraryManagement.Repository
                 }
             };
 
-            return ApiResponse<HeaderBookUpdateResponse>.SuccessResponse("Cập nhật sách thành công", 200, response);
+            return ApiResponse<HeaderBookUpdateResponse>.SuccessResponse("Cập nhật sách thành công!", 200, response);
         }
 
         // Hàm thay đổi trạng thái cuốn sách
-        public async Task<ApiResponse<ChangeStatusOfTheBookResponse>> changeStatusOfTheBookAsync(ChangeStatusOfTheBookRequest request)
+        public async Task<ApiResponse<ChangeStatusOfTheBookResponse>> ChangeStatusOfTheBookAsync(ChangeStatusOfTheBookRequest request)
         {
             var theBook = await _context.TheBooks.FirstOrDefaultAsync(tb => tb.IdTheBook == request.IdTheBook);
             if (theBook == null)
             {
-                return ApiResponse<ChangeStatusOfTheBookResponse>.FailResponse("Không tìm thấy cuốn sách", 404);
+                return ApiResponse<ChangeStatusOfTheBookResponse>.FailResponse("Không tìm thấy cuốn sách!", 404);
             }
 
             if (string.IsNullOrEmpty(request.Status))
             {
-                return ApiResponse<ChangeStatusOfTheBookResponse>.FailResponse("Trạng thái mới không hợp lệ", 400);
+                return ApiResponse<ChangeStatusOfTheBookResponse>.FailResponse("Trạng thái mới không hợp lệ!", 400);
             }
 
             theBook.Status = request.Status;
@@ -435,15 +430,13 @@ namespace LibraryManagement.Repository
                 Status = theBook.Status
             };
 
-            return ApiResponse<ChangeStatusOfTheBookResponse>.SuccessResponse("Cập nhật trạng thái thành công", 200, response);
+            return ApiResponse<ChangeStatusOfTheBookResponse>.SuccessResponse("Cập nhật trạng thái thành công!", 200, response);
         }
 
-
-
-        public async Task<List<EvaluationDetails>> getBooksEvaluation(EvaluationDetailInput dto)
+        public async Task<ApiResponse<List<EvaluationDetails>>> GetBooksEvaluation(EvaluationRequest evaluationRequest)
         {
           
-            var result = await _context.Evaluates.AsNoTracking().Where(x => x.IdBook == dto.IdBook).Take(50).Select(a => new EvaluationDetails
+            var result = await _context.Evaluates.AsNoTracking().Where(x => x.IdBook == evaluationRequest.IdBook).Take(50).Select(a => new EvaluationDetails
             {
                 IdEvaluation = a.IdEvaluate,
                 IdReader = a.IdReader,
@@ -451,37 +444,49 @@ namespace LibraryManagement.Repository
                 Rating = a.EvaStar,
                 Create_Date = a.CreateDate
             }).ToListAsync();
-            return result;
+            return ApiResponse<List<EvaluationDetails>>.SuccessResponse(
+                "Lấy danh sách đánh giá cuốn sách thành công!", 
+                200, 
+                result);
         }
 
-
-        //
-        public async Task<ApiResponse<bool>> LikeBook(EvaluationDetailInput dto)
+        public async Task<ApiResponse<bool>> LikeBook(EvaluationRequest evaluationRequest)
         {
           
-            var likedBook = await _context.FavoriteBooks.AsNoTracking().Where(x => x.IdReader == dto.idUser && x.IdBook == dto.IdBook).FirstOrDefaultAsync();
+            var likedBook = await _context.FavoriteBooks
+                .AsNoTracking()
+                .Where(x => x.IdReader == evaluationRequest.idUser && x.IdBook == evaluationRequest.IdBook)
+                .FirstOrDefaultAsync();
             if (likedBook != null)
             {
-                await _context.FavoriteBooks.AsNoTracking().Where(x=>x.IdReader == dto.idUser && x.IdBook == dto.IdBook).ExecuteDeleteAsync();
+                await _context.FavoriteBooks
+                    .AsNoTracking()
+                    .Where(x => x.IdReader == evaluationRequest.idUser && x.IdBook == evaluationRequest.IdBook)
+                    .ExecuteDeleteAsync();
                 await _context.SaveChangesAsync();
-                return new ApiResponse<bool>(false, "Bỏ like thành công", 200, data: false);
-             
+                return ApiResponse<bool>.SuccessResponse(
+                                "Bỏ yêu thích sách thành công!",
+                                200,
+                                false);
             }
             else
             {
                 var likeBook = new FavoriteBook
                 {
-                    IdBook = dto.IdBook,
-                    IdReader = dto.idUser,
+                    IdBook = evaluationRequest.IdBook,
+                    IdReader = evaluationRequest.idUser,
                     createDay = DateTime.UtcNow
                 };
                 await _context.LikedHeaderBooks.AddAsync(likeBook);
                 await _context.SaveChangesAsync();
-                return new ApiResponse<bool>(false, "Like thành công", 200, data: false);
+                return ApiResponse<bool>.SuccessResponse(
+                    "Yêu thích sách thành công!",
+                    200,
+                    false);
             }
         }
 
-        public async Task<List<BooksAndComments>> getAllBooksInDetail(string reeaderId)
+        public async Task<ApiResponse<List<BooksAndComments>>> GetAllBooksInDetail(string idReader)
         {
             var result = await _context.Books
                  .AsNoTracking()
@@ -493,7 +498,7 @@ namespace LibraryManagement.Repository
                      image = x.images.Select(img => img.Url).FirstOrDefault() ?? string.Empty,
                      valueOfbook = x.ValueOfBook,
                      publisher = x.Publisher,
-                     isLiked = _context.FavoriteBooks.Any(a=>a.IdReader == reeaderId && a.IdBook == x.IdBook),
+                     isLiked = _context.FavoriteBooks.Any(a=>a.IdReader == idReader && a.IdBook == x.IdBook),
                      reprintYear = x.ReprintYear,
                      Evaluations = x.Evaluates.Select(c => new EvaluationDetails
                      {
@@ -513,23 +518,31 @@ namespace LibraryManagement.Repository
                          UrlAvatar = k.Author.Images.Select(x => x.Url).FirstOrDefault() ?? string.Empty,
                      }).ToList()
                  }).ToListAsync();
-
-            return result;
+            return ApiResponse<List<BooksAndComments>>.SuccessResponse(
+                    "Lấy tất cả chi tiết của sách thành công!",
+                    200,
+                    result);
         }
    
-        public async Task<bool> DeleteEvaluation(DeleteEvaluationInput dto)
+        public async Task<ApiResponse<bool>> DeleteEvaluation(DeleteEvaluationRequest deleteEvaluationRequest)
         {
-            var user = await _authen.AuthenticationAsync(dto.token);
-            if (user == null) return false;
-            var evaluation = await _context.Evaluates.FirstOrDefaultAsync(x => x.IdEvaluate == dto.IdValuation);
-            if (evaluation == null) return false; 
+            var user = await _authen.AuthenticationAsync(deleteEvaluationRequest.token);
+            if (user == null)
+                return ApiResponse<bool>.FailResponse("Không tìm thấy độc giả!", 404);
+
+            var evaluation = await _context.Evaluates.FirstOrDefaultAsync(x => x.IdEvaluate == deleteEvaluationRequest.IdValuation);
+            if (evaluation == null)
+                return ApiResponse<bool>.FailResponse("Không tìm thấy đánh giá!", 404);
+
             _context.Evaluates.Remove(evaluation);
             await _context.SaveChangesAsync();
-            return true; 
-
+            return ApiResponse<bool>.SuccessResponse(
+                "Xóa đánh giá thành công!",
+                200,
+                true);
         }
 
-        public async Task<List<GetHeaderbookResponse>> GetAllHeaderBooks()
+        public async Task<ApiResponse<List<GetHeaderbookResponse>>> GetAllHeaderBooks()
         {
         
             var result = await _context.HeaderBooks
@@ -542,15 +555,18 @@ namespace LibraryManagement.Repository
                     Describe = a.DescribeBook
                 }).ToListAsync();
 
-            return result; 
+            return ApiResponse<List<GetHeaderbookResponse>>.SuccessResponse(
+                "Lấy tất cả đầu sách thành công!",
+                200,
+                result);
         }
 
-        public async Task<List<BooksAndCommentsWithoutLogin>> findBook(string namebook)
+        public async Task<ApiResponse<List<BooksAndCommentsResponse>>> FindBook(string namebook)
         {
             var result = await _context.Books
             .AsNoTracking()
             .Where(x => x.HeaderBook.NameHeaderBook.ToLower().Contains(namebook.ToLower()))
-            .Select(x => new BooksAndCommentsWithoutLogin
+            .Select(x => new BooksAndCommentsResponse
             {
                 idBook = x.IdBook,
                 nameBook = x.HeaderBook.NameHeaderBook,
@@ -578,24 +594,24 @@ namespace LibraryManagement.Repository
                 }).ToList()
             }).ToListAsync();
 
-            return result; 
+            return ApiResponse<List<BooksAndCommentsResponse>>.SuccessResponse(
+                "Tìm kiếm sách thành công!",
+                200,
+                result);
         }
 
-        public async Task<List<BooksAndComments>> getFavoriteBook(string idUser)
+        public async Task<ApiResponse<List<BooksAndComments>>> GetFavoriteBook(string idUser)
         {
             var result = await _context.FavoriteBooks
                .AsNoTracking()
                .Where(x=>x.IdReader == idUser)
                .Include(a => a.book).ThenInclude(x=>x.HeaderBook)
-               .ThenInclude(x => x.bookWritings)
-               .ThenInclude(c => c.Author)
-                
+                    .ThenInclude(x => x.bookWritings)
+                    .ThenInclude(c => c.Author)
                .Include(x=>x.book)
-               .ThenInclude(a => a.Evaluates)
-
+                    .ThenInclude(a => a.Evaluates)
                .Include(x=>x.book)
-               .ThenInclude(a => a.images)
-               
+                    .ThenInclude(a => a.images)
                .Select(x => new BooksAndComments
                {
                    idBook = x.IdBook,
@@ -630,15 +646,18 @@ namespace LibraryManagement.Repository
                              }).ToList(),
                    image = x.book.images.FirstOrDefault(a=>a.IdBook == x.IdBook) != null ? x.book.images.FirstOrDefault()!.Url : string.Empty
                }).ToListAsync();
-            return result; 
+            return ApiResponse<List<BooksAndComments>>.SuccessResponse(
+                "Lấy yêu thích sách thành công!",
+                200,
+                result);
         }
 
-        public async Task<List<BooksAndCommentsWithoutLogin>> getAllBooksInDetailById( string idbook)
+        public async Task<ApiResponse<List<BooksAndCommentsResponse>>> GetAllBooksInDetailById(string idbook)
         {
                 var result = await _context.Books
               .AsNoTracking()
               .Where(x => x.IdBook == idbook)
-              .Select(x => new BooksAndCommentsWithoutLogin
+              .Select(x => new BooksAndCommentsResponse
               {
                   idBook = x.IdBook,
                   nameBook = x.HeaderBook.NameHeaderBook,
@@ -666,10 +685,13 @@ namespace LibraryManagement.Repository
                   }).ToList()
               }).ToListAsync();
 
-            return result;
+            return ApiResponse<List<BooksAndCommentsResponse>>.SuccessResponse(
+                "Lấy chi tiết sách thành công!",
+                200,
+                result);
         }
 
-        public async Task<List<GetHeaderbookResponse>> GetAllHeaderBooksByTheBook(string idThebook)
+        public async Task<ApiResponse<List<GetHeaderbookResponse>>> GetAllHeaderBooksByTheBook(string idThebook)
         {
             var result = await _context.TheBooks.AsNoTracking()
                    .Where(x => x.IdTheBook == idThebook)
@@ -681,10 +703,13 @@ namespace LibraryManagement.Repository
                         Describe = x.Book.HeaderBook.DescribeBook
                    })
                     .ToListAsync();
-            return result; 
+            return ApiResponse<List<GetHeaderbookResponse>>.SuccessResponse(
+                "Lấy tất cả đầu sách thành công!",
+                200,
+                result);
         }
 
-        public async Task<ApiResponse<bool>> addEvaluation( string idReader, AddEvaluation dto)
+        public async Task<ApiResponse<bool>> AddEvaluation(string idReader, AddEvaluationRequest dto)
         {
             try
             {
@@ -698,15 +723,18 @@ namespace LibraryManagement.Repository
                 };
                 await _context.AddAsync(evaluate);
                 await _context.SaveChangesAsync();
-                return new ApiResponse<bool>(true, "Success", 201, true);
-            }catch(Exception ex )
-            {
-                return new ApiResponse<bool>(false, "Fail", 403, false); 
+                return ApiResponse<bool>.SuccessResponse(
+                    "Tạo đánh giá thành công!",
+                    201,
+                    true);
             }
-            
+            catch(Exception ex )
+            {
+                return ApiResponse<bool>.FailResponse("Tạo đánh giá thất bại!", 404);
+            }
         }
 
-        public async Task<List<CommentResponse>> getAllCommentByIdBook(string idbook)
+        public async Task<ApiResponse<List<CommentResponse>>> GetAllCommentByIdBook(string idbook)
         {
             var result = await _context.Evaluates
                          .AsNoTracking()
@@ -717,24 +745,32 @@ namespace LibraryManagement.Repository
                              IdEvaluation = x.IdEvaluate.ToString(),
                              IdReader = x.IdReader,
                              NameReader = x.Reader.NameReader!,
-                             AvatarUrl = _context.Images.Where(a => a.IdReader == x.IdReader).Select(x=>x.Url).FirstOrDefault()!,
+                             AvatarUrl = _context.Images.Where(a => a.IdReader == x.IdReader)
+                                                        .Select( x=> x.Url)
+                                                        .FirstOrDefault()!,
                              Comment = x.EvaComment,
                              Star = x.EvaStar,
                              CreateDate = x.CreateDate
-                         }).ToListAsync(); 
-            return result;
+                         }).ToListAsync();
+            return ApiResponse<List<CommentResponse>>.SuccessResponse(
+                "Lấy tất cả bình luận thành công!",
+                200,
+                result);
         }
 
-        public async Task<List<EvaResponse>> getAllStar(string idbook)
+        public async Task<ApiResponse<List<EvaResponse>>> GetAllStar(string idbook)
         {
             var values = await _context.Evaluates.AsNoTracking().Where(x => x.IdBook == idbook)
                 .GroupBy(x => x.EvaStar)
                 .Select(x => new EvaResponse { Star = x.Key, Status = x.Count() })
                 .ToListAsync();
-            return values; 
+            return ApiResponse<List<EvaResponse>>.SuccessResponse(
+                "Lấy danh sách sao thành công!",
+                200,
+                values);
         }
 
-        public async Task<bool> EditCommentAsync(string idComment, string comment, int rate)
+        public async Task<ApiResponse<bool>> EditCommentAsync(string idComment, string comment, int rate)
         {
             var updatedCount = await _context.Evaluates
                 .Where(x => x.IdEvaluate.ToString() == idComment)
@@ -743,29 +779,37 @@ namespace LibraryManagement.Repository
                     .SetProperty(x => x.CreateDate, DateTime.UtcNow)
                     .SetProperty(x=>x.EvaStar, rate)
                 );
-
-            return updatedCount > 0;
+            return ApiResponse<bool>.SuccessResponse(
+                "Lấy danh sách sao thành công!",
+                200,
+                updatedCount > 0);
         }
 
-        public async Task<bool> deleteComment(string idComment, string idReader)
+        public async Task<ApiResponse<bool>> DeleteComment(string idComment, string idReader)
         {
             var deleted = await _context.Evaluates
                .Where(x => x.IdEvaluate.ToString() == idComment && x.IdReader == idReader)
                .ExecuteDeleteAsync();
 
-            return deleted > 0;
+            return ApiResponse<bool>.SuccessResponse(
+                "Lấy danh sách sao thành công!",
+                200,
+                deleted > 0);
         }
 
-        public async Task<List<TheBookStatus>> GetTheBookStatus(string idThebook)
+        public async Task<ApiResponse<List<TheBookStatusResponse>>> GetTheBookStatus(string idThebook)
         {
             var result = await _context.TheBooks.AsNoTracking().Select(x =>
-            new TheBookStatus
+            new TheBookStatusResponse
             {
                 IdTheBook = x.IdTheBook,
                 IsAvailable = x.Status
             }
             ).ToListAsync();
-            return result;
+            return ApiResponse<List<TheBookStatusResponse>>.SuccessResponse(
+                "Lấy danh sách trạng thái sách thành công!",
+                200,
+                result);
         }
     }
 }

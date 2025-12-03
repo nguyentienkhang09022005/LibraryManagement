@@ -1,6 +1,4 @@
-﻿using LibraryManagement.Dto.Response;
-
-namespace LibraryManagement.Dto.Request
+﻿namespace LibraryManagement.Dto.Response
 {
     public class GetAuthorByIdResponse
     {

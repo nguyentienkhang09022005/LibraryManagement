@@ -6,13 +6,14 @@ namespace LibraryManagement.Repository.InterFace
 {
     public interface IBookReceiptService
     {
-        Task<ApiResponse<BooKReceiptResponse>> addBookReceiptAsync(BookReceiptRequest request);
-        Task<ApiResponse<BooKReceiptResponse>> updateBookReceiptAsync(BookReceiptRequest request, Guid idBookReipt);
+        Task<ApiResponse<BooKReceiptResponse>> AddBookReceiptAsync(BookReceiptRequest request);
 
-        Task<ApiResponse<string>> deleteBookReceiptAsync(Guid idBookReipt);
-        public Task<string> generateNextIdBookAsync();
-        public Task<string> generateNextIdTheBookAsync();
+        Task<ApiResponse<string>> DeleteBookReceiptAsync(Guid idBookReipt);
 
-        public Task<List<BookReceiptInformationOutput>> getAllReceiptHistory(string token);
-     }
+        Task<string> generateNextIdBookAsync();
+
+        Task<string> generateNextIdTheBookAsync();
+
+        Task<ApiResponse<List<BookReceiptInformationOutput>>> GetAllReceiptHistory(string token);
+    }
 }

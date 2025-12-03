@@ -25,10 +25,10 @@ namespace LibraryManagement.Repository
 
             int nextNumber = 1;
 
-            if (nextID != null && nextID.IdBook.StartsWith("book")) // Kiểm tra có tổn tại sách không và ký tự đầu tiên là book
+            if (nextID != null && nextID.IdBook.StartsWith("book")) 
             {
                 string numberPart = nextID.IdBook.Substring(4);
-                if (int.TryParse(numberPart, out int parsed)) // Kiểm tra chuyển đổi từ string qua int
+                if (int.TryParse(numberPart, out int parsed)) 
                 {
                     nextNumber = parsed + 1;
                 }
@@ -43,10 +43,10 @@ namespace LibraryManagement.Repository
 
             int nextNumber = 1;
 
-            if (nextID != null && nextID.IdTheBook.StartsWith("tb")) // Kiểm tra có tổn tại sách không và ký tự đầu tiên là book
+            if (nextID != null && nextID.IdTheBook.StartsWith("tb")) 
             {
                 string numberPart = nextID.IdTheBook.Substring(2);
-                if (int.TryParse(numberPart, out int parsed)) // Kiểm tra chuyển đổi từ string qua int
+                if (int.TryParse(numberPart, out int parsed))
                 {
                     nextNumber = parsed + 1;
                 }
@@ -54,22 +54,23 @@ namespace LibraryManagement.Repository
             return $"tb{nextNumber:D5}";
         }
 
-        // Hàm tạo phiếu nhập sách
-        public async Task<ApiResponse<BooKReceiptResponse>> addBookReceiptAsync(BookReceiptRequest request)
+        public async Task<ApiResponse<BooKReceiptResponse>> AddBookReceiptAsync(BookReceiptRequest request)
         {
             // Quy định khoảng cách năm xuất bản
             int publishBookGap = DateTime.Now.Year - request.headerBook.bookCreateRequest.ReprintYear;
             int publishGap = await _parameterRepository.getValueAsync("PublishGap");
             if (publishBookGap > publishGap)
             {
-                return ApiResponse<BooKReceiptResponse>.FailResponse($"Khoảng cách năm xuất bản phải nhỏ hơn {publishGap}", 400);
+                return ApiResponse<BooKReceiptResponse>.FailResponse(
+                    $"Khoảng cách năm xuất bản phải nhỏ hơn {publishGap}!", 
+                    400);
             }
 
             // Kiểm tra Reader có tồn tại hay không
             var reader = await _context.Readers.FirstOrDefaultAsync(rd => rd.IdReader == request.IdReader);
             if (reader == null)
             {
-                return ApiResponse<BooKReceiptResponse>.FailResponse("không tìm thấy độc giả", 404);
+                return ApiResponse<BooKReceiptResponse>.FailResponse("không tìm thấy độc giả!", 404);
             }    
 
             var headerBook = await _context.HeaderBooks.FirstOrDefaultAsync(hb => hb.NameHeaderBook == request.headerBook.NameHeaderBook);
@@ -79,10 +80,11 @@ namespace LibraryManagement.Repository
                 var existedBook = await _context.Books
                     .AnyAsync(b => b.IdHeaderBook == headerBook.IdHeaderBook &&
                                    b.ReprintYear == request.headerBook.bookCreateRequest.ReprintYear);
-
                 if (existedBook)
                 {
-                    return ApiResponse<BooKReceiptResponse>.FailResponse("Cuốn sách đã tồn tại với cùng tên và năm tái bản", 400);
+                    return ApiResponse<BooKReceiptResponse>.FailResponse(
+                        "Cuốn sách đã tồn tại với cùng tên và năm tái bản!", 
+                        400);
                 }
             }
 
@@ -178,16 +180,19 @@ namespace LibraryManagement.Repository
                     }
                 }
             };
-            return ApiResponse<BooKReceiptResponse>.SuccessResponse("Tạo phiếu nhập sách thành công", 201, response);
+            return ApiResponse<BooKReceiptResponse>.SuccessResponse(
+                "Tạo phiếu nhập sách thành công!", 
+                201, 
+                response);
         }
 
         // Xóa phiếu nhập sách
-        public async Task<ApiResponse<string>> deleteBookReceiptAsync(Guid idBookReipt)
+        public async Task<ApiResponse<string>> DeleteBookReceiptAsync(Guid idBookReipt)
         {
             // Lấy BookReceipt
             var bookReceipt = await _context.BookReceipts.FirstOrDefaultAsync(br => br.IdBookReceipt == idBookReipt);
             if (bookReceipt == null)
-                return ApiResponse<string>.FailResponse("Phiếu nhập sách không tồn tại", 404);
+                return ApiResponse<string>.FailResponse("Phiếu nhập sách không tồn tại!", 404);
 
             var detailReceipts = await _context.DetailBookReceipts
                 .Where(d => d.IdBookReceipt == bookReceipt.IdBookReceipt)
@@ -215,38 +220,36 @@ namespace LibraryManagement.Repository
             _context.HeaderBooks.RemoveRange(headerBooksToDelete);
 
              await _context.SaveChangesAsync();
-             return ApiResponse<string>.SuccessResponse("Xóa phiếu nhập sách thành công", 200, "");
+             return ApiResponse<string>.SuccessResponse("Xóa phiếu nhập sách thành công!", 200, string.Empty);
         }
 
-        // Sửa phiếu nhập sách
-        public async Task<ApiResponse<BooKReceiptResponse>> updateBookReceiptAsync(BookReceiptRequest request, Guid idBookReipt)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<BookReceiptInformationOutput>> getAllReceiptHistory(string token)
+        public async Task<ApiResponse<List<BookReceiptInformationOutput>>> GetAllReceiptHistory(string token)
         {
             var result = await _context.Readers
                  .Join(_context.BookReceipts,
-                 reader => reader.IdReader,
-                 receipt => receipt.IdReader,
-                 (reader, receipt) => new { reader, receipt })
-                 .Join(
-                _context.DetailBookReceipts,
-                combined => combined.receipt.IdBookReceipt,
-                detail => detail.IdBookReceipt,
-                (combined, detail) => new { combined.reader, combined.receipt, detail }
-               )
+                    reader => reader.IdReader,
+                    receipt => receipt.IdReader,
+                    (reader, receipt) => new { 
+                        reader, 
+                        receipt 
+                    })
+                 .Join(_context.DetailBookReceipts,
+                    combined => combined.receipt.IdBookReceipt,
+                    detail => detail.IdBookReceipt,
+                    (combined, detail) => new { 
+                        combined.reader, 
+                        combined.receipt, 
+                        detail 
+                    })
                  .Join(_context.Books,
-                 combined => combined.detail.IdBook,
-                 book => book.IdBook,
-                 (combined, book) => new
-                 {
-                     combined.reader,
-                     combined.receipt,
-                     combined.detail,
-                     book
-                 })
+                     combined => combined.detail.IdBook,
+                     book => book.IdBook,
+                     (combined, book) => new {
+                         combined.reader,
+                         combined.receipt,
+                         combined.detail,
+                         book
+                     })
                  .Select(x => new BookReceiptInformationOutput
                  {
                      IdReader = x.reader.IdReader,
@@ -255,11 +258,11 @@ namespace LibraryManagement.Repository
                      Quantity = x.detail.Quantity,
                      unitprice = x.detail.UnitPrice,
                      IdBook = x.book.IdBook,
-                   
-
                  }).ToListAsync();
-            return result;
-                
+            return ApiResponse<List<BookReceiptInformationOutput>>.SuccessResponse(
+                "Lấy tất cả phiếu nhập sách thành công!", 
+                200,
+                result);
         }
     }
 }

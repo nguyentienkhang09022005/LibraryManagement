@@ -16,30 +16,38 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint thêm phiếu nhập sách
-        [HttpPost("add_bookreceipt")]
-        public async Task<IActionResult> addBookReceipt([FromForm] BookReceiptRequest request)
+        [HttpPost("add-bookreceipt")]
+        public async Task<IActionResult> addBookReceipt([FromBody] BookReceiptRequest request)
         {
-            var result = await _bookReceiptService.addBookReceiptAsync(request);
+            var result = await _bookReceiptService.AddBookReceiptAsync(request);
             if (result.Success)
-                return Created("", result);
-            else return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint xóa phiếu nhập sách
-        [HttpDelete("delete_bookreceipt/{idBookReceipt}")]
-        public async Task<IActionResult> deleteBookReceipt(Guid idBookReceipt)
+        [HttpDelete("delete-bookreceipt")]
+        public async Task<IActionResult> deleteBookReceipt([FromQuery] Guid idBookReceipt)
         {
-            var result = await _bookReceiptService.deleteBookReceiptAsync(idBookReceipt);
+            var result = await _bookReceiptService.DeleteBookReceiptAsync(idBookReceipt);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpPost("getAllReceipt")]
-        public async Task<IActionResult> getAllReceipt([FromBody]string token)
+
+        [HttpGet("list-receipts")]
+        public async Task<IActionResult> getAllReceipt([FromQuery] string token)
         {
-            var result = await _bookReceiptService.getAllReceiptHistory(token);
-            if (result == null) return Unauthorized("Không có quyền admin");
-            return Ok(result);
+            var result = await _bookReceiptService.GetAllReceiptHistory(token);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

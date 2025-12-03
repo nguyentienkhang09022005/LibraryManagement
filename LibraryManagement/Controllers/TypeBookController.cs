@@ -20,8 +20,10 @@ namespace LibraryManagement.Controllers
         {
             var result = await _typeBookService.AddTypeBookAsync(request);
             if (result.Success)
-                return Created("", result);
-            return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpPut("update-typebook")]
@@ -30,8 +32,10 @@ namespace LibraryManagement.Controllers
         {
             var result = await _typeBookService.UpdateTypeBookAsync(request, idTypeBook);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpDelete("delete-typebook")]
@@ -39,21 +43,32 @@ namespace LibraryManagement.Controllers
         {
             var result = await _typeBookService.DeleteTypeBook(idTypeBook);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("list-typebook-and-header")]
         public async Task<IActionResult> getTypeBookAndHeaders()
         {
             var result = await _typeBookService.GetTypebookAndHeaders();
-            return Ok(result); 
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpGet("list-all-typebook")]
         public async Task<IActionResult> getAlltypeBook()
         {
-            return Ok(await _typeBookService.GetAllTypeBook());
+            var result = await _typeBookService.GetAllTypeBook();
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

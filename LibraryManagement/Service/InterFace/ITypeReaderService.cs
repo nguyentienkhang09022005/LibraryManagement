@@ -6,11 +6,12 @@ namespace LibraryManagement.Repository.InterFace
 {
     public interface ITypeReaderService
     {
-        public Task<ApiResponse<TypeReaderResponse>> addTypeReaderAsync(TypeReaderRequest request);
-        public Task<ApiResponse<TypeReaderResponse>> updateTypeReaderAsync(TypeReaderRequest request, Guid idTypeReader);
-        public Task<ApiResponse<string>> deleteTypeReaderAsync(Guid idTypeReader);
+        Task<ApiResponse<TypeReaderResponse>> AddTypeReaderAsync(TypeReaderRequest request);
 
-        public Task<List<TypeReaderResponse>> getAllTypeReader();
-     
+        Task<ApiResponse<TypeReaderResponse>> UpdateTypeReaderAsync(TypeReaderRequest request, Guid idTypeReader);
+        
+        Task<ApiResponse<string>> DeleteTypeReaderAsync(Guid idTypeReader);
+
+        Task<ApiResponse<List<TypeReaderResponse>>> GetAllTypeReader();
     }
 }
