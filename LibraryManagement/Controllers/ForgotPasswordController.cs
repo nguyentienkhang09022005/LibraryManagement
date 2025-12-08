@@ -1,6 +1,5 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Service.InterFace;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagement.Controllers
@@ -17,39 +16,51 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint gửi otp
-        [HttpPost("send_otp")]
+        [HttpPost("forgot-password-send-otp")]
         public async Task<IActionResult> sendOTP([FromBody] EmailRequest request)
         {
-            var result = await _forgotPasswordService.SendForgotPasswordOtpAsync(request.Email);
-            if (result) return Created("", new { success = true, message = "OTP đã được gửi" });
-            return BadRequest(new { success = false, message = "Gửi OTP thất bại" });
+            var result = await _forgotPasswordService.SendForgotPasswordOtpAsync(request);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint gửi lại otp
-        [HttpPost("resend_otp")]
+        [HttpPost("resend-otp")]
         public async Task<IActionResult> resendOTP([FromBody] EmailRequest request)
         {
-            var result = await _forgotPasswordService.ResendForgotPasswordOtpAsync(request.Email);
-            if (result) return Created("", new { success = true, message = "OTP đã được gửi lại" });
-            return BadRequest(new { success = false, message = "Gửi OTP thất bại" });
+            var result = await _forgotPasswordService.ResendForgotPasswordOtpAsync(request);
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint xác thực otp
-        [HttpPost("verify_otp")]
+        [HttpPost("forgot-password-confirm-otp")]
         public async Task<IActionResult> verifyOTP([FromBody] VerifyOtpRequest request)
         {
             var result = await _forgotPasswordService.VerifyForgotPasswordOtpAsync(request);
-            if (result) return Created("", new { success = true, message = "Xác thực OTP thành công" });
-            return BadRequest(new { success = false, message = "OTP không thuộc Email" });
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint thay đổi mật khẩu
-        [HttpPost("change_password")]
+        [HttpPost("change-password")]
         public async Task<IActionResult> changePassword([FromBody] ChangePasswordRequest request)
         {
             var result = await _forgotPasswordService.ChangePasswordAsync(request);
-            if (result) return Created("", new { success = true, message = "Thay đổi mật khẩu thành công" });
-            return BadRequest(new { success = false, message = "Thay đổi mật khẩu thất bại" });
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

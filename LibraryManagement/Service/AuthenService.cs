@@ -99,7 +99,7 @@ namespace LibraryManagement.Repository
                 var checkEmail = await _context.Readers.FirstOrDefaultAsync(e => e.Email == confirmOtpRequest.Email);
                 if (checkEmail != null)
                 {
-                    throw new Exception("Email đã tồn tại");
+                    throw new Exception("Email đã tồn tại!");
                 }
 
                 var newRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == ConstantRoles.Reader);

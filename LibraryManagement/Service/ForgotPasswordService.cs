@@ -1,103 +1,137 @@
-﻿using LibraryManagement.Dto.Request;
-using LibraryManagement.Models;
-using LibraryManagement.Service.InterFace;
-using FluentEmail.Core;
-using Microsoft.EntityFrameworkCore;
+﻿using FluentEmail.Core;
 using LibraryManagement.Data;
+using LibraryManagement.Dto.Request;
+using LibraryManagement.Dto.Response;
+using LibraryManagement.Helpers;
+using LibraryManagement.Service.InterFace;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace LibraryManagement.Service
 {
     public class ForgotPasswordService : IForgotPasswordService
     {
         private readonly LibraryManagermentContext _context;
-        private readonly IFluentEmail _fluentEmail;
+        private readonly IFluentEmail _email;
+        private readonly IMemoryCache _memoryCache;
 
-        public ForgotPasswordService(LibraryManagermentContext context, IFluentEmail fluentEmail)
+
+        public ForgotPasswordService(LibraryManagermentContext context, 
+                                     IFluentEmail email, 
+                                     IMemoryCache memoryCache)
         {
             _context = context;
-            _fluentEmail = fluentEmail;
+            _email = email;
+            _memoryCache = memoryCache;
         }
 
         // Hàm tạo otp
-        public async Task<bool> SendForgotPasswordOtpAsync(string email)
+        public async Task<ApiResponse<string>> SendForgotPasswordOtpAsync(EmailRequest request)
         {
-            var reader = await _context.Readers.FirstOrDefaultAsync(r => r.Email == email);
-            if (reader == null)
-                throw new Exception("User not found");
-
-            // Xoá các OTP cũ của reader
-            var oldOtps = _context.Otps.Where(x => x.IdReader == reader.IdReader);
-            _context.Otps.RemoveRange(oldOtps);
-
-            var otpCode = new Random().Next(100000, 999999);
-
-            var otp = new Otp
+            var checkEmail = await _context.Readers.FirstOrDefaultAsync(x => x.Email == request.Email);
+            if (checkEmail == null)
             {
-                IdOtp = Guid.NewGuid(),
-                IdReader = reader.IdReader,
-                otp = otpCode,
-                expirationTime = DateTime.UtcNow.AddMinutes(1) // Hiệu lực 1 phút
-            };
+                return ApiResponse<string>.FailResponse("Email không tồn tại!", 404);
+            }
 
-            _context.Otps.Add(otp);
-            await _context.SaveChangesAsync();
+            try
+            {
+                var otp = new Random().Next(100000, 999999).ToString();
 
-            await _fluentEmail
-                .To(email)
-                .Subject("Mã OTP khôi phục mật khẩu")
-                .Body($"<p>Mã OTP của bạn là: <strong>{otpCode}</strong>. Hiệu lực trong 1 phút.</p>", true)
-                .SendAsync();
+                var cacheKey = $"OTP_Forgot_Password_{request.Email}";
 
-            return true;
+                var cacheData = new ForgotPasswordCacheData
+                {
+                    Otp = otp,
+                    Email = request.Email,
+                };
+
+                _memoryCache.Set(cacheKey, cacheData, new MemoryCacheEntryOptions()
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2) // OTP hết hạn sau 2 phút
+                });
+
+                // Gửi OTP đến mail
+                var response = await _email
+                    .To(request.Email)
+                    .Subject("Mã OTP quên mật khẩu")
+                    .Tag("otp-forgot-password")
+                    .Body($"<p>Mã OTP của bạn là: <strong>{otp}</strong> (hiệu lực trong 2 phút).</p>", true)
+                    .SendAsync();
+
+                if (!response.Successful)
+                {
+                    return ApiResponse<string>.FailResponse("Gửi OTP thất bại! Vui lòng thử lại sau.", 500);
+                }
+
+                return ApiResponse<string>.SuccessResponse("OTP đã được gửi đến bạn!", 200, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
+            }
         }
 
         // Hàm gửi lại otp
-        public async Task<bool> ResendForgotPasswordOtpAsync(string email)
+        public async Task<ApiResponse<string>> ResendForgotPasswordOtpAsync(EmailRequest request)
         {
-            return await SendForgotPasswordOtpAsync(email);
+            return await SendForgotPasswordOtpAsync(request);
         }
 
         // Hàm xác thực otp và email
-        public async Task<bool> VerifyForgotPasswordOtpAsync(VerifyOtpRequest request)
+        public async Task<ApiResponse<string>> VerifyForgotPasswordOtpAsync(VerifyOtpRequest request)
         {
-            var reader = await _context.Readers.FirstOrDefaultAsync(r => r.Email == request.Email);
-            if (reader == null)
-                throw new Exception("User not found");
+            try
+            {
+                var checkEmail = await _context.Readers.FirstOrDefaultAsync(e => e.Email == request.Email);
+                if (checkEmail == null)
+                {
+                    throw new Exception("Không tìm thấy độc giả!");
+                }
 
-            var latestOtp = await _context.Otps
-                .Where(r => r.IdReader == reader.IdReader)
-                .OrderByDescending(otp => otp.expirationTime)
-                .FirstOrDefaultAsync();
+                var cacheKey = $"OTP_Forgot_Password_{request.Email}";
+                if (!_memoryCache.TryGetValue<ForgotPasswordCacheData>(cacheKey, out var cacheData))
+                {
+                    return ApiResponse<string>.FailResponse("OTP không hợp lệ hoặc đã hết hạn!", 400);
+                }
 
-            if (latestOtp == null)
-                throw new Exception("Không tìm thấy mã OTP");
+                if (cacheData.Otp != request.Otp)
+                {
+                    return ApiResponse<string>.FailResponse("OTP không đúng!", 400);
+                }
 
-            if (latestOtp.expirationTime < DateTime.UtcNow)
-                throw new Exception("Mã OTP đã hết hạn");
-
-            if (latestOtp.otp.ToString() != request.Otp)
-                throw new Exception("Mã OTP không đúng");
-
-            return true;
+                return ApiResponse<string>.SuccessResponse("Xác thực OTP thành công!", 200, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
+            }
         }
 
         // Hàm thay đổi mật khẩu
-        public async Task<bool> ChangePasswordAsync(ChangePasswordRequest request)
+        public async Task<ApiResponse<string>> ChangePasswordAsync(ChangePasswordRequest request)
         {
-            if (request.NewPassword != request.RepeatPassword)
-                throw new Exception("Mật khẩu không khớp");
+            try
+            {
+                if (request.NewPassword != request.RepeatPassword)
+                    return ApiResponse<string>.FailResponse("Hai mật khẩu không khớp!", 400);
 
-            var reader = await _context.Readers.FirstOrDefaultAsync(r => r.Email == request.Email);
-            if (reader == null)
-                throw new Exception("User not found");
+                var reader = await _context.Readers.FirstOrDefaultAsync(r => r.Email == request.Email);
+                if (reader == null)
+                    return ApiResponse<string>.FailResponse("Không tìm thấy độc giả!", 404);
 
-            reader.ReaderPassword = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+                reader.ReaderPassword = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
 
-            _context.Readers.Attach(reader);
-            _context.Entry(reader).Property(r => r.ReaderPassword).IsModified = true;
-            await _context.SaveChangesAsync();
+                _context.Readers.Attach(reader);
+                _context.Entry(reader).Property(r => r.ReaderPassword).IsModified = true;
+                await _context.SaveChangesAsync();
 
-            return true;
+                return ApiResponse<string>.SuccessResponse("Thay đổi mật khẩu thành công!", 200, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<string>.FailResponse("Lỗi hệ thống: " + ex.Message, 500);
+            }
         }
     }
 }
