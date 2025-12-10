@@ -6,21 +6,18 @@ namespace LibraryManagement.Repository.IRepository
 {
     public interface IReaderService
     {
-        // Interface thêm độc giả
         public Task<ApiResponse<ReaderResponse>> addReaderAsync(ReaderCreationRequest request);
 
-        // Interface lấy danh sách độc giả
-        public Task<List<ReaderResponse>> getAllReaderAsync();
+        Task<ApiResponse<List<ReaderResponse>>> getAllReaderAsync();
 
-        // Interface sửa độc giả
         public Task<ApiResponse<ReaderResponse>> updateReaderAsync(ReaderUpdateRequest request, string idReader);
 
-        // Interface xóa độc giả
         public Task<ApiResponse<string>> deleteReaderAsync(string idReader);
 
-        public Task<FindReaderOutputDto> findReaderAsync(string dto);
+        Task<ApiResponse<FindReaderResponse>> findReaderAsync(string dto);
+
         public Task<string> generateNextIdReaderAsync();
 
-        public Task<FindReaderOutputDto> findReaderInputAsync(string idReader);
+        Task<ApiResponse<FindReaderResponse>> findReaderInputAsync(string idReader);
     }
 }

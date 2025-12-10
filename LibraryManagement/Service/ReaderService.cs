@@ -15,19 +15,13 @@ namespace LibraryManagement.Repository
     public class ReaderService : IReaderService
     {
         private readonly LibraryManagermentContext _context;
-        private readonly IMapper _mapper;
-        private readonly IAuthenService _account;
         private readonly IParameterService _parameterService;
         private readonly IUpLoadImageFileService _upLoadImageFileService;
         public ReaderService(LibraryManagermentContext contex, 
-                                IMapper mapper, 
-                                IAuthenService authen,
                                 IParameterService parameterService,
                                 IUpLoadImageFileService upLoadImageFileService)
         {
-            _account = authen;
             _context = contex;
-            _mapper = mapper;
             _parameterService = parameterService;
             _upLoadImageFileService = upLoadImageFileService;
         }
@@ -62,14 +56,14 @@ namespace LibraryManagement.Repository
             int maxAge = await _parameterService.getValueAsync("MaxReaderAge");
             if(readerAge < minAge || readerAge > maxAge) // Kiểm tra tuổi độc giả
             {
-                return ApiResponse<ReaderResponse>.FailResponse($"Tuổi độc giả phải từ {minAge} đến {maxAge} tuổi", 400);
+                return ApiResponse<ReaderResponse>.FailResponse($"Tuổi độc giả phải từ {minAge} đến {maxAge} tuổi!", 400);
             }
 
             // Validate số điện thoại
             if (!string.IsNullOrEmpty(request.Phone))
             {
                 if (!Regex.IsMatch(request.Phone, @"^\d{10,12}$"))
-                    return ApiResponse<ReaderResponse>.FailResponse("Số điện thoại phải gồm từ 10 đến 12 chữ số", 400);
+                    return ApiResponse<ReaderResponse>.FailResponse("Số điện thoại phải gồm từ 10 đến 12 chữ số!", 400);
             }
 
             // Chuỗi url ảnh từ cloudinary
@@ -129,11 +123,11 @@ namespace LibraryManagement.Repository
                 TotalDebt = newReader.TotalDebt,
                 UrlAvatar = imageUrl
             };
-            return ApiResponse<ReaderResponse>.SuccessResponse("Thêm độc giả thành công", 201, readerResponse);
+            return ApiResponse<ReaderResponse>.SuccessResponse("Thêm độc giả thành công!", 201, readerResponse);
         }
 
         // Hàm lấy danh sách độc giả
-        public async Task<List<ReaderResponse>> getAllReaderAsync()
+        public async Task<ApiResponse<List<ReaderResponse>>> getAllReaderAsync()
         {
             var listReader = await _context.Readers
                 .AsNoTracking()
@@ -162,7 +156,10 @@ namespace LibraryManagement.Repository
                         : null,
                     
                 }).ToListAsync();
-            return listReader;
+            return ApiResponse<List<ReaderResponse>>.SuccessResponse(
+                "Lấy danh sách độc giả thành công!", 
+                201, 
+                listReader);
         }
 
 
@@ -172,7 +169,7 @@ namespace LibraryManagement.Repository
             // Kiểm tra tồn tại
             var readerExists = await _context.Readers.AnyAsync(r => r.IdReader == idReader);
             if (!readerExists)
-                return ApiResponse<ReaderResponse>.FailResponse("Không tìm thấy độc giả", 404);
+                return ApiResponse<ReaderResponse>.FailResponse("Không tìm thấy độc giả!", 404);
 
             // Validate DOB và tuổi
             if (request.Dob.HasValue)
@@ -183,14 +180,14 @@ namespace LibraryManagement.Repository
                 int minAge = await _parameterService.getValueAsync("MinReaderAge");
                 int maxAge = await _parameterService.getValueAsync("MaxReaderAge");
                 if (readerAge < minAge || readerAge > maxAge)
-                    return ApiResponse<ReaderResponse>.FailResponse($"Tuổi độc giả phải từ {minAge} đến {maxAge} tuổi", 400);
+                    return ApiResponse<ReaderResponse>.FailResponse($"Tuổi độc giả phải từ {minAge} đến {maxAge} tuổi!", 400);
             }
 
             // Validate số điện thoại
             if (!string.IsNullOrEmpty(request.Phone))
             {
                 if (!Regex.IsMatch(request.Phone, @"^\d{10,12}$"))
-                    return ApiResponse<ReaderResponse>.FailResponse("Số điện thoại phải gồm từ 10 đến 12 chữ số", 400);
+                    return ApiResponse<ReaderResponse>.FailResponse("Số điện thoại phải gồm từ 10 đến 12 chữ số!", 400);
             }
 
             // Kiểm tra giá trị Sex có hợp lệ hay không
@@ -198,7 +195,7 @@ namespace LibraryManagement.Repository
             {
                 var allowed = new[] { "Nam", "Nữ" };
                 if (!allowed.Contains(request.Sex))
-                    return ApiResponse<ReaderResponse>.FailResponse("Giới tính không hợp lệ", 400);
+                    return ApiResponse<ReaderResponse>.FailResponse("Giới tính không hợp lệ!", 400);
             }
 
             // Xử lý hash password nếu có
@@ -250,7 +247,7 @@ namespace LibraryManagement.Repository
                        TotalDebt = x.TotalDebt,
                        UrlAvatar = x.Images.Select(x=>x.Url).FirstOrDefault()
                    }).FirstOrDefaultAsync();
-            return ApiResponse<ReaderResponse>.SuccessResponse("Thay đổi thông tin độc giả thành công", 200, readerResponse);
+            return ApiResponse<ReaderResponse>.SuccessResponse("Thay đổi thông tin độc giả thành công!", 200, readerResponse);
         }
 
 
@@ -260,17 +257,17 @@ namespace LibraryManagement.Repository
             var deleteReader = await _context.Readers.FirstOrDefaultAsync(reader => reader.IdReader == idReader);
             if (deleteReader == null)
             {
-                return ApiResponse<string>.FailResponse("Không tìm thấy độc giả", 404);
+                return ApiResponse<string>.FailResponse("Không tìm thấy độc giả!", 404);
             }
             _context.Readers.Remove(deleteReader);
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.SuccessResponse("Đã xóa độc giả", 200, "");
+            return ApiResponse<string>.SuccessResponse("Đã xóa độc giả!", 200, string.Empty);
         }
 
-        public async Task<FindReaderOutputDto> findReaderAsync(string dto)
+        public async Task<ApiResponse<FindReaderResponse>> findReaderAsync(string dto)
         {
       
-            var listReader = await _context.Readers.AsNoTracking().Where(x => x.Email == dto).Select(a => new FindReaderOutputDto
+            var listReader = await _context.Readers.AsNoTracking().Where(x => x.Email == dto).Select(a => new FindReaderResponse
             {
                 phone = a.Phone!, 
                 Email = a.Email!,
@@ -278,12 +275,12 @@ namespace LibraryManagement.Repository
                 DateCreate = a.CreateDate
             }
             ).FirstOrDefaultAsync();
-            return listReader!;
+            return ApiResponse<FindReaderResponse>.SuccessResponse("Tìm kiếm độc giả thành công!", 200, listReader);
         }
 
-        public async Task<FindReaderOutputDto> findReaderInputAsync(string idReader)
+        public async Task<ApiResponse<FindReaderResponse>> findReaderInputAsync(string idReader)
         {
-            var listReader = await _context.Readers.AsNoTracking().Where(x => x.IdReader == idReader).Select(a => new FindReaderOutputDto
+            var listReader = await _context.Readers.AsNoTracking().Where(x => x.IdReader == idReader).Select(a => new FindReaderResponse
             {
                 phone = a.Phone!,
                 Email = a.Email!,
@@ -291,7 +288,7 @@ namespace LibraryManagement.Repository
                 DateCreate = a.CreateDate
             }
           ).FirstOrDefaultAsync();
-            return listReader!;
+            return ApiResponse<FindReaderResponse>.SuccessResponse("Tìm kiếm độc giả thành công!", 200, listReader);
         }
     }
 }

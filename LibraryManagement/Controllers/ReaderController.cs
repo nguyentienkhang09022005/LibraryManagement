@@ -2,7 +2,6 @@
 using LibraryManagement.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace LibraryManagement.Controllers
 {
@@ -17,74 +16,76 @@ namespace LibraryManagement.Controllers
             _readerService = readerService;
         }
 
-        [HttpGet("list_reader")]
-
+        [Authorize]
+        [HttpGet("list-reader")]
         public async Task<IActionResult> gettAllReader()
         {
-            try
+            var result = await _readerService.getAllReaderAsync();
+            if (result.Success)
             {
-                return Ok(await _readerService.getAllReaderAsync());
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpoint thêm độc giả
-        [HttpPost("add_reader")]
+        [Authorize]
+        [HttpPost("add-reader")]
         public async Task<IActionResult> addNewReader([FromForm] ReaderCreationRequest request)
         {
             var result = await _readerService.addReaderAsync(request);
             if (result.Success)
-                return Created("", result);
-            return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpont sửa độc giả
-        [HttpPatch("update_reader/{idReader}")]
-        public async Task<IActionResult> updateReader([FromForm] ReaderUpdateRequest request, string idReader)
+        [Authorize]
+        [HttpPatch("update-reader")]
+        public async Task<IActionResult> updateReader([FromForm] ReaderUpdateRequest request, [FromQuery] string idReader)
         {
             var result = await _readerService.updateReaderAsync(request, idReader);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpoint xóa độc giả
-        [HttpDelete("delete_reader/{idReader}")]
-        public async Task<IActionResult> deleteReader(string idReader)
+        [Authorize]
+        [HttpDelete("delete-reader")]
+        public async Task<IActionResult> deleteReader([FromQuery] string idReader)
         {
             var result = await _readerService.deleteReaderAsync(idReader);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        [HttpGet("find_readerby{username}")]
-        public async Task<IActionResult> findReader(string username)
+        [Authorize]
+        [HttpGet("find-reader-by-username")]
+        public async Task<IActionResult> findReader([FromQuery] string username)
         {
-            try
+            var result = await _readerService.findReaderAsync(username);
+            if (result.Success)
             {
-                var result = await _readerService.findReaderAsync(username);
-                return Ok(result);
+                return StatusCode(result.StatusCode, result);
             }
-            catch
-            {
-                return BadRequest();
-            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpGet("getReaderBy{idreader}")]
-        public async Task<IActionResult> getReaderById(string readerid) {
-            try
+
+        [Authorize]
+        [HttpGet("get-reader-by-id")]
+        public async Task<IActionResult> getReaderById([FromQuery] string idReader) 
+        {
+            var result = await _readerService.findReaderInputAsync(idReader);
+            if (result.Success)
             {
-                var result = await _readerService.findReaderInputAsync(readerid);
-                return Ok(result);
+                return StatusCode(result.StatusCode, result);
             }
-            catch
-            {
-                return BadRequest();
-            }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

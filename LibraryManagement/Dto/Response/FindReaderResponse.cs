@@ -2,7 +2,7 @@
 
 namespace LibraryManagement.Dto.Response
 {
-    public class FindReaderOutputDto
+    public class FindReaderResponse
     {
         public string phone { get; set; } = null!;
 
