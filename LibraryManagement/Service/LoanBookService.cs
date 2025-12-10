@@ -1,29 +1,22 @@
-﻿using Google.Apis.Util;
-using LibraryManagement.Data;
+﻿using LibraryManagement.Data;
 using LibraryManagement.Dto.Request;
 using LibraryManagement.Dto.Response;
 using LibraryManagement.Helpers;
 using LibraryManagement.Models;
 using LibraryManagement.Repository.InterFace;
-using LibraryManagement.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
-
-using ZstdSharp.Unsafe;
 
 namespace LibraryManagement.Repository
 {
     public class LoanBookService : ILoanBookService
     {
         private readonly LibraryManagermentContext _context;
-        private readonly IAuthenService _account;
         private readonly IParameterService _parameterRepository;
 
 
         public LoanBookService(LibraryManagermentContext context, 
-                                      IAuthenService authen, 
                                       IParameterService parameterRepository)
         {
-            _account = authen;
             _context = context;
             _parameterRepository = parameterRepository;
         }
@@ -40,20 +33,20 @@ namespace LibraryManagement.Repository
             var reader = await _context.Readers.FirstOrDefaultAsync(rd => rd.IdReader == request.IdReader);
             if (reader == null)
             {
-                return ApiResponse<LoanBookResponse>.FailResponse("không tìm thấy độc giả", 404);
+                return ApiResponse<LoanBookResponse>.FailResponse("không tìm thấy độc giả!", 404);
             }
 
             // Kiểm tra TheBook có tồn tại hay không
             var theBook = await _context.TheBooks.FirstOrDefaultAsync(tb => tb.IdTheBook == request.IdTheBook);
             if (theBook == null)
             {
-                return ApiResponse<LoanBookResponse>.FailResponse("không tìm thấy cuốn sách", 404);
+                return ApiResponse<LoanBookResponse>.FailResponse("không tìm thấy cuốn sách!", 404);
             }
 
             // Kiểm tra trạng thái cuốn sách
             if (theBook.Status == "Đã mượn")
             {
-                return ApiResponse<LoanBookResponse>.FailResponse("Cuốn sách đang được mượn", 400);
+                return ApiResponse<LoanBookResponse>.FailResponse("Cuốn sách đang được mượn!", 400);
             }
 
             // Kiểm tra thẻ độc giả còn hạn hay không
@@ -61,7 +54,7 @@ namespace LibraryManagement.Repository
             DateTime cardExpirationDate = cardIssueDate.AddMonths(cardExpirationMonths);
             if (cardExpirationDate < DateTime.UtcNow)
             {
-                return ApiResponse<LoanBookResponse>.FailResponse("Thẻ độc giả đã quá hạn 6 tháng", 400);
+                return ApiResponse<LoanBookResponse>.FailResponse("Thẻ độc giả đã quá hạn 6 tháng!", 400);
             }
 
             // Kiểm tra độc giả chỉ được mượn tối đa 5 quyển sách
@@ -71,7 +64,7 @@ namespace LibraryManagement.Repository
 
             if (currentlyBorrowed >= borrowingLimit)
             {
-                return ApiResponse<LoanBookResponse>.FailResponse("Độc giả chỉ được mượn tối đa 5 cuốn sách cùng lúc", 400);
+                return ApiResponse<LoanBookResponse>.FailResponse("Độc giả chỉ được mượn tối đa 5 cuốn sách cùng lúc!", 400);
             }
 
             DateTime borrowDate = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
@@ -100,7 +93,7 @@ namespace LibraryManagement.Repository
 
             if (theBookWithDetails == null)
             {
-                return ApiResponse<LoanBookResponse>.FailResponse("Không tìm thấy thông tin chi tiết của cuốn sách", 404);
+                return ApiResponse<LoanBookResponse>.FailResponse("Không tìm thấy thông tin chi tiết của cuốn sách!", 404);
             }
 
             // Lấy HeaderBook
@@ -138,7 +131,7 @@ namespace LibraryManagement.Repository
                 BorrowDate = loanBook.BorrowDate,
                 ReturnDate = loanBook.ReturnDate
             };
-            return ApiResponse<LoanBookResponse>.SuccessResponse("Tạo phiếu mượn thành công", 200, response);
+            return ApiResponse<LoanBookResponse>.SuccessResponse("Tạo phiếu mượn thành công!", 200, response);
         }
 
         // Xóa phiếu mượn
@@ -147,7 +140,7 @@ namespace LibraryManagement.Repository
             var deleteLoanBook = await _context.LoanSlipBooks.FirstOrDefaultAsync(lb => lb.IdLoanSlipBook == idLoanSlipBook);
             if (deleteLoanBook == null)
             {
-                return ApiResponse<string>.FailResponse("Không tìm thấy phiếu mượn", 404);
+                return ApiResponse<string>.FailResponse("Không tìm thấy phiếu mượn!", 404);
             }
             var theBook = await _context.TheBooks
                 .FirstOrDefaultAsync(tb => tb.IdTheBook == deleteLoanBook.IdTheBook);
@@ -160,10 +153,10 @@ namespace LibraryManagement.Repository
 
             _context.LoanSlipBooks.Remove(deleteLoanBook);
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.SuccessResponse("Đã xóa phiếu mượn sách thành công", 200, "");
+            return ApiResponse<string>.SuccessResponse("Đã xóa phiếu mượn sách thành công!", 200, string.Empty);
         }
 
-        public async Task<List<AmountOfEachTypeBook>> getAmountByTypeBook(int month)
+        public async Task<ApiResponse<List<AmountOfEachTypeBook>>> getAmountByTypeBook(int month)
         {
             var result = await _context.LoanSlipBooks
                         .AsNoTracking()
@@ -174,15 +167,14 @@ namespace LibraryManagement.Repository
                             TypeBook = x.Key,
                             Count = x.Count()
                         })
-                        .ToListAsync(); 
-            return result;
-
+                        .ToListAsync();
+            return ApiResponse<List<AmountOfEachTypeBook>>.SuccessResponse(
+                "Lấy giá của loại sách thành công!", 
+                200, 
+                result);
         }
 
-        // Sửa phiếu mượn sách
-
-
-        public async Task<List<LoanSlipBookResponse>> getListLoanSlipBook()
+        public async Task<ApiResponse<List<LoanSlipBookResponse>>> getListLoanSlipBook()
         {
             
             var result = await _context.LoanSlipBooks.Select(a => new LoanSlipBookResponse
@@ -198,10 +190,13 @@ namespace LibraryManagement.Repository
                 FineAmount = a.FineAmount,
                 IsReturned = a.IsReturned
             }).ToListAsync();
-            return result; 
+            return ApiResponse<List<LoanSlipBookResponse>>.SuccessResponse(
+                "Lấy danh sách phiếu mượn trả sách thành công!", 
+                200, 
+                result);
         }
 
-        public async Task<List<LoanSlipBookResponse>> getLoanSlipBookByReader(string idReader)
+        public async Task<ApiResponse<List<LoanSlipBookResponse>>> getLoanSlipBookByReader(string idReader)
         {
             var result = await _context.LoanSlipBooks.AsNoTracking().Where(x => x.IdReader == idReader)
                                     .Select(x => new LoanSlipBookResponse
@@ -217,15 +212,17 @@ namespace LibraryManagement.Repository
                                         FineAmount = x.FineAmount,
                                         IsReturned = x.IsReturned
                                     }).ToListAsync();
-            return result;
-            
+            return ApiResponse<List<LoanSlipBookResponse>>.SuccessResponse(
+                            "Lấy danh sách phiếu mượn trả sách của độc giả thành công!",
+                            200,
+                            result);
         }
 
-        public async Task<List<GetLoanSlipBookByType>> getLoanSlipBookByType(string? genre)
+        public async Task<ApiResponse<List<GetLoanSlipBookByType>>> getLoanSlipBookByType(string? genre)
         {
             if (genre != null)
             {
-                 return await _context.CategoryReportDetails
+                 var result = await _context.CategoryReportDetails
                     .Include(x => x.CategoryReport)
                     .Include(x => x.TypeBook)
                     .Where(x => x.TypeBook.NameTypeBook.ToLower().Contains(genre.ToLower()))
@@ -240,10 +237,14 @@ namespace LibraryManagement.Repository
                      .OrderByDescending(x => x.ReportMonth)
                      .ThenByDescending(x => x.TotalBorrow)
                     .ToListAsync();
+                return ApiResponse<List<GetLoanSlipBookByType>>.SuccessResponse(
+                "Lấy danh sách phiếu mượn trả sách theo loại thành công!",
+                200,
+                result);
             }
             else
             {
-                 return  await _context.CategoryReportDetails
+                 var result = await _context.CategoryReportDetails
                    .Include(x => x.CategoryReport)
                    .Include(x => x.TypeBook)
                    .Select(x => new GetLoanSlipBookByType
@@ -257,11 +258,15 @@ namespace LibraryManagement.Repository
                     .OrderByDescending(x => x.ReportMonth)
                     .ThenByDescending(x => x.TotalBorrow)
                    .ToListAsync();
+                return ApiResponse<List<GetLoanSlipBookByType>>.SuccessResponse(
+                "Lấy danh sách phiếu mượn trả sách theo loại thành công!",
+                200,
+                result);
             }
               
         }
 
-        public async Task<List<LoanBookHistory>> getLoanSlipBookByUser(string idReader)
+        public async Task<ApiResponse<List<LoanBookHistory>>> getLoanSlipBookByUser(string idReader)
         {
             var result = await _context.LoanSlipBooks
                 .Include(x => x.Reader)
@@ -276,7 +281,10 @@ namespace LibraryManagement.Repository
                     AvatarUrl = (x.TheBook.Book.images.FirstOrDefault() == null) ? string.Empty : x.TheBook.Book.images.FirstOrDefault()!.Url,
                     IsReturned = x.IsReturned
                 }).ToListAsync();
-            return result;
+            return ApiResponse<List<LoanBookHistory>>.SuccessResponse(
+                "Lấy danh sách phiếu mượn trả sách của độc giả thành công!",
+                200,
+                result);
         }
     }
 }

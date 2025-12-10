@@ -3,7 +3,6 @@ using LibraryManagement.Dto.Request;
 using LibraryManagement.Dto.Response;
 using LibraryManagement.Helpers;
 using LibraryManagement.Repository.InterFace;
-using LibraryManagement.Repository.IRepository;
 using LibraryManagement.Service.InterFace;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,15 +11,12 @@ namespace LibraryManagement.Service
     public class SlipBookService : ISlipBookService
     {
         private readonly LibraryManagermentContext _context;
-        private readonly IAuthenService _account;
         private readonly IParameterService _parameterRepository;
 
 
         public SlipBookService(LibraryManagermentContext context,
-                                      IAuthenService authen,
                                       IParameterService parameterRepository)
         {
-            _account = authen;
             _context = context;
             _parameterRepository = parameterRepository;
         }
@@ -34,12 +30,12 @@ namespace LibraryManagement.Service
 
             if (loanbook == null)
             {
-                return ApiResponse<SlipBookResponse>.FailResponse("Không tìm thấy phiếu mượn", 404);
+                return ApiResponse<SlipBookResponse>.FailResponse("Không tìm thấy phiếu mượn!", 404);
             }
 
             if (loanbook.IsReturned)
             {
-                return ApiResponse<SlipBookResponse>.FailResponse("Phiếu mượn này đã được trả trước đó", 400);
+                return ApiResponse<SlipBookResponse>.FailResponse("Phiếu mượn này đã được trả trước đó!", 400);
             }
 
             DateTime borrowDate = DateTime.SpecifyKind(loanbook.BorrowDate, DateTimeKind.Utc);
@@ -63,7 +59,7 @@ namespace LibraryManagement.Service
             var reader = await _context.Readers.FirstOrDefaultAsync(r => r.IdReader == request.IdReader);
             if (reader == null)
             {
-                return ApiResponse<SlipBookResponse>.FailResponse("Không tìm thấy độc giả", 404);
+                return ApiResponse<SlipBookResponse>.FailResponse("Không tìm thấy độc giả!", 404);
             }
             reader.TotalDebt += fineAmount;
             _context.Readers.Attach(reader);
@@ -95,7 +91,7 @@ namespace LibraryManagement.Service
                 }
             };
 
-            return ApiResponse<SlipBookResponse>.SuccessResponse("Tạo phiếu trả sách thành công", 200, response);
+            return ApiResponse<SlipBookResponse>.SuccessResponse("Tạo phiếu trả sách thành công!", 200, response);
         }
 
         // Xóa phiếu trả sách
@@ -104,7 +100,7 @@ namespace LibraryManagement.Service
             var deleteSlipBook = await _context.LoanSlipBooks.FirstOrDefaultAsync(lb => lb.IdLoanSlipBook == idLoanSlipBook);
             if (deleteSlipBook == null)
             {
-                return ApiResponse<string>.FailResponse("Không tìm thấy phiếu trả", 404);
+                return ApiResponse<string>.FailResponse("Không tìm thấy phiếu trả!", 404);
             }
 
             // Nếu đã có ngày trả thì mới thực hiện cập nhật sách và nợ
@@ -133,9 +129,7 @@ namespace LibraryManagement.Service
             }
             _context.LoanSlipBooks.Remove(deleteSlipBook);
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.SuccessResponse("Đã xóa phiếu trả sách thành công", 200, "");
+            return ApiResponse<string>.SuccessResponse("Đã xóa phiếu trả sách thành công!", 200, string.Empty);
         }
-
-        // Sửa phiếu trả sách
     }
 }
