@@ -16,6 +16,7 @@ namespace LibraryManagement.Controllers
             _authorService = authorService;
         }
 
+        [Authorize]
         [HttpGet("list-author")]
         public async Task<IActionResult> gettListAuthor()
         {
@@ -27,6 +28,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("add-author")]
         public async Task<IActionResult> addAuthor([FromForm] AuthorCreationRequest request)
         {
@@ -38,6 +40,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPatch("update-author")]
         public async Task<IActionResult> updateAuthor([FromForm] AuthorUpdateRequest request, 
                                                       [FromQuery] Guid idAuthor)
@@ -50,6 +53,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpDelete("delete-author")]
         public async Task<IActionResult> deleteAuthor([FromQuery] Guid idAuthor)
         {
@@ -61,6 +65,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("find-author-by-name")]
         public async Task<IActionResult> findAuthor([FromQuery] AuthorFindNameRequest request)
         {
@@ -72,6 +77,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("inf-author")]
         public async Task<IActionResult> getAuthorById([FromQuery] Guid idAuthor)
         {

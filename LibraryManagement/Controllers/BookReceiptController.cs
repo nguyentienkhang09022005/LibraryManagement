@@ -1,5 +1,6 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagement.Controllers
@@ -16,6 +17,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint thêm phiếu nhập sách
+        [Authorize]
         [HttpPost("add-bookreceipt")]
         public async Task<IActionResult> addBookReceipt([FromBody] BookReceiptRequest request)
         {
@@ -28,6 +30,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint xóa phiếu nhập sách
+        [Authorize]
         [HttpDelete("delete-bookreceipt")]
         public async Task<IActionResult> deleteBookReceipt([FromQuery] Guid idBookReceipt)
         {
@@ -39,6 +42,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-receipts")]
         public async Task<IActionResult> getAllReceipt([FromQuery] string token)
         {

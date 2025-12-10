@@ -1,5 +1,6 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagement.Controllers
@@ -15,6 +16,7 @@ namespace LibraryManagement.Controllers
             _typeBookService = typeBookService;
         }
 
+        [Authorize]
         [HttpPost("add-typebook")]
         public async Task<IActionResult> addTypeBook([FromBody] TypeBookRequest request)
         {
@@ -26,6 +28,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPut("update-typebook")]
         public async Task<IActionResult> updateTypeBook([FromBody] TypeBookRequest request, 
                                                         [FromQuery] Guid idTypeBook)
@@ -38,6 +41,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpDelete("delete-typebook")]
         public async Task<IActionResult> deleteTypeBook([FromQuery] Guid idTypeBook)
         {
@@ -49,6 +53,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-typebook-and-header")]
         public async Task<IActionResult> getTypeBookAndHeaders()
         {
@@ -60,6 +65,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-all-typebook")]
         public async Task<IActionResult> getAlltypeBook()
         {

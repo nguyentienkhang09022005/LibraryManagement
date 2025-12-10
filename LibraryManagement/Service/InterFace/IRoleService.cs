@@ -15,10 +15,11 @@ namespace LibraryManagement.Repository.InterFace
         // Sửa role
         public Task<ApiResponse<RoleResponse>> updateRoleAsync(RoleRequest request);
 
-        public Task<List<RoleResponse>> listRolesAsync(); 
-        public Task<List<PermissionResponse>> listPermissionsByRoleAsync(string role);
+        Task<ApiResponse<List<RoleResponse>>> listRolesAsync();
 
-        public Task<List<PermissionResponse>> listPerMissionAsync(); 
-      
+        Task<ApiResponse<List<PermissionResponse>>> listPermissionsByRoleAsync(string role);
+
+        Task<ApiResponse<List<PermissionResponse>>> listPerMissionAsync();
+
     }
 }

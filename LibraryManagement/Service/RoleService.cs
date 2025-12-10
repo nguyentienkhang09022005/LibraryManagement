@@ -34,9 +34,9 @@ namespace LibraryManagement.Repository
                 _context.Roles.Add(newRole);
                 await _context.SaveChangesAsync();
                 var roleResponse = _mapper.Map<RoleResponse>(newRole);
-                return ApiResponse<RoleResponse>.SuccessResponse("Thêm role thành công", 201, roleResponse);
+                return ApiResponse<RoleResponse>.SuccessResponse("Thêm role thành công!", 201, roleResponse);
             }
-            return ApiResponse<RoleResponse>.FailResponse("Role đã tồn tại", 409);
+            return ApiResponse<RoleResponse>.FailResponse("Role đã tồn tại!", 409);
         }
 
         // Hàm xóa role
@@ -45,35 +45,44 @@ namespace LibraryManagement.Repository
             var deleteRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == roleName);
             if (deleteRole == null)
             {
-                return ApiResponse<string>.FailResponse("Không tìm thấy role", 404);
+                return ApiResponse<string>.FailResponse("Không tìm thấy role!", 404);
             }
             _context.Roles.Remove(deleteRole);
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.SuccessResponse("Xóa role thành công", 200, roleName);
+            return ApiResponse<string>.SuccessResponse("Xóa role thành công!", 200, roleName);
         }
 
-        public async Task<List<PermissionResponse>> listPerMissionAsync()
+        public async Task<ApiResponse<List<PermissionResponse>>> listPerMissionAsync()
         {
             var result = await _context.Permissions.AsNoTracking().Select(x => new PermissionResponse
             {
                 PermissionName = x.PermissionName,
                 Description = x.Description,
             }).ToListAsync();
-            return result;
+            return ApiResponse<List<PermissionResponse>>.SuccessResponse(
+                "Lấy danh sách permission thành công!",
+                200,
+                result);
         }
 
-        public async Task<List<PermissionResponse>> listPermissionsByRoleAsync(string role)
+        public async Task<ApiResponse<List<PermissionResponse>>> listPermissionsByRoleAsync(string role)
         {
             var result = await _context.RolePermissions.AsNoTracking().Where(x => x.RoleName == role)
                 .Select(x => new PermissionResponse { PermissionName = x.PermissionName, Description = x.Permission.Description })
                 .ToListAsync();
-            return result;
+            return ApiResponse<List<PermissionResponse>>.SuccessResponse(
+                "Lấy danh sách permission của role thành công!", 
+                200, 
+                result);
         }
 
-        public async Task<List<RoleResponse>> listRolesAsync()
+        public async Task<ApiResponse<List<RoleResponse>>> listRolesAsync()
         {
-            var result = await _context.Roles.AsNoTracking().Select(x=> new RoleResponse { RoleName = x.RoleName, Description =  x.Description } ).ToListAsync();
-            return result;
+            var result = await _context.Roles.AsNoTracking().Select(x => new RoleResponse { RoleName = x.RoleName, Description = x.Description }).ToListAsync();
+            return ApiResponse<List<RoleResponse>>.SuccessResponse(
+                "Lấy danh sách role thành công!",
+                200,
+                result);
         }
 
         // Hàm sửa nội dung role
@@ -82,7 +91,7 @@ namespace LibraryManagement.Repository
             var updateRole = await _context.Roles.FirstOrDefaultAsync(role => role.RoleName == request.RoleName);
             if (updateRole == null)
             {
-                return ApiResponse<RoleResponse>.FailResponse("Không tìm thấy role", 404);
+                return ApiResponse<RoleResponse>.FailResponse("Không tìm thấy role!", 404);
             }
 
             updateRole.Description = request.Description;
@@ -90,7 +99,7 @@ namespace LibraryManagement.Repository
             _context.Roles.Update(updateRole);
             await _context.SaveChangesAsync();
             var roleResponse = _mapper.Map<RoleResponse>(updateRole);
-            return ApiResponse<RoleResponse>.SuccessResponse("Thay đổi role thành công", 200, roleResponse);
+            return ApiResponse<RoleResponse>.SuccessResponse("Thay đổi role thành công!", 200, roleResponse);
         }
     }
 }

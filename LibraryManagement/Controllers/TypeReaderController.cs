@@ -1,5 +1,6 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagement.Controllers
@@ -15,6 +16,7 @@ namespace LibraryManagement.Controllers
             _typeReaderServie = typeReaderServie;
         }
 
+        [Authorize]
         [HttpPost("add-typereader")]
         public async Task<IActionResult> addTypeReader([FromBody] TypeReaderRequest request)
         {
@@ -26,6 +28,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPut("update-typereader")]
         public async Task<IActionResult> updateTypeReader([FromBody] TypeReaderRequest request, 
                                                           [FromQuery] Guid idTypeReader)
@@ -38,6 +41,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpDelete("delete-typereader")]
         public async Task<IActionResult> deleteTypeReader([FromQuery] Guid idTypeReader)
         {
@@ -49,6 +53,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("get-all-typereader")]
         public async Task<IActionResult> getAllTypeReader()
         {

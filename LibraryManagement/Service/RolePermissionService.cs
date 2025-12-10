@@ -26,7 +26,7 @@ namespace LibraryManagement.Service
 
             if (role == null || permission == null)
             {
-                return ApiResponse<RolePermissionResponse>.FailResponse("Role hoặc Permission không tồn tại", 404);
+                return ApiResponse<RolePermissionResponse>.FailResponse("Role hoặc Permission không tồn tại!", 404);
             }
 
             // Kiểm tra trùng
@@ -34,7 +34,7 @@ namespace LibraryManagement.Service
                 rp.RoleName == request.RoleName && rp.PermissionName == request.PermissionName);
             if (exists)
             {
-                return ApiResponse<RolePermissionResponse>.FailResponse("Phân quyền đã tồn tại", 409);
+                return ApiResponse<RolePermissionResponse>.FailResponse("Phân quyền đã tồn tại!", 409);
             }
 
             var rolePermission = new RolePermission
@@ -46,7 +46,7 @@ namespace LibraryManagement.Service
             _context.RolePermissions.Add(rolePermission);
             await _context.SaveChangesAsync();
 
-            return ApiResponse<RolePermissionResponse>.SuccessResponse("Thêm phân quyền thành công", 201, new RolePermissionResponse
+            return ApiResponse<RolePermissionResponse>.SuccessResponse("Thêm phân quyền thành công!", 201, new RolePermissionResponse
             {
                 RoleName = request.RoleName,
                 PermissionName = request.PermissionName
@@ -61,13 +61,13 @@ namespace LibraryManagement.Service
 
             if (rolePermission == null)
             {
-                return ApiResponse<string>.FailResponse("Phân quyền không tồn tại", 404);
+                return ApiResponse<string>.FailResponse("Phân quyền không tồn tại!", 404);
             }
 
             _context.RolePermissions.Remove(rolePermission);
             await _context.SaveChangesAsync();
 
-            return ApiResponse<string>.SuccessResponse("Xóa phân quyền thành công", 200, "");
+            return ApiResponse<string>.SuccessResponse("Xóa phân quyền thành công!", 200, string.Empty);
         }
 
         // Sửa thông tin phân quyền
@@ -78,7 +78,7 @@ namespace LibraryManagement.Service
 
             if (request.NewRoleName == null && request.NewPermissionName == null)
             {
-                return ApiResponse<RolePermissionResponse>.SuccessResponse("Không có thay đổi nào được thực hiện", 200,
+                return ApiResponse<RolePermissionResponse>.SuccessResponse("Không có thay đổi nào được thực hiện!", 200,
                     new RolePermissionResponse
                     {
                         RoleName = finalRoleName,
@@ -92,7 +92,7 @@ namespace LibraryManagement.Service
 
             if (existingOld == null)
             {
-                return ApiResponse<RolePermissionResponse>.FailResponse("Phân quyền cũ không tồn tại", 404);
+                return ApiResponse<RolePermissionResponse>.FailResponse("Phân quyền cũ không tồn tại!", 404);
             }
 
             // Nếu thay đổi
@@ -103,7 +103,7 @@ namespace LibraryManagement.Service
 
                 if (isDuplicate)
                 {
-                    return ApiResponse<RolePermissionResponse>.FailResponse("Phân quyền mới đã tồn tại", 409);
+                    return ApiResponse<RolePermissionResponse>.FailResponse("Phân quyền mới đã tồn tại!", 409);
                 }
             }
 
@@ -112,7 +112,7 @@ namespace LibraryManagement.Service
             {
                 bool roleExists = await _context.Roles.AnyAsync(r => r.RoleName == request.NewRoleName);
                 if (!roleExists)
-                    return ApiResponse<RolePermissionResponse>.FailResponse("Role mới không tồn tại", 404);
+                    return ApiResponse<RolePermissionResponse>.FailResponse("Role mới không tồn tại!", 404);
             }
 
             // Kiểm tra Permission mới
@@ -120,7 +120,7 @@ namespace LibraryManagement.Service
             {
                 bool permissionExists = await _context.Permissions.AnyAsync(p => p.PermissionName == request.NewPermissionName);
                 if (!permissionExists)
-                    return ApiResponse<RolePermissionResponse>.FailResponse("Permission mới không tồn tại", 404);
+                    return ApiResponse<RolePermissionResponse>.FailResponse("Permission mới không tồn tại!", 404);
             }
 
             // Cập nhật
@@ -133,7 +133,7 @@ namespace LibraryManagement.Service
 
             await _context.SaveChangesAsync();
 
-            return ApiResponse<RolePermissionResponse>.SuccessResponse("Cập nhật phân quyền thành công", 200,
+            return ApiResponse<RolePermissionResponse>.SuccessResponse("Cập nhật phân quyền thành công!", 200,
                 new RolePermissionResponse
                 {
                     RoleName = finalRoleName,

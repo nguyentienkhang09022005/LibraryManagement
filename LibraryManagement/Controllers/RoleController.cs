@@ -1,7 +1,6 @@
 ﻿using LibraryManagement.Dto.Request;
-using LibraryManagement.Dto.Response;
-using LibraryManagement.Helpers;
 using LibraryManagement.Repository.InterFace;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagement.Controllers
@@ -18,73 +17,78 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint tạo role mới
-        [HttpPost("add_role")]
+        [Authorize]
+        [HttpPost("add-role")]
         public async Task<IActionResult> addNewRole([FromBody] RoleRequest request)
         {
             var result = await _roleService.addRoleAsync(request);
             if (result.Success)
-                return Created("", result);
-            return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint xóa role
-        [HttpDelete("delete_role/{RoleName}")]
-        public async Task<IActionResult> deleteRole(string RoleName)
+        [Authorize]
+        [HttpDelete("delete-role")]
+        public async Task<IActionResult> deleteRole([FromQuery] string RoleName)
         {
             var result = await _roleService.deleteRoleAsync(RoleName);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint sửa role
-        [HttpPut("update_role")]
+        [Authorize]
+        [HttpPut("update-role")]
         public async Task<IActionResult> updateRole([FromBody] RoleRequest request)
         {
             var result = await _roleService.updateRoleAsync(request);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        [HttpGet("getAllRoles")]
+        [Authorize]
+        [HttpGet("get-all-role")]
         public async Task<IActionResult> getAllRoles()
         {
-            try
+            var result = await _roleService.listRolesAsync();
+            if (result.Success)
             {
-                var result = await _roleService.listRolesAsync();
-                return Ok(result);
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpGet("getAllPermisson")]
+
+        [Authorize]
+        [HttpGet("get-all-permisson")]
         public async Task<IActionResult> getAllPermission()
         {
-            try
+            var result = await _roleService.listPerMissionAsync();
+            if (result.Success)
             {
-                var result = await _roleService.listPerMissionAsync();
-                return Ok(result);
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpGet("getAllPermissonByRole")]
-        public async Task<IActionResult> getAllPermissionByRole(string rolename)
+
+        [Authorize]
+        [HttpGet("get-all-permisson-by-role")]
+        public async Task<IActionResult> getAllPermissionByRole([FromQuery] string rolename)
         {
-            try
+            var result = await _roleService.listPermissionsByRoleAsync(rolename);
+            if (result.Success)
             {
-                var result = await _roleService.listPermissionsByRoleAsync(rolename);
-                return Ok(result);
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

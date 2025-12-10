@@ -1,6 +1,7 @@
 ﻿using LibraryManagement.Data;
 using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagement.Controllers
@@ -18,6 +19,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint tạo sách
+        [Authorize]
         [HttpPost("add-book")]
         public async Task<IActionResult> addHeaderBook([FromForm] HeaderBookCreationRequest request)
         {
@@ -30,6 +32,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint xóa sách
+        [Authorize]
         [HttpDelete("delete-book")]
         public async Task<IActionResult> deleteHeaderBook([FromQuery] string idBook)
         {
@@ -42,6 +45,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint sửa sách
+        [Authorize]
         [HttpPatch("update-book")]
         public async Task<IActionResult> updateHeaderBook([FromForm] HeaderBookUpdateRequest request, 
                                                           [FromQuery] string idBook)
@@ -55,6 +59,7 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint thay đổi trạng thái cuốn sách
+        [Authorize]
         [HttpPatch("change-status")]
         public async Task<IActionResult> changeStatusOfTheBook(ChangeStatusOfTheBookRequest request)
         {
@@ -66,6 +71,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("detail-evaluation")]
         public async Task<IActionResult> getDetailedEvaluation([FromBody] EvaluationRequest evaluationRequest)
         {
@@ -77,6 +83,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("like-book")]
         public async Task<IActionResult> LikeBook([FromBody] EvaluationRequest evaluationRequest)
         {
@@ -88,6 +95,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-liked-book")]
         public async Task<IActionResult> getLikeHeaderBook([FromQuery] string idReader)
         {
@@ -100,6 +108,7 @@ namespace LibraryManagement.Controllers
 
         }
 
+        [Authorize]
         [HttpDelete("delete-evaluation")]
         public async Task<IActionResult> deleteEvaluation([FromBody] DeleteEvaluationRequest request)
         {
@@ -111,6 +120,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("list-headerbook")]
         public async Task<IActionResult> getAllHeaderbooks()
         {
@@ -122,6 +132,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("books-in-detail")]
         public async Task<IActionResult> getBooksAndComments([FromQuery] string idUser)
         {
@@ -133,6 +144,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("books-in-detail-by-id")]
         public async Task<IActionResult> getBooksAndCommentsById([FromQuery] string idbook)
         {
@@ -144,6 +156,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("find-books")]
         public async Task<IActionResult> findBooks([FromQuery] string namebook)
         {
@@ -155,6 +168,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("headerbook-by-thebook-id")]
         public async Task<IActionResult> getHeaderBookByThebookId([FromQuery] string idTheBook)
         {
@@ -166,6 +180,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPost("add-evaluation")]
         public async Task<IActionResult> addEvaluation([FromBody] AddEvaluationRequest request, [FromQuery] string idUser)
         {
@@ -177,6 +192,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("all-comments")]
         public async Task<IActionResult> getAllComments([FromQuery] string idBook)
         {
@@ -188,6 +204,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("star-by-id")]
         public async Task<IActionResult> getStarByid([FromQuery] string idbook)
         {
@@ -199,6 +216,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpPut("edit-comment")]
         public async Task<IActionResult> editComment(string idComment, string comment, int rate)
         {
@@ -210,6 +228,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpDelete("delete-comment")]
         public async Task<IActionResult> deleteComment([FromQuery] string idComment, [FromQuery] string idReader)
         {
@@ -221,6 +240,7 @@ namespace LibraryManagement.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [Authorize]
         [HttpGet("the-book-status")]
         public async Task<IActionResult> GetTheBookStatus([FromQuery] string idThebook)
         {

@@ -1,5 +1,6 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagement.Controllers
@@ -15,33 +16,42 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint phân quyền mới
-        [HttpPost("add_role_permission")]
+        [Authorize]
+        [HttpPost("add-role-permission")]
         public async Task<IActionResult> addNewRolePermission([FromBody] RolePermissionRequest request)
         {
             var result = await _rolePermissionService.addRolePermissionAsync(request);
             if (result.Success)
-                return Created("", result);
-            return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint xóa phân quyền
-        [HttpDelete("delete_role_permission")]
+        [Authorize]
+        [HttpDelete("delete-role-permission")]
         public async Task<IActionResult> deleteRolePermission([FromBody] RolePermissionRequest request)
         {
             var result = await _rolePermissionService.deleteRolePermissionAsync(request);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint thay đổi phân quyền
-        [HttpPatch("update_role_permission")]
+        [Authorize]
+        [HttpPatch("update-role-permission")]
         public async Task<IActionResult> updateRolePermission([FromBody] RolePermissionUpdateRequest request)
         {
             var result = await _rolePermissionService.updateRolePermissionAsync(request);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }
