@@ -16,39 +16,40 @@ namespace LibraryManagement.Controllers
             _categoryReportService = categoryReportService;
         }
 
-        // Endpoint tạo báo cáo thể loại theo tháng
-        [HttpPost("add_category_report")]
+        [Authorize]
+        [HttpPost("add-category-report")]
         public async Task<IActionResult> addCategoryReport([FromBody] CategoryReportRequest request)
         {
             var result = await _categoryReportService.addCategoryReportAsync(request);
             if (result.Success)
-                return Created("", result);
-            return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpoint xóa báo cáo thể loại theo tháng
-        [HttpDelete("delete_category_report/{idCategoryReport}")]
-        public async Task<IActionResult> deleteCategoryReport(Guid idCategoryReport)
+        [Authorize]
+        [HttpDelete("delete-category-report")]
+        public async Task<IActionResult> deleteCategoryReport([FromQuery] Guid idCategoryReport)
         {
             var result = await _categoryReportService.deleteCategoryReportAsync(idCategoryReport);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpGet("getCategoryOverdueReport")]
-           [Authorize]
+
+        [Authorize]
+        [HttpGet("get-category-overdue-report")]
         public async Task<IActionResult> GetCategoryOverdueReport()
         {
-            try
+            var result = await _categoryReportService.getOverdueReport();
+            if (result.Success)
             {
-                var result = await _categoryReportService.getOverdueReport();
-                return Ok(result);
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
-            }
-
+            return StatusCode(result.StatusCode, result);
+        }
     }
 }

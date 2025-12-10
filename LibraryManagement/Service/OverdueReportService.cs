@@ -98,7 +98,7 @@ namespace LibraryManagement.Service
                 }).ToList()
             };
 
-            return ApiResponse<OverdueReportResponse>.SuccessResponse("Tạo báo cáo trả trễ thành công", 200, response);
+            return ApiResponse<OverdueReportResponse>.SuccessResponse("Tạo báo cáo trả trễ thành công!", 200, response);
         }
 
         // Xóa báo cáo
@@ -107,18 +107,11 @@ namespace LibraryManagement.Service
             var overdueReport = await _context.OverdueReports.FirstOrDefaultAsync(report => report.IdOverdueReport == idOverReport);
             if (overdueReport == null)
             {
-                return ApiResponse<string>.FailResponse("Không tìm thấy báo cáo", 404);
+                return ApiResponse<string>.FailResponse("Không tìm thấy báo cáo!", 404);
             }
             _context.OverdueReports.Remove(overdueReport);
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.SuccessResponse("Đã xóa báo cáo thành công", 200, "");
-        }
-
-
-
-        public Task<ApiResponse<OverdueReportResponse>> updateOverdueReportAsync(OverdueReportRequest request, Guid idOverReport)
-        {
-            throw new NotImplementedException();
+            return ApiResponse<string>.SuccessResponse("Đã xóa báo cáo thành công!", 200, string.Empty);
         }
     }
 }

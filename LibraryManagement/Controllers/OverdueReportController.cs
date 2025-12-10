@@ -1,5 +1,7 @@
 ﻿using LibraryManagement.Dto.Request;
+using LibraryManagement.Service;
 using LibraryManagement.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagement.Controllers
@@ -16,23 +18,29 @@ namespace LibraryManagement.Controllers
         }
 
         // Endpoint tạo báo cáo sách trả trễ theo ngày
-        [HttpPost("add_overdue_report")]
+        [Authorize]
+        [HttpPost("add-overdue-report")]
         public async Task<IActionResult> addOverdueReport([FromBody] OverdueReportRequest request)
         {
             var result = await _overdueReportService.addOverdueReportAsync(request);
             if (result.Success)
-                return Created("", result);
-            return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
         // Endpoint xóa báo cáo sách trả trễ
-        [HttpDelete("delete_overdue_report/{idOverdueReport}")]
-        public async Task<IActionResult> deleteOverdueReport(Guid idOverdueReport)
+        [Authorize]
+        [HttpDelete("delete-overdue-report")]
+        public async Task<IActionResult> deleteOverdueReport([FromQuery] Guid idOverdueReport)
         {
             var result = await _overdueReportService.deleteOverReportAsync(idOverdueReport);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

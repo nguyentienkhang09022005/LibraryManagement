@@ -102,7 +102,7 @@ namespace LibraryManagement.Service
                 }
             }).ToList();
 
-            return ApiResponse<CategoryReportResponse>.SuccessResponse($"Đã tạo báo cáo tháng {month} thành công", 200, new CategoryReportResponse
+            return ApiResponse<CategoryReportResponse>.SuccessResponse($"Đã tạo báo cáo tháng {month} thành công!", 200, new CategoryReportResponse
             {
                 IdCategoryReport = categoryReport.IdCategoryReport,
                 MonthReport = categoryReport.MonthReport,
@@ -117,14 +117,14 @@ namespace LibraryManagement.Service
             var categoryReport = await _context.CategoryReports.FirstOrDefaultAsync(report => report.IdCategoryReport == idCategoryReport);
             if (categoryReport == null)
             {
-                return ApiResponse<string>.FailResponse("Không tìm thấy báo cáo", 404);
+                return ApiResponse<string>.FailResponse("Không tìm thấy báo cáo!", 404);
             }
             _context.CategoryReports.Remove(categoryReport);
             await _context.SaveChangesAsync();
-            return ApiResponse<string>.SuccessResponse("Đã xóa báo cáo thành công", 200, "");
+            return ApiResponse<string>.SuccessResponse("Đã xóa báo cáo thành công!", 200, string.Empty);
         }
 
-        public async Task<List<CategoryOverdueResponse>> getOverdueReport()
+        public async Task<ApiResponse<List<CategoryOverdueResponse>>> getOverdueReport()
         {
             var result = await _context.OverdueReportDetails.AsNoTracking()
                              .Select(x => new CategoryOverdueResponse
@@ -139,13 +139,10 @@ namespace LibraryManagement.Service
                             .OrderByDescending(x => x.reportDate)
                             .ThenByDescending(x => x.DateLate)
                             .ToListAsync();
-            return result; 
-        }
-
-        // Sửa thông tin báo cáo
-        public async Task<ApiResponse<CategoryReportResponse>> updateCategoryReportAsync(CategoryReportRequest request, Guid idCategoryReport)
-        {
-            throw new NotImplementedException();
+            return ApiResponse<List<CategoryOverdueResponse>>.SuccessResponse(
+                "Lấy danh sách báo cáo trả trễ thành công!", 
+                200, 
+                result);
         }
     }
 }

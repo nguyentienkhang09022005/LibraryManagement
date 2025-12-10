@@ -10,10 +10,13 @@ namespace LibraryManagement.Repository.InterFace
     public interface IParameterService
     {
         Task<ApiResponse<ParameterResponse>> addParameterAsync(ParameterRequest request);
+
         Task<ApiResponse<ParameterResponse>> updateParameterAsync(ParameterRequest request, Guid idParameter);
+
         Task<ApiResponse<string>> deleteParameterAsync(Guid idParameter);
+
         Task<int> getValueAsync(string nameParameter);
 
-        public Task<List<Parameter>> getParametersAsync();
+        public Task<ApiResponse<List<Parameter>>> getParametersAsync();
     }
 }

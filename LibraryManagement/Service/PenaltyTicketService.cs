@@ -25,14 +25,14 @@ namespace LibraryManagement.Repository
             var reader = await _context.Readers.FirstOrDefaultAsync(r => r.IdReader == request.IdReader);
             if (reader == null)
             {
-                return ApiResponse<PenaltyTicketResponse>.FailResponse("Không tìm thấy độc giả", 404);
+                return ApiResponse<PenaltyTicketResponse>.FailResponse("Không tìm thấy độc giả!", 404);
             }
 
             // Áp dụng quy định kiểm tra số tiền thu 
             int policyValue = await _parameterService.getValueAsync("LateReturnPenaltyPolicy");
             if (policyValue == 1 && request.AmountCollected > reader.TotalDebt)
             {
-                return ApiResponse<PenaltyTicketResponse>.FailResponse("Số tiền thu vượt quá số tiền độc giả đang nợ", 400);
+                return ApiResponse<PenaltyTicketResponse>.FailResponse("Số tiền thu vượt quá số tiền độc giả đang nợ!", 400);
             }
 
             // Tạo phiếu thu
@@ -51,7 +51,7 @@ namespace LibraryManagement.Repository
             _context.Entry(reader).Property(r => r.TotalDebt).IsModified = true;
             await _context.SaveChangesAsync();
 
-            return ApiResponse<PenaltyTicketResponse>.SuccessResponse("Tạo phiếu thu tiền phạt thành công", 200, new PenaltyTicketResponse
+            return ApiResponse<PenaltyTicketResponse>.SuccessResponse("Tạo phiếu thu tiền phạt thành công!", 200, new PenaltyTicketResponse
             {
                 IdPenalty = penalty.IdPenalty,
                 CreatedDate = penalty.CreatedDate,
@@ -70,7 +70,7 @@ namespace LibraryManagement.Repository
         {
             var penalty = await _context.PenaltyTickets.Include(p => p.Reader).FirstOrDefaultAsync(p => p.IdPenalty == idPenaltyTicket);
             if (penalty == null)
-                return ApiResponse<string>.FailResponse("Không tìm thấy phiếu thu", 404);
+                return ApiResponse<string>.FailResponse("Không tìm thấy phiếu thu!", 404);
 
             var reader = penalty.Reader;
             reader.TotalDebt += penalty.AmountCollected;
@@ -81,10 +81,10 @@ namespace LibraryManagement.Repository
             _context.PenaltyTickets.Remove(penalty);
             await _context.SaveChangesAsync();
 
-            return ApiResponse<string>.SuccessResponse("Xóa phiếu thu thành công", 200, null);
+            return ApiResponse<string>.SuccessResponse("Xóa phiếu thu thành công!", 200, string.Empty);
         }
 
-        public async Task<List<TicketResponse>> GetTicketResponsesAsync(string idUser)
+        public async Task<ApiResponse<List<TicketResponse>>> GetTicketResponsesAsync(string idUser)
         {
             var result = await _context.PenaltyTickets.AsNoTracking()
                 .Where(x => x.IdReader == idUser)
@@ -96,7 +96,7 @@ namespace LibraryManagement.Repository
                     TotalDebit = x.Reader.TotalDebt,
                 })
                 .ToListAsync();
-            return result;
+            return ApiResponse<List<TicketResponse>>.SuccessResponse("Lấy danh sách phiếu thu tiền phạt thành công!", 200, result);
         }
 
         // Sửa phiếu thu tiền phạt
@@ -105,7 +105,7 @@ namespace LibraryManagement.Repository
             var penalty = await _context.PenaltyTickets.Include(p => p.Reader).FirstOrDefaultAsync(p => p.IdPenalty == idPenaltyTicket);
             if (penalty == null)
             {
-                return ApiResponse<PenaltyTicketResponse>.FailResponse("Không tìm thấy phiếu thu", 404);
+                return ApiResponse<PenaltyTicketResponse>.FailResponse("Không tìm thấy phiếu thu!", 404);
             }
 
             var reader = penalty.Reader;
@@ -116,7 +116,7 @@ namespace LibraryManagement.Repository
             int policyValue = await _parameterService.getValueAsync("LateReturnPenaltyPolicy");
             if (policyValue == 1 && request.AmountCollected > (reader.TotalDebt + previousCollected))
             {
-                return ApiResponse<PenaltyTicketResponse>.FailResponse("Số tiền thu vượt quá số tiền độc giả đang nợ", 400);
+                return ApiResponse<PenaltyTicketResponse>.FailResponse("Số tiền thu vượt quá số tiền độc giả đang nợ!", 400);
             }
 
             penalty.AmountCollected = request.AmountCollected;
@@ -133,7 +133,7 @@ namespace LibraryManagement.Repository
             _context.Entry(reader).Property(r => r.TotalDebt).IsModified = true;
             await _context.SaveChangesAsync();
 
-            return ApiResponse<PenaltyTicketResponse>.SuccessResponse("Cập nhật phiếu thu thành công", 200, new PenaltyTicketResponse
+            return ApiResponse<PenaltyTicketResponse>.SuccessResponse("Cập nhật phiếu thu thành công!", 200, new PenaltyTicketResponse
             {
                 IdPenalty = penalty.IdPenalty,
                 CreatedDate = penalty.CreatedDate,

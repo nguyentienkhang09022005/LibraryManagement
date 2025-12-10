@@ -1,5 +1,6 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Repository.InterFace;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagement.Controllers
@@ -15,47 +16,52 @@ namespace LibraryManagement.Controllers
             _penaltyTicketService = penaltyTicketService;
         }
 
-        // Endpoint tạo phiếu thu tiền phạt
-        [HttpPost("add_penalty")]
+        [Authorize]
+        [HttpPost("add-penalty")]
         public async Task<IActionResult> addPenaltyTicket([FromBody] PenaltyTicketRequest request)
         {
             var result = await _penaltyTicketService.addPenaltyTicketAsync(request);
             if (result.Success)
-                return Created("", result);
-            return BadRequest(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpoint xóa phiếu thu tiền phạt
-        [HttpDelete("delete_penalty/{idPenaltyTicket}")]
-        public async Task<IActionResult> deletePenaltyTicket(Guid idPenaltyTicket)
+        [Authorize]
+        [HttpDelete("delete-penalty")]
+        public async Task<IActionResult> deletePenaltyTicket([FromQuery] Guid idPenaltyTicket)
         {
             var result = await _penaltyTicketService.deletePenaltyTicketAsync(idPenaltyTicket);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
 
-        // Endpoint sửa thông tin phiếu thu tiền phạt
-        [HttpPatch("update_penalty/{idPenaltyTicket}")]
-        public async Task<IActionResult> updatePenaltyTicket([FromBody] PenaltyTicketRequest request, Guid idPenaltyTicket)
+        [Authorize]
+        [HttpPatch("update_penalty")]
+        public async Task<IActionResult> updatePenaltyTicket([FromBody] PenaltyTicketRequest request, [FromQuery] Guid idPenaltyTicket)
         {
             var result = await _penaltyTicketService.updatePenaltyTicketAsync(request, idPenaltyTicket);
             if (result.Success)
-                return Ok(result);
-            return NotFound(result);
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
         }
-        [HttpGet("getPenatiesById{idUser}")]
-        public async Task<IActionResult> getPenatiesById(string idUser)
+
+        [Authorize]
+        [HttpGet("list-penalty-ticket-by-user")]
+        public async Task<IActionResult> getPenaltiesById([FromQuery] string idUser)
         {
-            try
+            var result = await _penaltyTicketService.GetTicketResponsesAsync(idUser);
+            if (result.Success)
             {
-                var result = await _penaltyTicketService.GetTicketResponsesAsync(idUser);
-                return Ok(result);
+                return StatusCode(result.StatusCode, result);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
+            return StatusCode(result.StatusCode, result);
         }
     }
 }
