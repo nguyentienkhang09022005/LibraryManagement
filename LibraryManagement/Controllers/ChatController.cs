@@ -1,11 +1,8 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Models;
-using LibraryManagement.Service;
 using LibraryManagement.Service.InterFace;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewComponents;
 using System.Security.Claims;
 
 namespace LibraryManagement.Controllers
@@ -20,8 +17,8 @@ namespace LibraryManagement.Controllers
             _chatService = chatService;
         }
 
+        [Authorize]
         [HttpPost("send")]
-           [Authorize]
         public async Task<IActionResult> Send([FromBody] MessageRequest message)
         {
             var senderId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -40,16 +37,17 @@ namespace LibraryManagement.Controllers
             return Ok(messageSent);
         }
 
+        [Authorize]
         [HttpGet("history")]
-           [Authorize]
         public async Task<IActionResult> History([FromQuery] string receiveUserId) {
             var sendUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (sendUserId == null) return NotFound("Không tìm thấy thông tin người dùng");
             return Ok(await _chatService.GetAllMessagesAsync(sendUserId, receiveUserId));
 
         }
-        [HttpGet("getAllUserSentMessage")]
+
         [Authorize]
+        [HttpGet("get-all-user-sent-message")]
         public async Task<IActionResult> GetAllUserMessage()
         {
             var sender = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
