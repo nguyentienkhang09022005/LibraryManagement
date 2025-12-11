@@ -34,9 +34,6 @@ namespace LibraryManagement.Models
         public Reader Reader { get; set; }
 
         [ForeignKey("IdTheBook")]
-        public TheBook TheBook { get; set; }
-
-      
+        public TheBook TheBook { get; set; } 
     }
-
 }

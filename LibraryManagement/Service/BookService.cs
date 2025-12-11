@@ -64,12 +64,18 @@ namespace LibraryManagement.Repository
                 }
 
                 // Kiểm tra sách đã tồn tại thông qua tên đầu sách và năm tái bản
-                var existedBook = await _context.Books
-                    .AnyAsync(b => b.IdHeaderBook == headerBook.IdHeaderBook
-                                && b.ReprintYear == request.bookCreateRequest.ReprintYear);
-                if (existedBook)
+                if (headerBook != null)
                 {
-                    return ApiResponse<HeaderBookResponse>.FailResponse("Cuốn sách đã tồn tại với cùng tên và năm tái bản!", 400);
+                    // Kiểm tra sách đã tồn tại thông qua tên đầu sách và năm tái bản
+                    var existedBook = await _context.Books
+                        .AnyAsync(b => b.IdHeaderBook == headerBook.IdHeaderBook
+                                    && b.ReprintYear == request.bookCreateRequest.ReprintYear);
+
+                    if (existedBook)
+                    {
+                        return ApiResponse<HeaderBookResponse>.FailResponse(
+                            "Cuốn sách đã tồn tại với cùng tên và năm tái bản!", 400);
+                    }
                 }
 
                 if (headerBook == null)
