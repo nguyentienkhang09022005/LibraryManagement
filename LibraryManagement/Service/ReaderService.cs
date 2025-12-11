@@ -201,10 +201,7 @@ namespace LibraryManagement.Repository
             // Xử lý hash password nếu có
             string? hashedPassword = null;
             if (!string.IsNullOrEmpty(request.ReaderPassword))
-                hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.ReaderPassword);
-
-            // Dùng ExecuteUpdateAsync để update trực tiếp
-         
+                hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.ReaderPassword);         
 
             await _context.Readers
                 .AsNoTracking()
@@ -217,6 +214,7 @@ namespace LibraryManagement.Repository
                 .SetProperty(r => r.Address, r => !string.IsNullOrEmpty(request.Address) ? request.Address : r.Address)
                 .SetProperty(r => r.Email, r => !string.IsNullOrEmpty(request.Email) ? request.Email : r.Email)
                 .SetProperty(r => r.Phone, r => !string.IsNullOrEmpty(request.Phone) ? request.Phone : r.Phone)
+                .SetProperty(r => r.RoleName, r => !string.IsNullOrEmpty(request.RoleName) ? request.RoleName : r.RoleName)
                 .SetProperty(r => r.ReaderPassword, r => !string.IsNullOrEmpty(request.ReaderPassword) ? hashedPassword : r.ReaderPassword)
             );
 
@@ -243,6 +241,7 @@ namespace LibraryManagement.Repository
                        Email = x.Email,
                        Dob = x.Dob,
                        Phone = x.Phone,
+                       Role = x.RoleName,
                        CreateDate = x.CreateDate,
                        TotalDebt = x.TotalDebt,
                        UrlAvatar = x.Images.Select(x=>x.Url).FirstOrDefault()
