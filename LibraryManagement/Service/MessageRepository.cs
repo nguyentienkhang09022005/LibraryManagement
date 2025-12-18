@@ -58,16 +58,28 @@ namespace LibraryManagement.Service
         }
 
 
-        public async Task<List<Message>> GetAllMessagesAsync(string userId1, string userId2)
+        public async Task<List<Message>> GetChatWithManagerAsync(string readerId)
+        {
+            if (string.IsNullOrEmpty(readerId)) return new List<Message>();
+
+            var filter = Builders<Message>.Filter.Or(
+                Builders<Message>.Filter.And(
+                    Builders<Message>.Filter.Eq(m => m.SenderId, readerId),
+                    Builders<Message>.Filter.Eq(m => m.ReceiverId, "")
+                )
+            );
+
+            return await _messages.Find(filter)
+                .SortBy(m => m.SentAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<Message>> GetChatWithReaderAsync(string readerId, string managerId)
         {
             var filter = Builders<Message>.Filter.Or(
                 Builders<Message>.Filter.And(
-                    Builders<Message>.Filter.Eq(m => m.SenderId, userId1),
-                    Builders<Message>.Filter.Eq(m => m.ReceiverId, userId2)
-                ),
-                Builders<Message>.Filter.And(
-                    Builders<Message>.Filter.Eq(m => m.SenderId, userId2),
-                    Builders<Message>.Filter.Eq(m => m.ReceiverId, userId1)
+                    Builders<Message>.Filter.Eq(m => m.SenderId, managerId),
+                    Builders<Message>.Filter.Eq(m => m.ReceiverId, readerId)
                 )
             );
 

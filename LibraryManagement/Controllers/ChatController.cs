@@ -26,51 +26,63 @@ namespace LibraryManagement.Controllers
         public async Task<IActionResult> Send([FromBody] MessageRequest message)
         {
             var senderId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (senderId == null) return BadRequest("Vui lòng đăng nhập");
-            if (message == null) {
-                return BadRequest("Vui lòng nhập tin nhắn");
-            }
-
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            string receiverId;
+            if (senderId == null) return BadRequest("Vui lòng đăng nhập");
+
+            string finalReceiverId;
 
             if (role == "Manager")
             {
                 if (string.IsNullOrEmpty(message.ReceiverId))
                     return BadRequest("Manager phải chọn người nhận");
-
-                receiverId = message.ReceiverId;
+                finalReceiverId = message.ReceiverId;
             }
-            else
+            else 
             {
-                receiverId = await _readerService.GetManagerIdAsync();
-                if (receiverId == null)
-                    return NotFound("Không tìm thấy Manager");
+                finalReceiverId = "";
             }
 
             Message messageSent = new Message
             {
                 SenderId = senderId,
-                ReceiverId = message.ReceiverId,
-                SentAt = message.SentAt,
+                ReceiverId = finalReceiverId,
+                SentAt = DateTime.UtcNow,
                 Content = message.Content,
             };
+
             await _chatService.SendMessageAsync(messageSent);
             return Ok(messageSent);
         }
 
         [Authorize]
-        [HttpGet("history")]
-        public async Task<IActionResult> History([FromQuery] string receiveUserId) {
-            var sendUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (sendUserId == null) return NotFound("Không tìm thấy thông tin người dùng");
-            return Ok(await _chatService.GetAllMessagesAsync(sendUserId, receiveUserId));
+        [HttpGet("history-chat")]
+        public async Task<IActionResult> History([FromQuery] string? receiveUserId) 
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
+            if (userId == null)
+                return NotFound("Không tìm thấy thông tin người dùng");
+
+            if (role == "Reader")
+            {
+                return Ok(await _chatService.GetChatWithManagerAsync(userId));
+            }
+
+            if (role == "Manager")
+            {
+                if (string.IsNullOrEmpty(receiveUserId))
+                    return BadRequest("Manager cần truyền readerId");
+
+                return Ok(await _chatService.GetChatWithReaderAsync(receiveUserId, userId));
+            }
+
+            return Forbid();
         }
 
         [Authorize]
-        [HttpGet("get-all-user-sent-message")]
+        [HttpGet("get-all-reader-sent-message")]
         public async Task<IActionResult> GetAllUserMessage()
         {
             var sender = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

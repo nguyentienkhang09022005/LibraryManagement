@@ -5,7 +5,9 @@ namespace LibraryManagement.Service.InterFace
 {
     public interface IChatService
     {
-        Task<List<Message>> GetAllMessagesAsync(string userId1, string userId2);
+        Task<List<Message>> GetChatWithManagerAsync(string userId1);
+
+        Task<List<Message>> GetChatWithReaderAsync(string userId1, string userId2);
 
         Task SendMessageAsync(Message message);
 

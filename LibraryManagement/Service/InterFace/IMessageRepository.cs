@@ -7,7 +7,9 @@ namespace LibraryManagement.Service.InterFace
     {
         public Task SendMessageAsync(Message message);
 
-        public Task<List<Message>> GetAllMessagesAsync(string userId1, string userId2);
+        Task<List<Message>> GetChatWithReaderAsync(string readerId, string managerId);
+
+        Task<List<Message>> GetChatWithManagerAsync(string readerId);
 
         public Task<List<MessageClient>> getAllMessageClient(string senderId);
     }
