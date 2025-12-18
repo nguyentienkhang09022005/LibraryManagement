@@ -5,8 +5,7 @@ namespace LibraryManagement.Dto.Request
 {
     public class MessageRequest
     {
-
-        public string ReceiverId { get; set; } = null!;
+        public string? ReceiverId { get; set; }
 
         public MessageContent Content { get; set; } = null!;
 

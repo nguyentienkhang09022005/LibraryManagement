@@ -86,7 +86,7 @@ namespace LibraryManagement.Service
 
         public async Task<List<MessageClient>> getAllMessageClient(string senderId)
         {
-            // 1. Lấy toàn bộ PartnerId unique chỉ với 1 truy vấn
+            // Lấy toàn bộ PartnerId unique chỉ với 1 truy vấn
             var userIds = await _messages.Aggregate()
                 .Match(m => m.SenderId == senderId || m.ReceiverId == senderId)
                 .Project(m => new
@@ -104,7 +104,7 @@ namespace LibraryManagement.Service
             if (allUserIds.Count == 0)
                 return new List<MessageClient>();
 
-            // 2. Truy vấn nhanh SQL chỉ lấy trường cần
+            // Truy vấn nhanh SQL chỉ lấy trường cần
             var userInfos = await _context.Readers
                 .AsNoTracking()
                 .Where(x => allUserIds.Contains(x.IdReader))

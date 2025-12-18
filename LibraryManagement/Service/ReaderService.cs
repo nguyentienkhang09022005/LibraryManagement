@@ -289,5 +289,13 @@ namespace LibraryManagement.Repository
           ).FirstOrDefaultAsync();
             return ApiResponse<FindReaderResponse>.SuccessResponse("Tìm kiếm độc giả thành công!", 200, listReader);
         }
+
+        public async Task<string?> GetManagerIdAsync()
+        {
+            return await _context.Readers
+                .Where(r => r.RoleName == "Manager")
+                .Select(r => r.IdReader)
+                .FirstOrDefaultAsync();
+        }
     }
 }

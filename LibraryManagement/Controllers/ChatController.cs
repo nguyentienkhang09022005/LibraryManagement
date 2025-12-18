@@ -1,5 +1,6 @@
 ﻿using LibraryManagement.Dto.Request;
 using LibraryManagement.Models;
+using LibraryManagement.Repository.IRepository;
 using LibraryManagement.Service.InterFace;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,9 +13,12 @@ namespace LibraryManagement.Controllers
     public class ChatController : ControllerBase
     {
         private readonly IChatService _chatService;
-        public ChatController(IChatService chatService)
+        private readonly IReaderService _readerService;
+
+        public ChatController(IChatService chatService, IReaderService readerService)
         {
             _chatService = chatService;
+            _readerService = readerService;
         }
 
         [Authorize]
@@ -26,6 +30,25 @@ namespace LibraryManagement.Controllers
             if (message == null) {
                 return BadRequest("Vui lòng nhập tin nhắn");
             }
+
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            string receiverId;
+
+            if (role == "Manager")
+            {
+                if (string.IsNullOrEmpty(message.ReceiverId))
+                    return BadRequest("Manager phải chọn người nhận");
+
+                receiverId = message.ReceiverId;
+            }
+            else
+            {
+                receiverId = await _readerService.GetManagerIdAsync();
+                if (receiverId == null)
+                    return NotFound("Không tìm thấy Manager");
+            }
+
             Message messageSent = new Message
             {
                 SenderId = senderId,
