@@ -57,29 +57,16 @@ namespace LibraryManagement.Service
             _messages.Indexes.CreateMany(indexModels);
         }
 
-
-        public async Task<List<Message>> GetChatWithManagerAsync(string readerId)
-        {
-            if (string.IsNullOrEmpty(readerId)) return new List<Message>();
-
-            var filter = Builders<Message>.Filter.Or(
-                Builders<Message>.Filter.And(
-                    Builders<Message>.Filter.Eq(m => m.SenderId, readerId),
-                    Builders<Message>.Filter.Eq(m => m.ReceiverId, "")
-                )
-            );
-
-            return await _messages.Find(filter)
-                .SortBy(m => m.SentAt)
-                .ToListAsync();
-        }
-
-        public async Task<List<Message>> GetChatWithReaderAsync(string readerId, string managerId)
+        public async Task<List<Message>> GetChatHistoryAsync(string readerId1, string readerId2)
         {
             var filter = Builders<Message>.Filter.Or(
                 Builders<Message>.Filter.And(
-                    Builders<Message>.Filter.Eq(m => m.SenderId, managerId),
-                    Builders<Message>.Filter.Eq(m => m.ReceiverId, readerId)
+                    Builders<Message>.Filter.Eq(m => m.SenderId, readerId1),
+                    Builders<Message>.Filter.Eq(m => m.ReceiverId, readerId2)
+                ),
+                Builders<Message>.Filter.And(
+                    Builders<Message>.Filter.Eq(m => m.SenderId, readerId2),
+                    Builders<Message>.Filter.Eq(m => m.ReceiverId, readerId1)
                 )
             );
 

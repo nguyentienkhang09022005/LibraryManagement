@@ -3,6 +3,7 @@ using LibraryManagement.Models;
 using LibraryManagement.Repository.IRepository;
 using LibraryManagement.Service.InterFace;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -40,7 +41,14 @@ namespace LibraryManagement.Controllers
             }
             else 
             {
-                finalReceiverId = "";
+                var idManager = await _readerService.GetManagerIdAsync();
+
+                if (idManager == null)
+                {
+                    return BadRequest("Hiện không có Manager nào trực tuyến để nhận tin nhắn.");
+                }
+
+                finalReceiverId = idManager;
             }
 
             Message messageSent = new Message
@@ -62,20 +70,30 @@ namespace LibraryManagement.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            if (userId == null)
+            if (string.IsNullOrEmpty(userId))
                 return NotFound("Không tìm thấy thông tin người dùng");
 
             if (role == "Reader")
             {
-                return Ok(await _chatService.GetChatWithManagerAsync(userId));
+                var managerId = await _readerService.GetManagerIdAsync();
+                if (string.IsNullOrEmpty(managerId))
+                {
+                    return BadRequest("Hệ thống hiện chưa có Manager để lấy lịch sử.");
+                }
+
+                var history = await _chatService.GetChatHistoryAsync(userId, managerId);
+                return Ok(history);
             }
 
             if (role == "Manager")
             {
                 if (string.IsNullOrEmpty(receiveUserId))
-                    return BadRequest("Manager cần truyền readerId");
+                {
+                    return BadRequest("Manager cần truyền receiveUserId (ID của Reader)");
+                }
 
-                return Ok(await _chatService.GetChatWithReaderAsync(receiveUserId, userId));
+                var history = await _chatService.GetChatHistoryAsync(userId, receiveUserId);
+                return Ok(history);
             }
 
             return Forbid();
