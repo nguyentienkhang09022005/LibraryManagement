@@ -9,34 +9,24 @@ using LibraryManagement.Repository.IRepository;
 using LibraryManagement.Service;
 using LibraryManagement.Service.Interface;
 using LibraryManagement.Service.InterFace;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Npgsql;
 using System.Net;
 using System.Text;
 
-
 var builder = WebApplication.CreateBuilder(args);
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-
-// Add services to the container.
 
 DotNetEnv.Env.Load();
-
 builder.Configuration["ConnectionStrings:PostgreSQLConnection"] = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__PostgreSQLConnection");
 builder.Configuration["JWT:SecretKey"] = Environment.GetEnvironmentVariable("JWT__SecretKey");
-
 builder.Configuration["SendGrid:ApiKey"] = Environment.GetEnvironmentVariable("SENDER_APIKEY");
 builder.Configuration["SendGrid:Email"] = Environment.GetEnvironmentVariable("SENDER_EMAIL");
 builder.Configuration["SendGrid:Name"] = Environment.GetEnvironmentVariable("SENDER_NAME");
-
 builder.Configuration["CloudinarySettings:CloudName"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__CLOUDNAME");
 builder.Configuration["CloudinarySettings:ApiKey"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APIKEY");
 builder.Configuration["CloudinarySettings:ApiSecret"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APISECRET");
@@ -44,99 +34,40 @@ builder.Configuration["MongoDB:ConnectionString"] = Environment.GetEnvironmentVa
 builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__ID"] = Environment.GetEnvironmentVariable("CLIENT__ID");
 builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__SECRET"] = Environment.GetEnvironmentVariable("CLIENT__SECRET");
 
-// Connect to MongoDB
-
 System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-//NpgsqlConnection.GlobalTypeMapper.MapDateTime(DateTimeKind.Utc);
-
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "LibraryManagement API", Version = "v1" });
-
-    var jwtScheme = new OpenApiSecurityScheme
-    {
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Description = "Nhập JWT Bearer token (chỉ phần token, không kèm 'Bearer ').",
-        Reference = new OpenApiReference
-        {
-            Id = JwtBearerDefaults.AuthenticationScheme, 
-            Type = ReferenceType.SecurityScheme
-        }
-    };
-    c.AddSecurityDefinition(jwtScheme.Reference.Id, jwtScheme);
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { jwtScheme, Array.Empty<string>() }
-    });
-});
-
-
-// Cấu hình cho phép tất cả các ứng dụng được gọi đến API
-builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
- policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
-
-
-
-builder.Services.AddSingleton(option =>
-{
-    var settings = option.GetRequiredService<IOptions<CloudinarySettings>>().Value;
-
-    var account = new Account(settings.CloudName, settings.ApiKey, settings.ApiSecret);
-    return new Cloudinary(account);
-
-}); 
 
 builder.Services.AddDbContext<LibraryManagermentContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
 
-// Đăng ký sử dụng Mapper
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("SignalRCors", policy =>
+    {
+        policy.SetIsOriginAllowed(origin => true)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
-// Tạo service sử dụng JWT
 builder.Services.AddAuthentication(options =>
 {
-    // Đặt default scheme là PolicyScheme tự động nhận JWT hoặc Cookie
-    options.DefaultScheme = "JwtOrCookie";
-    options.DefaultAuthenticateScheme = "JwtOrCookie";
-    options.DefaultChallengeScheme = "JwtOrCookie";
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddPolicyScheme("JwtOrCookie", "JWT or Cookie", options =>
-{
-    options.ForwardDefaultSelector = context =>
-    {
-        // Nếu có header Bearer thì dùng JWT
-        var hasBearer = context.Request.Headers["Authorization"].FirstOrDefault()?.StartsWith("Bearer ") == true;
-        if (hasBearer)
-            return JwtBearerDefaults.AuthenticationScheme;
-
-        if (context.Request.Cookies.ContainsKey(".AspNetCore.Cookies"))
-            return CookieAuthenticationDefaults.AuthenticationScheme;
-
-        return CookieAuthenticationDefaults.AuthenticationScheme;
-    };
-})
-.AddCookie()
 .AddJwtBearer(options =>
 {
     options.SaveToken = true;
     options.RequireHttpsMetadata = false;
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = false,
         ValidateAudience = false,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]!))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]
+            ?? throw new InvalidOperationException("JWT SecretKey is missing!")))
     };
+
     options.Events = new JwtBearerEvents
     {
         OnChallenge = context =>
@@ -146,41 +77,70 @@ builder.Services.AddAuthentication(options =>
             context.Response.ContentType = "application/json";
             var result = System.Text.Json.JsonSerializer.Serialize(new
             {
+                code = "UNAUTHENTICATION",
+                status = 401,
                 message = "Vui lòng đăng nhập"
-            });
-
-            return context.Response.WriteAsync(result);
-        }
-    };
-})
-.AddGoogle(google =>
-{
-    google.ClientId = builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__ID"] ?? Environment.GetEnvironmentVariable("GOOGLE__CLIENT__ID")!;
-    google.ClientSecret = builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__SECRET"] ?? Environment.GetEnvironmentVariable("GOOGLE__CLIENT__SECRET")!;
-    google.CallbackPath = "/signin-google";
-    google.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
-    google.Events = new OAuthEvents
-    {
-        // Khi Google trả về lỗi, không redirect về lỗi mặc định, mà trả về 401 JSON
-        OnRemoteFailure = context =>
-        {
-            context.HandleResponse();
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            context.Response.ContentType = "application/json";
-            var result = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                message = "Đăng nhập Google thất bại: " + (context.Failure?.Message ?? "Không rõ lỗi")
             });
             return context.Response.WriteAsync(result);
         },
-     
+
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chathub"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
     };
 });
 
 builder.Services.AddAuthorization();
 
-// Life cycle DI
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "LibraryManagement API", Version = "v1" });
+    var jwtScheme = new OpenApiSecurityScheme
+    {
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Description = "Nhập JWT Bearer token",
+        Reference = new OpenApiReference
+        {
+            Id = JwtBearerDefaults.AuthenticationScheme,
+            Type = ReferenceType.SecurityScheme
+        }
+    };
+    c.AddSecurityDefinition(jwtScheme.Reference.Id, jwtScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtScheme, Array.Empty<string>() }
+    });
+});
+
+builder.Services.AddAutoMapper(typeof(Program));
+
+builder.Services.AddSingleton(option =>
+{
+    var settings = option.GetRequiredService<IOptions<CloudinarySettings>>().Value;
+    var acc = new Account(
+        Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__CLOUDNAME"),
+        Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APIKEY"),
+        Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APISECRET")
+    );
+    return new Cloudinary(acc);
+});
+
+// Services DI
 builder.Services.AddScoped<IReaderService, ReaderService>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
 builder.Services.AddScoped<ITokenGenerator, TokenGenerator>();
@@ -201,55 +161,42 @@ builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
 builder.Services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
 builder.Services.AddScoped<IUpLoadImageFileService, UpLoadImageFileService>();
 
-
+builder.Services.AddScoped<IMessageHubService, MessageHubService>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IChatService, ChatService>();
+
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
-// SendGrid and FluentEmail Registration
 builder.Services
     .AddFluentEmail(builder.Configuration["SendGrid:Email"], builder.Configuration["SendGrid:Name"])
     .AddRazorRenderer()
     .AddSendGridSender(builder.Configuration["SendGrid:ApiKey"]);
 
-// Cấu hình up ảnh lên Cloudinary
-var account = new Account(
-    Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__CLOUDNAME"),
-    Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APIKEY"),
-    Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APISECRET")
-);
-builder.Services.AddSingleton(new Cloudinary(account));
-builder.Services.AddScoped<IUpLoadImageFileService, UpLoadImageFileService>();
-
 builder.Services.AddMemoryCache();
-
-builder.Services.AddSignalR(); 
-
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-
-// Configure the HTTP request pipeline.
 app.UseHttpsRedirection();
-
 app.UseRouting();
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
 });
-app.UseCors();
 
+app.UseCors("SignalRCors");
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    c.RoutePrefix = "swagger"; // Swagger UI sẽ ở /docs
+    c.RoutePrefix = "swagger";
     c.DocumentTitle = "API Docs";
 });
-app.MapControllers();
 
+app.MapControllers();
 app.MapHub<ChatHub>("/chathub");
 
 app.Run();

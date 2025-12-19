@@ -7,9 +7,11 @@ namespace LibraryManagement.Service
     public class ChatService : IChatService
     {
         private readonly IMessageRepository _messageRepo;
-        public ChatService(IMessageRepository repo)
+        private readonly IMessageHubService _messageHubService;
+        public ChatService(IMessageRepository repo, IMessageHubService messageHubService)
         {
             _messageRepo = repo;
+            _messageHubService = messageHubService;
         }
 
         public Task<List<MessageClient>> getAllMessageClient(string senderId)
@@ -18,7 +20,11 @@ namespace LibraryManagement.Service
         public Task<List<Message>> GetChatHistoryAsync(string readerId1, string readerId2)
             => _messageRepo.GetChatHistoryAsync(readerId1, readerId2);
 
-        public Task SendMessageAsync(Message message)
-            => _messageRepo.SendMessageAsync(message);
+        public async Task SendMessageAsync(Message message)
+        {
+            await _messageRepo.SendMessageAsync(message);
+
+            await _messageHubService.PushMessageAsync(message);
+        }
     }
 }

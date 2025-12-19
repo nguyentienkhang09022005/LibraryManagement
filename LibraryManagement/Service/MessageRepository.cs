@@ -2,21 +2,18 @@
 using LibraryManagement.Dto.Request;
 using LibraryManagement.Models;
 using LibraryManagement.Service.InterFace;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
-using ZstdSharp.Unsafe;
 
 namespace LibraryManagement.Service
 {
     public class MessageRepository : IMessageRepository
     {
        
-        private readonly IHubContext<ChatHub> _hubContext;
         private readonly IMongoCollection<Message> _messages;
         private readonly LibraryManagermentContext _context; 
 
-        public MessageRepository(IConfiguration configuration, IHubContext<ChatHub> hubContext, LibraryManagermentContext context )
+        public MessageRepository(IConfiguration configuration, LibraryManagermentContext context )
         {
             var connectionString = configuration["MongoDB:ConnectionString"];
             var databaseName = configuration["MongoDB:DatabaseName"];
@@ -25,7 +22,7 @@ namespace LibraryManagement.Service
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase(databaseName);
             _messages = database.GetCollection<Message>(collectionName);
-            _hubContext = hubContext;
+
             _context = context;
             EnsureIndexes();
         }
@@ -79,8 +76,6 @@ namespace LibraryManagement.Service
         {
             message.SentAt = DateTime.UtcNow;
             await _messages.InsertOneAsync(message);
-            await _hubContext.Clients.User(message.ReceiverId)
-                .SendAsync("ReceiveMessage", message.SenderId, message.Content, message.SentAt);
         }
 
         public async Task<List<MessageClient>> getAllMessageClient(string senderId)

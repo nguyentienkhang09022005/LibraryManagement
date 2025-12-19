@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace LibraryManagement.Service.InterFace
 {
+
+    [Authorize]
     public class ChatHub : Hub
     {
-        public async Task SendMessage(string toUser, string message)
+        public override async Task OnConnectedAsync()
         {
-            await Clients.User(toUser).SendAsync("ReceiveMessage", Context.UserIdentifier, message);
+            await base.OnConnectedAsync();
         }
     }
 }
