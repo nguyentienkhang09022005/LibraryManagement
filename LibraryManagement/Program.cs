@@ -33,6 +33,11 @@ builder.Configuration["CloudinarySettings:ApiSecret"] = Environment.GetEnvironme
 builder.Configuration["MongoDB:ConnectionString"] = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__MongoDbConnection");
 builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__ID"] = Environment.GetEnvironmentVariable("CLIENT__ID");
 builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__SECRET"] = Environment.GetEnvironmentVariable("CLIENT__SECRET");
+builder.Configuration["GeminiSettings:ApiKey"] = Environment.GetEnvironmentVariable("APIKEY__GEMINI");
+builder.Configuration["GeminiSettings:BaseUrl"] = Environment.GetEnvironmentVariable("GEMINI__APIURL");
+builder.Configuration["RedisSettings:Host"] = Environment.GetEnvironmentVariable("REDISSETTINGS__HOST");
+builder.Configuration["RedisSettings:Port"] = Environment.GetEnvironmentVariable("REDISSETTINGS__PORT");
+builder.Configuration["RedisSettings:Password"] = Environment.GetEnvironmentVariable("REDISSETTINGS__PASSWORD");
 
 System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
@@ -159,6 +164,9 @@ builder.Services.AddScoped<IOverdueReportService, OverdueReportService>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
 builder.Services.AddScoped<IForgotPasswordService, ForgotPasswordService>();
+builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
+builder.Services.AddScoped<IChatWithAIService, ChatWithAIService>();
+builder.Services.AddHttpClient<IGeminiService, GeminiService>();
 builder.Services.AddScoped<IUpLoadImageFileService, UpLoadImageFileService>();
 
 builder.Services.AddScoped<IMessageHubService, MessageHubService>();
@@ -166,6 +174,15 @@ builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IChatService, ChatService>();
 
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+
+// Redis Registration
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    var host = builder.Configuration["RedisSettings:Host"];
+    var port = builder.Configuration["RedisSettings:Port"];
+    var password = builder.Configuration["RedisSettings:Password"];
+    options.Configuration = $"{host}:{port},password={password},ssl=true,abortConnect=false";
+});
 
 builder.Services
     .AddFluentEmail(builder.Configuration["SendGrid:Email"], builder.Configuration["SendGrid:Name"])
@@ -199,6 +216,4 @@ app.UseSwaggerUI(c =>
 app.MapControllers();
 app.MapHub<ChatHub>("/chathub");
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "7102";
-
-app.Run($"http://0.0.0.0:{port}");
+app.Run();
