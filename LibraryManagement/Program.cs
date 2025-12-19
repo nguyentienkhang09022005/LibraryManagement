@@ -199,4 +199,6 @@ app.UseSwaggerUI(c =>
 app.MapControllers();
 app.MapHub<ChatHub>("/chathub");
 
-app.Run();
+var port = Environment.GetEnvironmentVariable("PORT") ?? "7102";
+
+app.Run($"http://0.0.0.0:{port}");
