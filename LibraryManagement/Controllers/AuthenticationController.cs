@@ -2,6 +2,7 @@
 using LibraryManagement.Repository.IRepository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -83,6 +84,7 @@ namespace LibraryManagement.Controllers
         }
 
         [HttpGet("profile")]
+        [Authorize(AuthenticationSchemes = "GoogleCookie")]
         public async Task<IActionResult> Profile()
         {
             if (!User.Identity!.IsAuthenticated)

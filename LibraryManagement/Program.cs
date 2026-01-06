@@ -60,6 +60,8 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+
+    options.DefaultSignInScheme = "GoogleCookie";
 })
 .AddJwtBearer(options =>
 {
@@ -103,11 +105,13 @@ builder.Services.AddAuthentication(options =>
         }
     };
 })
-.AddGoogle(options =>
+.AddCookie("GoogleCookie")
+.AddGoogle("Google", options =>
 {
     options.ClientId = builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__ID"]!;
     options.ClientSecret = builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__SECRET"]!;
     options.CallbackPath = "/signin-google";
+    options.SignInScheme = "GoogleCookie";
 });
 
 builder.Services.AddAuthorization();
@@ -213,7 +217,7 @@ app.UseAuthorization();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
-{
+{   
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
     c.RoutePrefix = "swagger";
     c.DocumentTitle = "API Docs";
