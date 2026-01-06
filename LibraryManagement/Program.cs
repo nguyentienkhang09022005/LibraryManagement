@@ -102,6 +102,12 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         }
     };
+})
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__ID"]!;
+    options.ClientSecret = builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__SECRET"]!;
+    options.CallbackPath = "/signin-google";
 });
 
 builder.Services.AddAuthorization();
