@@ -223,10 +223,23 @@ namespace LibraryManagement.Repository
                 string imageUrl = await _upLoadImageFileService.UploadImageAsync(request.AvatarImage);
                 if (!string.IsNullOrEmpty(imageUrl))
                 {
-                    await _context.Images.AsNoTracking()
-                            .Where(x => x.IdReader == idReader)
-                            .ExecuteUpdateAsync(setter =>
-                            setter.SetProperty(a => a.Url, imageUrl));
+                    var existingImage = await _context.Images.FirstOrDefaultAsync(x => x.IdReader == idReader);
+
+                    if (existingImage != null)
+                    {
+                        existingImage.Url = imageUrl;
+                    }
+                    else
+                    {
+                        var newImage = new Image
+                        {
+                            IdReader = idReader,
+                            Url = imageUrl
+                        };
+                        _context.Images.Add(newImage);
+                    }
+
+                    await _context.SaveChangesAsync();
                 }
             }
             var readerResponse = await _context.Readers.AsNoTracking()
