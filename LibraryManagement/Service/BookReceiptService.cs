@@ -11,11 +11,13 @@ namespace LibraryManagement.Repository
     public class BookReceiptService : IBookReceiptService
     {
         private readonly LibraryManagermentContext _context;
+        private readonly IUpLoadImageFileService _upLoadImageFileRepository;
         private readonly IParameterService _parameterRepository;
-        public BookReceiptService(LibraryManagermentContext context, IParameterService parameterRepository)
+        public BookReceiptService(LibraryManagermentContext context, IParameterService parameterRepository, IUpLoadImageFileService upLoadImageFileRepository)
         {
             _context = context;
             _parameterRepository = parameterRepository;
+            _upLoadImageFileRepository = upLoadImageFileRepository;
         }
 
         // Hàm tạo Id sách
@@ -71,7 +73,9 @@ namespace LibraryManagement.Repository
             if (reader == null)
             {
                 return ApiResponse<BooKReceiptResponse>.FailResponse("không tìm thấy độc giả!", 404);
-            }    
+            }
+
+            string imageUrl = null!;
 
             var headerBook = await _context.HeaderBooks.FirstOrDefaultAsync(hb => hb.NameHeaderBook == request.headerBook.NameHeaderBook);
             // Nếu đã tồn tại đầu sách, kiểm tra xem đã có Book cùng năm tái bản chưa
@@ -120,6 +124,10 @@ namespace LibraryManagement.Repository
                 await _context.SaveChangesAsync();
             }
 
+            if (request.headerBook.BookImage != null)
+            {
+                imageUrl = await _upLoadImageFileRepository.UploadImageAsync(request.headerBook.BookImage);
+            }
             // Tạo Book
             var book = new Book
             {
@@ -132,6 +140,17 @@ namespace LibraryManagement.Repository
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
 
+            // Lưu ảnh sách vào bảng image nếu có
+            if (!string.IsNullOrEmpty(imageUrl))
+            {
+                var image = new Image
+                {
+                    IdBook = book.IdBook,
+                    Url = imageUrl,
+                };
+                _context.Images.Add(image);
+                await _context.SaveChangesAsync();
+            }
             // Lưu phiếu nhập sách
             var bookReceipt = new BookReceipt
             {
