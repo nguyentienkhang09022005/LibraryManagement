@@ -202,45 +202,73 @@ namespace LibraryManagement.Repository
             }
         }
 
-        // Hàm xóa sách
         public async Task<ApiResponse<string>> DeleteBookAsync(string idBook)
         {
-            // Tìm Book
-            var book = await _context.Books.FirstOrDefaultAsync(b => b.IdBook == idBook.ToString());
-            if (book == null)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                return ApiResponse<string>.FailResponse("Không tìm thấy sách!", 404);
-            }
+                var book = await _context.Books
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(b => b.IdBook == idBook);
+                    
+                if (book == null)
+                {
+                    return ApiResponse<string>.FailResponse("Không tìm thấy sách!", 404);
+                }
+                
+                var headerBookId = book.IdHeaderBook;
 
-            // Tìm các cuốn sách thuộc Book
-            var theBooks = await _context.TheBooks
-                .Where(tb => tb.IdBook == idBook.ToString())
-                .ToListAsync();
-
-            _context.TheBooks.RemoveRange(theBooks);
-            _context.Books.Remove(book);
-
-            // Kiểm tra có còn bản sách nào cho đầu sách này không
-            int remainingBooks = await _context.Books
-                .CountAsync(b => b.IdHeaderBook == book.IdHeaderBook && b.IdBook != idBook.ToString());
-
-            if (remainingBooks == 0)
-            {
-                var headerBook = await _context.HeaderBooks // Xóa đầu sách
-                    .FirstOrDefaultAsync(hb => hb.IdHeaderBook == book.IdHeaderBook);
-
-                var createBooks = await _context.BookWritings // Xóa sáng tác của tác giả
-                    .Where(cb => cb.IdHeaderBook == book.IdHeaderBook)
+                var theBookIds = await _context.TheBooks
+                    .Where(tb => tb.IdBook == idBook)
+                    .Select(tb => tb.IdTheBook)
                     .ToListAsync();
 
-                _context.BookWritings.RemoveRange(createBooks);
-                if (headerBook != null)
+                await _context.LoanSlipBooks
+                    .Where(lsb => theBookIds.Contains(lsb.IdTheBook))
+                    .ExecuteDeleteAsync();
+
+                await _context.Images
+                    .Where(img => img.IdBook == idBook)
+                    .ExecuteDeleteAsync();
+
+                await _context.Evaluates
+                    .Where(e => e.IdBook == idBook)
+                    .ExecuteDeleteAsync();
+
+                await _context.FavoriteBooks
+                    .Where(fb => fb.IdBook == idBook)
+                    .ExecuteDeleteAsync();
+
+                await _context.TheBooks
+                    .Where(tb => tb.IdBook == idBook)
+                    .ExecuteDeleteAsync();
+
+                await _context.Books
+                    .Where(b => b.IdBook == idBook)
+                    .ExecuteDeleteAsync();
+
+                int remainingBooks = await _context.Books
+                    .CountAsync(b => b.IdHeaderBook == headerBookId);
+
+                if (remainingBooks == 0)
                 {
-                    _context.HeaderBooks.Remove(headerBook);
+                    await _context.BookWritings
+                        .Where(cb => cb.IdHeaderBook == headerBookId)
+                        .ExecuteDeleteAsync();
+
+                    await _context.HeaderBooks
+                        .Where(hb => hb.IdHeaderBook == headerBookId)
+                        .ExecuteDeleteAsync();
                 }
+                
+                await transaction.CommitAsync();
+                return ApiResponse<string>.SuccessResponse("Xóa sách thành công!", 200, null!);
             }
-            await _context.SaveChangesAsync();
-            return ApiResponse<string>.SuccessResponse("Xóa sách thành công!", 200, null!);
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return ApiResponse<string>.FailResponse($"Lỗi khi xóa sách: {ex.Message}", 500);
+            }
         }
 
         // Hàm cập nhật sách

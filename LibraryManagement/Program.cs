@@ -31,8 +31,8 @@ builder.Configuration["CloudinarySettings:CloudName"] = Environment.GetEnvironme
 builder.Configuration["CloudinarySettings:ApiKey"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APIKEY");
 builder.Configuration["CloudinarySettings:ApiSecret"] = Environment.GetEnvironmentVariable("CLOUDINARYSETTINGS__APISECRET");
 builder.Configuration["MongoDB:ConnectionString"] = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__MongoDbConnection");
-builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__ID"] = Environment.GetEnvironmentVariable("CLIENT__ID");
-builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__SECRET"] = Environment.GetEnvironmentVariable("CLIENT__SECRET");
+builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__ID"] = Environment.GetEnvironmentVariable("GOOGLE__CLIENT__ID");
+builder.Configuration["GOOGLE_SETTINGS:GOOGLE__CLIENT__SECRET"] = Environment.GetEnvironmentVariable("GOOGLE__CLIENT__SECRET");
 builder.Configuration["GeminiSettings:ApiKey"] = Environment.GetEnvironmentVariable("APIKEY__GEMINI");
 builder.Configuration["GeminiSettings:BaseUrl"] = Environment.GetEnvironmentVariable("GEMINI__APIURL");
 builder.Configuration["RedisSettings:Host"] = Environment.GetEnvironmentVariable("REDISSETTINGS__HOST");
@@ -203,6 +203,15 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+
+// Import sách từ Google Books API (uncomment để chạy)
+// using (var scope = app.Services.CreateScope())
+// {
+//     var context = scope.ServiceProvider.GetRequiredService<LibraryManagermentContext>();
+//     var httpClient = new HttpClient();
+//     var importer = new GoogleBooksImporter(context, httpClient);
+//     await importer.ImportBooksAsync(200); // Import 200 sách
+// }
 
 app.UseHttpsRedirection();
 app.UseRouting();

@@ -76,5 +76,17 @@ namespace LibraryManagement.Controllers
             }
             return StatusCode(result.StatusCode, result);
         }
+
+        [Authorize]
+        [HttpGet("list-typebook-with-count")]
+        public async Task<IActionResult> getAllTypeBookWithCount()
+        {
+            var result = await _typeBookService.GetAllTypeBookWithCount();
+            if (result.Success)
+            {
+                return StatusCode(result.StatusCode, result);
+            }
+            return StatusCode(result.StatusCode, result);
+        }
     }
 }

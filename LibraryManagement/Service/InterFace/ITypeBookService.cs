@@ -15,5 +15,7 @@ namespace LibraryManagement.Repository.InterFace
         Task<ApiResponse<List<TypeBookResponseAndBook>>> GetTypebookAndHeaders();
 
         Task<ApiResponse<List<TypeBookResponse>>> GetAllTypeBook();
+
+        Task<ApiResponse<List<TypeBookWithCountResponse>>> GetAllTypeBookWithCount();
     }
 }
