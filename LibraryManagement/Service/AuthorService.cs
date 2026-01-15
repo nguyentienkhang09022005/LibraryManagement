@@ -212,6 +212,7 @@ namespace LibraryManagement.Repository
                    Nationality = a.Nationality,
                    UrlAvatar = _context.Images.Where(x => x.IdAuthor == a.IdAuthor).Select(x => x.Url).FirstOrDefault(),
                    Books = _context.BookWritings
+                   .Where(bw => bw.IdAuthor == a.IdAuthor)
                    .Include(x => x.HeaderBook).ThenInclude(x => x.Books)
                    .SelectMany(bw=>bw.HeaderBook.Books.Select(book => new BookResponse
                    {

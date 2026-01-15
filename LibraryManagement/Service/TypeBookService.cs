@@ -93,5 +93,25 @@ namespace LibraryManagement.Repository
                 200,
                 result);
         }
+
+        public async Task<ApiResponse<List<TypeBookWithCountResponse>>> GetAllTypeBookWithCount()
+        {
+            var result = await _context.TypeBooks
+                .AsNoTracking()
+                .Select(t => new TypeBookWithCountResponse
+                {
+                    IdTypeBook = t.IdTypeBook,
+                    NameTypeBook = t.NameTypeBook,
+                    BookCount = _context.HeaderBooks.Count(h => h.IdTypeBook == t.IdTypeBook)
+                })
+                .OrderByDescending(t => t.BookCount)
+                .ThenBy(t => t.NameTypeBook)
+                .ToListAsync();
+
+            return ApiResponse<List<TypeBookWithCountResponse>>.SuccessResponse(
+                "Lấy danh sách loại sách với số lượng thành công!",
+                200,
+                result);
+        }
     }
 }
